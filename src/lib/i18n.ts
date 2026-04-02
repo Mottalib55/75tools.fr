@@ -21,6 +21,10 @@ export const translations = {
         name: "NetSalaire",
         description: "Calculez instantanément votre salaire net à partir du brut. Simulez vos revenus avec précision.",
       },
+      gymSquad: {
+        name: "Gym Squad",
+        description: "Coordonnez vos séances de sport avec votre équipe. Planifiez qui va à la salle et quand.",
+      },
       timeManagement: {
         name: "Gestion de Temps",
         description: "Optimisez votre productivité avec notre outil de gestion du temps intelligent.",
@@ -59,6 +63,10 @@ export const translations = {
       netsalaire: {
         name: "NetSalaire",
         description: "Instantly calculate your net salary from gross. Simulate your income with precision.",
+      },
+      gymSquad: {
+        name: "Gym Squad",
+        description: "Coordinate your gym sessions with your team. Plan who's going to the gym and when.",
       },
       timeManagement: {
         name: "Time Management",

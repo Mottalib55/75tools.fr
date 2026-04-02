@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   CreditCard,
   Calculator,
+  Dumbbell,
   Clock,
   ArrowRight,
   ExternalLink,
@@ -47,7 +48,7 @@ const Hub = ({ lang }: HubProps) => {
       icon: <CreditCard className="h-5 w-5" />,
       href: "/mycard",
       available: true,
-      area: "md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/7]",
+      area: "md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]",
     },
     {
       id: "netsalaire",
@@ -57,7 +58,16 @@ const Hub = ({ lang }: HubProps) => {
       href: "https://www.netsalaire.com",
       external: true,
       available: true,
-      area: "md:[grid-area:1/7/2/13] xl:[grid-area:1/7/2/13]",
+      area: "md:[grid-area:1/7/2/13] xl:[grid-area:1/5/2/9]",
+    },
+    {
+      id: "gym-squad",
+      name: t.tools.gymSquad.name,
+      description: t.tools.gymSquad.description,
+      icon: <Dumbbell className="h-5 w-5" />,
+      href: "/gym",
+      available: true,
+      area: "md:[grid-area:2/1/3/13] xl:[grid-area:1/9/2/13]",
     },
     {
       id: "coming-1",
@@ -65,7 +75,7 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.timeManagement.description,
       icon: <Clock className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:2/1/3/7] xl:[grid-area:2/1/3/5]",
+      area: "md:[grid-area:3/1/4/7] xl:[grid-area:2/1/3/5]",
     },
     {
       id: "coming-2",
@@ -73,7 +83,7 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.aiAssistant.description,
       icon: <Sparkles className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:2/7/3/13] xl:[grid-area:2/5/3/9]",
+      area: "md:[grid-area:3/7/4/13] xl:[grid-area:2/5/3/9]",
     },
     {
       id: "coming-3",
@@ -81,7 +91,7 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.automation.description,
       icon: <Zap className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:3/1/4/13] xl:[grid-area:2/9/3/13]",
+      area: "md:[grid-area:4/1/5/13] xl:[grid-area:2/9/3/13]",
     },
   ];
 
@@ -174,7 +184,7 @@ const Hub = ({ lang }: HubProps) => {
             <div className="flex items-center gap-3">
               <span className="hidden sm:inline-flex items-center gap-2 text-sm text-neutral-400 bg-neutral-900 px-4 py-2 rounded-full border border-neutral-800">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                2 {t.header.toolsAvailable}
+                3 {t.header.toolsAvailable}
               </span>
               {/* Language Switcher */}
               <button
@@ -215,7 +225,7 @@ const Hub = ({ lang }: HubProps) => {
       {/* Tools Grid */}
       <section className="pb-24">
         <div className="container mx-auto px-6">
-          <ul className="grid grid-cols-1 gap-4 md:grid-cols-12 md:grid-rows-3 lg:gap-5 xl:max-h-[38rem] xl:grid-rows-2 max-w-6xl mx-auto">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-12 md:grid-rows-4 lg:gap-5 xl:max-h-[38rem] xl:grid-rows-2 max-w-6xl mx-auto">
             {tools.map((tool) => (
               <GridItem
                 key={tool.id}
