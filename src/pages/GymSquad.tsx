@@ -139,7 +139,7 @@ const GymSquad = () => {
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white flex items-center justify-center gap-3">
             <Dumbbell className="w-8 h-8" />
-            Gym Squad
+            Gym Crew
           </h1>
           <p className="text-[#888] mt-1">Who's hitting the gym and when?</p>
         </header>
