@@ -3,18 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, Dumbbell, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-const MEMBERS = ["Motta", "Raul", "Tobi", "Dani", "Jean", "Vlad", "Lucas", "Hugo"];
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MEMBERS = ["Motta", "Raul", "Tobi", "Dani", "Jean", "Vlad", "Lucas", "Hugo", "Sergio", "Carlos", "Ignacio"];
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const HOURS = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
 
-function getMonday(offset: number): Date {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(now);
-  monday.setDate(diff + offset * 7);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
+function getStartDate(offset: number): Date {
+  const today = new Date();
+  today.setDate(today.getDate() + offset * 7);
+  today.setHours(0, 0, 0, 0);
+  return today;
 }
 
 function dateKey(date: Date): string {
@@ -49,10 +46,10 @@ const GymSquad = () => {
   const [loading, setLoading] = useState(false);
 
   const getWeekDates = useCallback(() => {
-    const monday = getMonday(weekOffset);
+    const start = getStartDate(weekOffset);
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
       return d;
     });
   }, [weekOffset]);
@@ -117,13 +114,7 @@ const GymSquad = () => {
 
   const weekDates = getWeekDates();
 
-  const weekLabel = (() => {
-    let label = `Week of ${shortDate(weekDates[0])} - ${shortDate(weekDates[6])}`;
-    if (weekOffset === 0) label += " (this week)";
-    else if (weekOffset === 1) label += " (next week)";
-    else if (weekOffset === -1) label += " (last week)";
-    return label;
-  })();
+  const weekLabel = `${shortDate(weekDates[0])} - ${shortDate(weekDates[6])}`;
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-[#e0e0e0]">
@@ -176,8 +167,13 @@ const GymSquad = () => {
         {/* Week Navigation */}
         <nav className="flex items-center justify-center gap-4 mb-5">
           <button
-            onClick={() => setWeekOffset((w) => w - 1)}
-            className="px-4 py-2 bg-[#1a1a1a] border border-[#333] text-[#aaa] rounded-lg text-sm transition-all hover:border-[#4f9cf7] hover:text-[#4f9cf7] hover:bg-[#1a2d4a]"
+            onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}
+            disabled={weekOffset === 0}
+            className={`px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm transition-all ${
+              weekOffset === 0
+                ? "text-[#444] cursor-not-allowed"
+                : "text-[#aaa] hover:border-[#4f9cf7] hover:text-[#4f9cf7] hover:bg-[#1a2d4a]"
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -209,7 +205,7 @@ const GymSquad = () => {
                     : "text-[#aaa] bg-[#1a1a1a]"
                 }`}
               >
-                {DAYS[i]}
+                {DAY_NAMES[date.getDay()]}
                 <br />
                 {shortDate(date)}
               </div>
