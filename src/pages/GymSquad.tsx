@@ -189,80 +189,75 @@ const GymSquad = () => {
         </nav>
 
         {/* Planning Grid */}
-        <section className={`overflow-x-auto mb-8 ${!selectedMember ? "opacity-40 pointer-events-none" : ""}`}>
-          <div className="min-w-[700px] pr-4">
-          <div
-            className="grid gap-0.5"
-            style={{ gridTemplateColumns: "70px repeat(7, 1fr)" }}
-          >
-            {/* Header row */}
-            <div className="p-2 text-center rounded-md sticky left-0 z-10 bg-[#0f0f0f]" />
-            {weekDates.map((date, i) => (
-              <div
-                key={i}
-                className={`p-2 text-center rounded-md font-semibold text-xs uppercase tracking-wide ${
-                  isToday(date)
-                    ? "text-[#4f9cf7] bg-[#1a2d4a]"
-                    : "text-[#aaa] bg-[#1a1a1a]"
-                }`}
-              >
-                {DAY_NAMES[date.getDay()]}
-                <br />
-                {shortDate(date)}
-              </div>
-            ))}
+        <section className={`overflow-x-auto mb-8 -mx-4 px-4 ${!selectedMember ? "opacity-40 pointer-events-none" : ""}`}>
+          <table className="border-collapse" style={{ minWidth: 700 }}>
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-10 bg-[#0f0f0f] p-2 w-[70px] min-w-[70px]" />
+                {weekDates.map((date, i) => (
+                  <th
+                    key={i}
+                    className={`p-2 text-center font-semibold text-xs uppercase tracking-wide min-w-[80px] ${
+                      isToday(date)
+                        ? "text-[#4f9cf7] bg-[#1a2d4a]"
+                        : "text-[#aaa] bg-[#1a1a1a]"
+                    }`}
+                  >
+                    {DAY_NAMES[date.getDay()]}
+                    <br />
+                    {shortDate(date)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {HOURS.map((hour) => (
+                <tr key={hour}>
+                  <td className="sticky left-0 z-10 bg-[#1a1a1a] p-2 text-center font-medium text-[#777] text-sm w-[70px] min-w-[70px]">
+                    {hour}
+                  </td>
+                  {weekDates.map((date, dayIdx) => {
+                    const slotKey = `${dateKey(date)}_${hour}`;
+                    const members = slots[slotKey] || [];
+                    const hasMe = selectedMember ? members.includes(selectedMember) : false;
+                    const hasOthers = members.filter((m) => m !== selectedMember).length > 0;
 
-            {/* Hour rows */}
-            {HOURS.map((hour) => (
-              <>
-                <div
-                  key={`h-${hour}`}
-                  className="p-2 text-center rounded-md bg-[#1a1a1a] font-medium text-[#777] text-sm flex items-center justify-center sticky left-0 z-10"
-                >
-                  {hour}
-                </div>
-                {weekDates.map((date, dayIdx) => {
-                  const slotKey = `${dateKey(date)}_${hour}`;
-                  const members = slots[slotKey] || [];
-                  const hasMe = selectedMember ? members.includes(selectedMember) : false;
-                  const hasOthers = members.filter((m) => m !== selectedMember).length > 0;
+                    let cellClass = "bg-[#141414]";
+                    if (hasMe && hasOthers) {
+                      cellClass = "bg-[#1a2d1a] border border-[#3d7a43]";
+                    } else if (hasMe) {
+                      cellClass = "bg-[#162d1a] border border-[#2d5a33]";
+                    } else if (hasOthers) {
+                      cellClass = "bg-[#1a1a2d]";
+                    }
 
-                  let cellClass = "bg-[#141414] hover:bg-[#1e1e1e]";
-                  if (hasMe && hasOthers) {
-                    cellClass = "bg-[#1a2d1a] border border-[#3d7a43]";
-                  } else if (hasMe) {
-                    cellClass = "bg-[#162d1a] border border-[#2d5a33]";
-                  } else if (hasOthers) {
-                    cellClass = "bg-[#1a1a2d] hover:bg-[#1e1e1e]";
-                  }
-
-                  return (
-                    <div
-                      key={`${hour}-${dayIdx}`}
-                      onClick={() => !loading && toggleSlot(slotKey)}
-                      className={`p-1 text-center rounded-md cursor-pointer transition-all min-h-[52px] flex items-center justify-center ${cellClass}`}
-                    >
-                      <div className="flex flex-wrap gap-0.5 justify-center">
-                        {members.map((name) => (
-                          <span
-                            key={name}
-                            className={`text-[0.6rem] px-1.5 py-0.5 rounded-[10px] font-semibold leading-none ${
-                              name === selectedMember
-                                ? "bg-[#2d7a33] text-[#b8f0bd]"
-                                : "bg-[#2d2d5a] text-[#b8b8f0]"
-                            }`}
-                          >
-                            {name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            ))}
-          </div>
-          </div>
+                    return (
+                      <td
+                        key={dayIdx}
+                        onClick={() => !loading && toggleSlot(slotKey)}
+                        className={`p-1 text-center cursor-pointer transition-all min-h-[52px] min-w-[80px] ${cellClass}`}
+                      >
+                        <div className="flex flex-wrap gap-0.5 justify-center min-h-[36px] items-center">
+                          {members.map((name) => (
+                            <span
+                              key={name}
+                              className={`text-[0.6rem] px-1.5 py-0.5 rounded-[10px] font-semibold leading-none ${
+                                name === selectedMember
+                                  ? "bg-[#2d7a33] text-[#b8f0bd]"
+                                  : "bg-[#2d2d5a] text-[#b8b8f0]"
+                              }`}
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
 
         {!selectedMember && (
