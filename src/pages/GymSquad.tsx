@@ -190,8 +190,9 @@ const GymSquad = () => {
 
         {/* Planning Grid */}
         <section className={`overflow-x-auto mb-8 ${!selectedMember ? "opacity-40 pointer-events-none" : ""}`}>
+          <div className="min-w-[700px] pr-4">
           <div
-            className="grid gap-0.5 min-w-[700px]"
+            className="grid gap-0.5"
             style={{ gridTemplateColumns: "70px repeat(7, 1fr)" }}
           >
             {/* Header row */}
@@ -260,6 +261,7 @@ const GymSquad = () => {
                 })}
               </>
             ))}
+          </div>
           </div>
         </section>
 
