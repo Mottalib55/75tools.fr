@@ -195,7 +195,7 @@ const GymSquad = () => {
             style={{ gridTemplateColumns: "70px repeat(7, 1fr)" }}
           >
             {/* Header row */}
-            <div className="p-2 text-center rounded-md" />
+            <div className="p-2 text-center rounded-md sticky left-0 z-10 bg-[#0f0f0f]" />
             {weekDates.map((date, i) => (
               <div
                 key={i}
@@ -216,7 +216,7 @@ const GymSquad = () => {
               <>
                 <div
                   key={`h-${hour}`}
-                  className="p-2 text-center rounded-md bg-[#1a1a1a] font-medium text-[#777] text-sm flex items-center justify-center"
+                  className="p-2 text-center rounded-md bg-[#1a1a1a] font-medium text-[#777] text-sm flex items-center justify-center sticky left-0 z-10"
                 >
                   {hour}
                 </div>
