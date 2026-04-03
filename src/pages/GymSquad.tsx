@@ -43,7 +43,7 @@ const GymSquad = () => {
   });
   const [weekOffset, setWeekOffset] = useState(0);
   const [slots, setSlots] = useState<SlotMap>({});
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const getWeekDates = useCallback(() => {
     const start = getStartDate(weekOffset);
@@ -55,27 +55,34 @@ const GymSquad = () => {
   }, [weekOffset]);
 
   const fetchSlots = useCallback(async () => {
-    const dates = getWeekDates();
-    const startKey = `${dateKey(dates[0])}_`;
-    const endKey = `${dateKey(dates[6])}_`;
+    try {
+      const dates = getWeekDates();
+      const startKey = `${dateKey(dates[0])}_`;
+      const endKey = `${dateKey(dates[6])}_`;
 
-    const { data, error } = await supabase
-      .from("gym_slots")
-      .select("slot_key, member")
-      .gte("slot_key", startKey)
-      .lte("slot_key", endKey + "~");
+      const { data, error: dbError } = await supabase
+        .from("gym_slots")
+        .select("slot_key, member")
+        .gte("slot_key", startKey)
+        .lte("slot_key", endKey + "~");
 
-    if (error) {
-      console.error("Error fetching slots:", error);
-      return;
+      if (dbError) {
+        console.error("Fetch error:", dbError);
+        setError(`DB error: ${dbError.message}`);
+        return;
+      }
+
+      setError(null);
+      const map: SlotMap = {};
+      for (const row of data || []) {
+        if (!map[row.slot_key]) map[row.slot_key] = [];
+        map[row.slot_key].push(row.member);
+      }
+      setSlots(map);
+    } catch (e) {
+      console.error("Network error:", e);
+      setError(`Network error: ${e}`);
     }
-
-    const map: SlotMap = {};
-    for (const row of data || []) {
-      if (!map[row.slot_key]) map[row.slot_key] = [];
-      map[row.slot_key].push(row.member);
-    }
-    setSlots(map);
   }, [getWeekDates]);
 
   useEffect(() => {
@@ -91,35 +98,60 @@ const GymSquad = () => {
 
   const toggleSlot = async (slotKey: string) => {
     if (!selectedMember) return;
-    setLoading(true);
 
-    const members = slots[slotKey] || [];
-    const isRegistered = members.includes(selectedMember);
+    // Optimistic update - update UI immediately
+    setSlots((prev) => {
+      const next = { ...prev };
+      const members = [...(next[slotKey] || [])];
+      const idx = members.indexOf(selectedMember);
+      if (idx === -1) {
+        members.push(selectedMember);
+      } else {
+        members.splice(idx, 1);
+      }
+      if (members.length > 0) {
+        next[slotKey] = members;
+      } else {
+        delete next[slotKey];
+      }
+      return next;
+    });
 
-    if (isRegistered) {
-      await supabase
-        .from("gym_slots")
-        .delete()
-        .eq("slot_key", slotKey)
-        .eq("member", selectedMember);
-    } else {
-      await supabase
-        .from("gym_slots")
-        .insert({ slot_key: slotKey, member: selectedMember });
+    // Then persist to Supabase
+    try {
+      const members = slots[slotKey] || [];
+      const isRegistered = members.includes(selectedMember);
+
+      if (isRegistered) {
+        const { error: dbError } = await supabase
+          .from("gym_slots")
+          .delete()
+          .eq("slot_key", slotKey)
+          .eq("member", selectedMember);
+        if (dbError) console.error("Delete error:", dbError);
+      } else {
+        const { error: dbError } = await supabase
+          .from("gym_slots")
+          .insert({ slot_key: slotKey, member: selectedMember });
+        if (dbError) console.error("Insert error:", dbError);
+      }
+
+      // Refresh from DB to sync with other users
+      await fetchSlots();
+    } catch (e) {
+      console.error("Toggle error:", e);
+      // Refresh to revert optimistic update on error
+      await fetchSlots();
     }
-
-    await fetchSlots();
-    setLoading(false);
   };
 
   const weekDates = getWeekDates();
-
   const weekLabel = `${shortDate(weekDates[0])} - ${shortDate(weekDates[6])}`;
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-[#e0e0e0]">
-      {/* Header */}
       <div className="max-w-[1100px] mx-auto px-4 py-5">
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-2">
           <button
             onClick={() => navigate(-1)}
@@ -136,6 +168,7 @@ const GymSquad = () => {
           </button>
         </div>
 
+        {/* Header */}
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white flex items-center justify-center gap-3">
             <Dumbbell className="w-8 h-8" />
@@ -143,6 +176,13 @@ const GymSquad = () => {
           </h1>
           <p className="text-[#888] mt-1">Who's hitting the gym and when?</p>
         </header>
+
+        {/* Error banner */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Member Selection */}
         <section className="text-center mb-6">
@@ -189,13 +229,19 @@ const GymSquad = () => {
         </nav>
 
         {/* Planning Grid */}
-        <section className={`overflow-x-auto mb-8 ${!selectedMember ? "opacity-40 pointer-events-none" : ""}`}>
+        <div
+          className={`overflow-x-auto mb-8 ${!selectedMember ? "opacity-40 pointer-events-none" : ""}`}
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           <div
-            className="grid gap-0.5"
-            style={{ gridTemplateColumns: "60px repeat(7, minmax(80px, 1fr))" }}
+            className="grid gap-px bg-[#222]"
+            style={{
+              gridTemplateColumns: "60px repeat(7, minmax(80px, 1fr))",
+              minWidth: 640,
+            }}
           >
             {/* Header row */}
-            <div className="p-2 text-center sticky left-0 z-10 bg-[#0f0f0f]" />
+            <div className="p-2 bg-[#0f0f0f] sticky left-0 z-10" />
             {weekDates.map((date, i) => (
               <div
                 key={i}
@@ -211,7 +257,7 @@ const GymSquad = () => {
               </div>
             ))}
 
-            {/* Hour rows */}
+            {/* Slot rows */}
             {HOURS.map((hour) => (
               <React.Fragment key={hour}>
                 <div className="p-2 text-center bg-[#1a1a1a] font-medium text-[#777] text-sm flex items-center justify-center sticky left-0 z-10">
@@ -223,21 +269,26 @@ const GymSquad = () => {
                   const hasMe = selectedMember ? members.includes(selectedMember) : false;
                   const hasOthers = members.filter((m) => m !== selectedMember).length > 0;
 
-                  let cellClass = "bg-[#141414]";
-                  if (hasMe && hasOthers) {
-                    cellClass = "bg-[#1a2d1a] border border-[#3d7a43]";
-                  } else if (hasMe) {
-                    cellClass = "bg-[#162d1a] border border-[#2d5a33]";
-                  } else if (hasOthers) {
-                    cellClass = "bg-[#1a1a2d]";
-                  }
+                  let cellBg = "#141414";
+                  if (hasMe && hasOthers) cellBg = "#1a2d1a";
+                  else if (hasMe) cellBg = "#162d1a";
+                  else if (hasOthers) cellBg = "#1a1a2d";
 
                   return (
-                    <button
-                      type="button"
+                    <div
                       key={dayIdx}
-                      onClick={() => !loading && toggleSlot(slotKey)}
-                      className={`p-1 text-center transition-all min-h-[52px] flex items-center justify-center touch-manipulation ${cellClass}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => toggleSlot(slotKey)}
+                      onKeyDown={(e) => e.key === "Enter" && toggleSlot(slotKey)}
+                      style={{
+                        background: cellBg,
+                        minHeight: 48,
+                        touchAction: "manipulation",
+                        cursor: "pointer",
+                        WebkitTapHighlightColor: "rgba(79,156,247,0.2)",
+                      }}
+                      className="p-1 flex items-center justify-center"
                     >
                       <div className="flex flex-wrap gap-0.5 justify-center">
                         {members.map((name) => (
@@ -253,13 +304,13 @@ const GymSquad = () => {
                           </span>
                         ))}
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </React.Fragment>
             ))}
           </div>
-        </section>
+        </div>
 
         {!selectedMember && (
           <div className="text-center text-[#888] text-sm">
