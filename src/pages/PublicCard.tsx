@@ -668,20 +668,9 @@ END:VCARD`.replace(/\n{2,}/g, "\n");
             </div>
           )}
 
-          {/* Bouton Ajouter aux contacts */}
-          {hasName && (
-            <button
-              onClick={generateVCard}
-              className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3.5 rounded-xl font-medium hover:bg-slate-800 transition-colors mb-4"
-            >
-              <UserPlus size={20} />
-              Add to contacts
-            </button>
-          )}
-
           {/* CTA LinkedIn & WhatsApp */}
           {(isFieldActive(profile.linkedin, profile.linkedin_enabled) || isFieldActive(profile.whatsapp, profile.whatsapp_enabled)) && (
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-3 mb-3">
               {isFieldActive(profile.linkedin, profile.linkedin_enabled) && (
                 <a
                   href={profile.linkedin}
@@ -707,6 +696,17 @@ END:VCARD`.replace(/\n{2,}/g, "\n");
                 </a>
               )}
             </div>
+          )}
+
+          {/* Bouton Ajouter aux contacts */}
+          {hasName && (
+            <button
+              onClick={generateVCard}
+              className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3.5 rounded-xl font-medium hover:bg-slate-800 transition-colors mb-6"
+            >
+              <UserPlus size={20} />
+              Add to contacts
+            </button>
           )}
 
           {/* Réseaux Sociaux */}
