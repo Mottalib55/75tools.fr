@@ -672,36 +672,68 @@ END:VCARD`.replace(/\n{2,}/g, "\n");
           {hasName && (
             <button
               onClick={generateVCard}
-              className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3.5 rounded-xl font-medium hover:bg-slate-800 transition-colors mb-6"
+              className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3.5 rounded-xl font-medium hover:bg-slate-800 transition-colors mb-4"
             >
               <UserPlus size={20} />
               Add to contacts
             </button>
           )}
 
+          {/* CTA LinkedIn & WhatsApp */}
+          {(isFieldActive(profile.linkedin, profile.linkedin_enabled) || isFieldActive(profile.whatsapp, profile.whatsapp_enabled)) && (
+            <div className="flex gap-3 mb-6">
+              {isFieldActive(profile.linkedin, profile.linkedin_enabled) && (
+                <a
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent("linkedin_click", profile.id)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#0A66C2] hover:bg-[#004182] text-white py-3 rounded-xl font-medium transition-colors"
+                >
+                  <Linkedin size={20} />
+                  LinkedIn
+                </a>
+              )}
+              {isFieldActive(profile.whatsapp, profile.whatsapp_enabled) && (
+                <a
+                  href={getWhatsAppLink(profile.whatsapp!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent("whatsapp_click", profile.id)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white py-3 rounded-xl font-medium transition-colors"
+                >
+                  <WhatsAppIcon size={20} />
+                  WhatsApp
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Réseaux Sociaux */}
-          {socialLinks.length > 0 && (
+          {socialLinks.filter(l => l.key !== "linkedin" && l.key !== "whatsapp").length > 0 && (
             <div className="flex flex-wrap justify-center gap-3">
-              {socialLinks.map((link) => {
-                const colors = socialColors[link.key];
-                return (
-                  <a
-                    key={link.key}
-                    href={(link as any).href || link.value}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackEvent(`${link.key}_click`, profile.id)}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                      colors
-                        ? `${colors.bg} ${colors.hover} ${colors.text}`
-                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                    }`}
-                    title={link.label}
-                  >
-                    {link.icon}
-                  </a>
-                );
-              })}
+              {socialLinks
+                .filter((link) => link.key !== "linkedin" && link.key !== "whatsapp")
+                .map((link) => {
+                  const colors = socialColors[link.key];
+                  return (
+                    <a
+                      key={link.key}
+                      href={(link as any).href || link.value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackEvent(`${link.key}_click`, profile.id)}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                        colors
+                          ? `${colors.bg} ${colors.hover} ${colors.text}`
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                      }`}
+                      title={link.label}
+                    >
+                      {link.icon}
+                    </a>
+                  );
+                })}
             </div>
           )}
 
