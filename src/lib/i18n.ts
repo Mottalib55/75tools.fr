@@ -25,6 +25,10 @@ export const translations = {
         name: "Gym Squad",
         description: "Coordonnez vos séances de sport avec votre équipe. Planifiez qui va à la salle et quand.",
       },
+      seoDashboard: {
+        name: "SEO Dashboard",
+        description: "Tableau de bord SEO multi-sites. Suivez vos performances Google Search Console et Bing en temps réel.",
+      },
       timeManagement: {
         name: "Gestion de Temps",
         description: "Optimisez votre productivité avec notre outil de gestion du temps intelligent.",
@@ -67,6 +71,10 @@ export const translations = {
       gymSquad: {
         name: "Gym Squad",
         description: "Coordinate your gym sessions with your team. Plan who's going to the gym and when.",
+      },
+      seoDashboard: {
+        name: "SEO Dashboard",
+        description: "Multi-site SEO dashboard. Track your Google Search Console and Bing performance in real time.",
       },
       timeManagement: {
         name: "Time Management",

@@ -4,6 +4,7 @@ import {
   CreditCard,
   Calculator,
   Dumbbell,
+  BarChart3,
   Clock,
   ArrowRight,
   ExternalLink,
@@ -67,7 +68,17 @@ const Hub = ({ lang }: HubProps) => {
       icon: <Dumbbell className="h-5 w-5" />,
       href: "/gym",
       available: true,
-      area: "md:[grid-area:2/1/3/13] xl:[grid-area:1/9/2/13]",
+      area: "md:[grid-area:2/1/3/7] xl:[grid-area:1/9/2/13]",
+    },
+    {
+      id: "seo-dashboard",
+      name: t.tools.seoDashboard.name,
+      description: t.tools.seoDashboard.description,
+      icon: <BarChart3 className="h-5 w-5" />,
+      href: "https://seo-platform-sigma.vercel.app",
+      external: true,
+      available: true,
+      area: "md:[grid-area:2/7/3/13] xl:[grid-area:2/1/3/5]",
     },
     {
       id: "coming-1",
@@ -75,7 +86,7 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.timeManagement.description,
       icon: <Clock className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:3/1/4/7] xl:[grid-area:2/1/3/5]",
+      area: "md:[grid-area:3/1/4/7] xl:[grid-area:2/5/3/9]",
     },
     {
       id: "coming-2",
@@ -83,15 +94,7 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.aiAssistant.description,
       icon: <Sparkles className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:3/7/4/13] xl:[grid-area:2/5/3/9]",
-    },
-    {
-      id: "coming-3",
-      name: t.tools.automation.name,
-      description: t.tools.automation.description,
-      icon: <Zap className="h-5 w-5" />,
-      available: false,
-      area: "md:[grid-area:4/1/5/13] xl:[grid-area:2/9/3/13]",
+      area: "md:[grid-area:3/7/4/13] xl:[grid-area:2/9/3/13]",
     },
   ];
 
@@ -184,7 +187,7 @@ const Hub = ({ lang }: HubProps) => {
             <div className="flex items-center gap-3">
               <span className="hidden sm:inline-flex items-center gap-2 text-sm text-neutral-400 bg-neutral-900 px-4 py-2 rounded-full border border-neutral-800">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                3 {t.header.toolsAvailable}
+                4 {t.header.toolsAvailable}
               </span>
               {/* Language Switcher */}
               <button
