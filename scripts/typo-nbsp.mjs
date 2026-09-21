@@ -43,19 +43,30 @@ async function* walk(d) {
 
 function fix(html) {
   const fr = /<html[^>]*\blang="fr/i.test(html);
-  let skip = 0, count = 0;
+  // Langue à virgule décimale : on corrige aussi le séparateur dans le texte visible.
+  // Réécrire 106 appels à `toFixed()` site par site ne tenait pas ; la correction se
+  // fait donc ici, sur le seul texte que le lecteur voit (rightetf.com, 2026-09-21).
+  const { lang } = dotDecimals(html);
+  const virgule = lang && !/^(en|ja|ko|zh|th|he|hi|bn|ar|ms|id)|^de-CH|^it-CH/i.test(lang);
+  let skip = 0, count = 0, decimales = 0;
   const out = html.split(/(<[^>]+>)/).map((part) => {
     if (part.startsWith('<')) {
-      const m = part.match(/^<(\/?)(script|style|pre|textarea|astro-island)\b/i);
+      const m = part.match(/^<(\/?)(script|style|pre|textarea|astro-island|code|kbd)\b/i);
       if (m) skip += m[1] ? -1 : (part.endsWith('/>') ? 0 : 1);
       return part;
     }
     if (skip > 0 || !part.trim()) return part;
     let t = part.replace(UNIT, (_, d) => (count++, d + NB));
     if (fr) t = t.replace(FR_BEFORE, () => (count++, NB)).replace(FR_AFTER, () => (count++, '«' + NB));
+    if (virgule) {
+      t = t.replace(DOT_DECIMAL, (m) => {
+        decimales++;
+        return m.replace('.', ',');
+      });
+    }
     return t;
   }).join('');
-  return { out, count };
+  return { out, count, decimales };
 }
 
 // Toute décimale à point, unité ou non (« 13.18 € », « 0.5 maand », « divisé par 111.8 »),
@@ -100,15 +111,20 @@ function wrongAccents(html) {
 function missingAccents(html) {
   if (!/<html[^>]*\blang="fr/i.test(html)) return [];
   const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/https?:\/\/\S+/g, ' ');
-  return text.match(NO_ACCENT) || [];
+  const hits = text.match(NO_ACCENT) || [];
+  // « a la » est ambigu : « Quelle Audi a la meilleure autonomie ? » est correct.
+  // On ne le retient donc que sur une page qui perd déjà d'autres accents, signe
+  // d'un texte désaccentué (guidevoitureelectrique.fr, 2026-09-21).
+  const ambigu = (m) => /^(a la|a l'|au dela)$/i.test(m.trim());
+  return hits.some((m) => !ambigu(m)) ? hits : [];
 }
 
-let total = 0, files = 0, dots = 0; const dotPages = [];
+let total = 0, files = 0, dots = 0, corrigees = 0; const dotPages = [];
 let accents = 0; const accentPages = [];
 for await (const f of walk(dist)) {
   const html = await readFile(f, 'utf8');
-  const { out, count } = fix(html);
-  if (count) { total += count; files++; if (!CHECK) await writeFile(f, out); }
+  const { out, count, decimales } = fix(html);
+  if (count || decimales) { total += count; corrigees += decimales; files++; if (!CHECK) await writeFile(f, out); }
   if (CHECK) {
     const { lang, hits } = dotDecimals(html);
     if (hits.length) { dots += hits.length; dotPages.push(`${f} : ${hits.slice(0, 3).join(', ')}`); }
@@ -119,6 +135,7 @@ for await (const f of walk(dist)) {
   }
 }
 console.log(`typo-nbsp: ${total} espace(s) ${CHECK ? 'à corriger' : 'rendue(s) insécable(s)'} dans ${files} page(s)`);
+if (!CHECK && corrigees) console.log(`typo-nbsp: ${corrigees} décimale(s) passée(s) à la virgule`);
 if (CHECK) {
   console.log(`typo-nbsp: ${dots} décimale(s) avec un point dans une langue à virgule`);
   dotPages.slice(0, 10).forEach((l) => console.log('  ' + l));
