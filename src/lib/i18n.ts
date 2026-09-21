@@ -100,7 +100,7 @@ export const translations = {
 export type Translations = typeof translations.fr;
 
 export function getTranslations(lang: Language): Translations {
-  return translations[lang];
+  return translations[lang] as Translations;
 }
 
 export function detectBrowserLanguage(): Language {

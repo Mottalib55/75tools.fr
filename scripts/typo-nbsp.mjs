@@ -73,10 +73,23 @@ function fix(html) {
 // sauf numéros d'articles et de documents (« art. 22.2 », « artikel 11.7a », « Mémento 2.01 »), dates,
 // numéros de section (« 8.1 Responsable »), cylindrées (« 1.5 TSI ») et normes (« ECE 22.05 »).
 const DOT_DECIMAL = /(?<![\d.,’'\w])(?<!(?:art\.?|artikel|Art\.?|§|Abs\.?|al\.|Form\.?|art[ií]culos?|Art[ií]culos?|articles?|Articles?|artigos?|Artigos?)\s?)(?<!\d\.\d[\d.a-z)]*,?\s(?:y|e|et|and|und|o|ou)\s)(?<!(?:Mémento|Merkblatt|Memento)[^\d]{0,14})(?<!(?:ECE|norme|\^|Ducato|\d\.\d\d ou|version|TLS|ETH|RGAA|WCAG|HTTP|Web)\s?)(?:\d{1,3}(?:['’]\d{3})+|\d+)\.\d{1,2}(?![\d.\w])(?!\s(?:[A-Z][a-zé]|TSI|TDI|TFSI|TCe|PureTech|BlueHDi|dCi|HDi|THP|hybride|essence|diesel|ou\s\d))/g;
+/** Texte réellement lu par le visiteur : hors script, style et code. */
+function texteVisible(html) {
+  let skip = 0;
+  return html.split(/(<[^>]+>)/).map((part) => {
+    if (part.startsWith('<')) {
+      const m = part.match(/^<(\/?)(script|style|pre|textarea|astro-island|code|kbd)\b/i);
+      if (m) skip += m[1] ? -1 : (part.endsWith('/>') ? 0 : 1);
+      return ' ';
+    }
+    return skip > 0 ? ' ' : part;
+  }).join('');
+}
+
 function dotDecimals(html) {
   const lang = (html.match(/<html[^>]*\blang="([^"]+)"/i) || [])[1] || '';
   if (/^(en|ja|ko|zh|th|he|hi|bn|ar|ms|id)|^de-CH|^it-CH/i.test(lang)) return { lang, hits: [] };   // point décimal : anglais, japonais, coréen, chinois, thaï, hébreu, hindi, bengali, arabe (chiffres latins), malais, indonésien, suisse allemand et italien (CLDR)
-  const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
+  const text = texteVisible(html);
   // Numéro de version (« iDrive 8.5 », « Safety Sense 3.0 », « Blade 2.0 », « mise à jour
   // logicielle 3.5 », « un 2.0 turbo ») : nom propre ou « version / logicielle / un » juste avant,
   // et aucune unité juste après. Une vraie mesure (« Batterie 77.5 kWh ») garde son unité.
@@ -104,13 +117,13 @@ const RES_OK = new Set(['très', 'près', 'après', 'auprès', 'exprès', 'progr
 const WRONG_ACCENT = /(?<![\p{L}])(vià|và|[\p{L}]*è(?:ss|tt|ll|nn|mm|pp|rr)[\p{L}]*|[\p{L}]*[bcdfgmnprtv]rès)(?![\p{L}])/gu;
 function wrongAccents(html) {
   if (!/<html[^>]*\blang="fr/i.test(html)) return [];
-  const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
+  const text = texteVisible(html);
   return (text.match(WRONG_ACCENT) || []).filter((w) => !RES_OK.has(w.toLowerCase()));
 }
 
 function missingAccents(html) {
   if (!/<html[^>]*\blang="fr/i.test(html)) return [];
-  const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/https?:\/\/\S+/g, ' ');
+  const text = texteVisible(html).replace(/https?:\/\/\S+/g, ' ');
   const hits = text.match(NO_ACCENT) || [];
   // « a la » est ambigu : « Quelle Audi a la meilleure autonomie ? » est correct.
   // On ne le retient donc que sur une page qui perd déjà d'autres accents, signe

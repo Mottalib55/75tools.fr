@@ -6,7 +6,32 @@ import {
   Send, Music2, Camera
 } from "lucide-react";
 import defaultAvatar from "@/assets/avatar.jpg";
-import type { CardData, SocialField } from "@/pages/Admin";
+export interface SocialField {
+  value: string;
+  enabled: boolean;
+}
+
+export interface CardData {
+  firstName: string;
+  lastName: string;
+  title: string;
+  company: string;
+  bio: string;
+  avatar: string;
+  phone: SocialField;
+  email: SocialField;
+  website: SocialField;
+  linkedin: SocialField;
+  twitter: SocialField;
+  instagram: SocialField;
+  facebook: SocialField;
+  tiktok: SocialField;
+  youtube: SocialField;
+  snapchat: SocialField;
+  github: SocialField;
+  whatsapp: SocialField;
+  telegram: SocialField;
+}
 
 const defaultData: CardData = {
   firstName: "",
