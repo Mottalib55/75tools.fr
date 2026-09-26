@@ -47,13 +47,17 @@ const EM_DASH = /\s*(?:\u2014|&mdash;|&#8212;)\s*/g;
 // Les dossiers d'archive ne sont pas servis : les corriger reviendrait a
 // travailler sur un site fantome.
 const ARCHIVES = new Set(['_archives', 'archive', 'archives', 'old', 'backup', 'node_modules']);
+// Caches de build : ce qui s'y trouve n'est jamais servi. Les contrôler revenait
+// à signaler 166 « fautes d'accent » dans des fichiers intermédiaires de Next
+// que personne ne lit (brutanet.fr, 2026-09-26).
+const CACHES = new Set(['.next', '.nuxt', '.svelte-kit', '.astro', '.cache', '.vercel', '.turbo']);
 
 async function* walk(d) {
   for (const e of await readdir(d, { withFileTypes: true })) {
     if (e.isDirectory() && ARCHIVES.has(e.name)) continue;
     const p = join(d, e.name);
     // node_modules contient des .html de documentation : ils ne font pas partie du site
-    if (e.isDirectory()) { if (e.name !== 'node_modules' && e.name !== '.git') yield* walk(p); }
+    if (e.isDirectory()) { if (e.name !== 'node_modules' && e.name !== '.git' && !CACHES.has(e.name)) yield* walk(p); }
     else if (e.name.endsWith('.html')) yield p;
   }
 }
@@ -114,11 +118,17 @@ function fix(html) {
 const DOT_DECIMAL = /(?<![\d.,’'\w])(?<!(?:art\.?|artikel|Art\.?|§|Abs\.?|al\.|Form\.?|art[ií]culos?|Art[ií]culos?|articles?|Articles?|artigos?|Artigos?)\s?)(?<!\d\.\d[\d.a-z)]*,?\s(?:y|e|et|and|und|o|ou)\s)(?<!(?:Mémento|Merkblatt|Memento)[^\d]{0,14})(?<!(?:ECE|norme|\^|Ducato|\d\.\d\d ou|version|TLS|ETH|RGAA|WCAG|HTTP|Web)\s?)(?:\d{1,3}(?:['’]\d{3})+|\d+)\.\d{1,2}(?![\d.\w])(?!\s(?:[A-Z][a-zé]|TSI|TDI|TFSI|TCe|PureTech|BlueHDi|dCi|HDi|THP|hybride|essence|diesel|ou\s\d))/g;
 /** Texte réellement lu par le visiteur : hors script, style et code. */
 function texteVisible(html) {
+  // Les blocs script et style partent d'abord, en bloc : un script minifié
+  // contient des « i<n » que le découpage en balises prend pour une balise
+  // ouvrante, ce qui lui fait avaler le « </script> » fermant. Le compteur
+  // passait alors à -1 et tout le CSS et le JavaScript de la suite du document
+  // ressortait comme du texte visible (salairebrutonet.com, 2026-09-26).
+  html = html.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ');
   let skip = 0;
   return html.split(/(<[a-zA-Z!\/][^>]*>)/).map((part) => {
     if (part.startsWith('<')) {
       const m = part.match(/^<(\/?)(script|style|pre|textarea|astro-island|code|kbd)\b/i);
-      if (m) skip += m[1] ? -1 : (part.endsWith('/>') ? 0 : 1);
+      if (m) skip = Math.max(0, skip + (m[1] ? -1 : (part.endsWith('/>') ? 0 : 1)));
       return ' ';
     }
     return skip > 0 ? ' ' : part;
@@ -189,9 +199,12 @@ let tirets = 0; const tiretPages = [];
 let hydratees = 0;
 for await (const f of walk(dist)) {
   const html = await readFile(f, 'utf8');
-  if (HYDRATE.test(html)) { hydratees++; continue; }
+  // Une page réhydratée n'est pas réécrite, mais elle reste contrôlée : taire le
+  // défaut reviendrait à supprimer la règle pour les sites Next.
+  const hydratee = HYDRATE.test(html);
+  if (hydratee) hydratees++;
   const { out, count, decimales, cadratins } = fix(html);
-  if (count || decimales || cadratins) { total += count; corrigees += decimales; files++; if (!CHECK) await writeFile(f, out); }
+  if (count || decimales || cadratins) { total += count; corrigees += decimales; files++; if (!CHECK && !hydratee) await writeFile(f, out); }
   if (cadratins) { tirets += cadratins; if (tiretPages.length < 10) tiretPages.push(`${f} : ${cadratins}`); }
   if (CHECK) {
     const { lang, hits } = dotDecimals(html);
