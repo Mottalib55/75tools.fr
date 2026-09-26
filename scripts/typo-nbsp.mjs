@@ -31,9 +31,26 @@ const NB = ' ';
 const UNIT = /(\d) (?=(?:%|€|\$|CHF|Fr\.|h\b|\d{3}(?!\d)))/g;
 const FR_BEFORE = / (?=[:;?!»])/g;
 const FR_AFTER = /« /g;
+// Le tiret cadratin « — » en incise est une signature d'ecriture automatique :
+// il abonde dans les textes produits par un modele et presque jamais sous la
+// plume d'un redacteur qui compose pour le web. On le remplace donc partout
+// dans le texte visible. La virgule convient aux trois emplois rencontres :
+// l'incise (« … holidays — typically before … »), l'etiquette suivie de son
+// explication (« ANTS — Immatriculation ») et la mention de pied de page
+// (« © 2026 Site — Tous droits reserves »). Le tiret demi-cadratin « – », lui,
+// reste legitime dans les intervalles (« 2–3 ans ») et n'est pas touche.
+// Trois ecritures possibles dans le HTML construit : le caractere lui-meme et
+// ses deux entites. Ne traiter que la premiere laissait passer la majorite
+// des cas, les gabarits Astro ecrivant volontiers `&mdash;`.
+const EM_DASH = /\s*(?:\u2014|&mdash;|&#8212;)\s*/g;
+
+// Les dossiers d'archive ne sont pas servis : les corriger reviendrait a
+// travailler sur un site fantome.
+const ARCHIVES = new Set(['_archives', 'archive', 'archives', 'old', 'backup', 'node_modules']);
 
 async function* walk(d) {
   for (const e of await readdir(d, { withFileTypes: true })) {
+    if (e.isDirectory() && ARCHIVES.has(e.name)) continue;
     const p = join(d, e.name);
     // node_modules contient des .html de documentation : ils ne font pas partie du site
     if (e.isDirectory()) { if (e.name !== 'node_modules' && e.name !== '.git') yield* walk(p); }
@@ -48,25 +65,47 @@ function fix(html) {
   // fait donc ici, sur le seul texte que le lecteur voit (rightetf.com, 2026-09-21).
   const { lang } = dotDecimals(html);
   const virgule = lang && !/^(en|ja|ko|zh|th|he|hi|bn|ar|ms|id)|^de-CH|^it-CH/i.test(lang);
-  let skip = 0, count = 0, decimales = 0;
-  const out = html.split(/(<[^>]+>)/).map((part) => {
+  let count = 0, decimales = 0, cadratins = 0;
+  // `application/ld+json` n'est pas du code : c'est le même texte que la page,
+  // déclaré à Google. Le sauter faisait diverger la réponse déclarée de la
+  // réponse affichée, ce que le contrôle §7 signale (2026-09-25).
+  const pile = [];
+  const out = html.split(/(<[a-zA-Z!\/][^>]*>)/).map((part) => {
     if (part.startsWith('<')) {
       const m = part.match(/^<(\/?)(script|style|pre|textarea|astro-island|code|kbd)\b/i);
-      if (m) skip += m[1] ? -1 : (part.endsWith('/>') ? 0 : 1);
+      if (m) {
+        const fermeture = Boolean(m[1]);
+        if (fermeture) pile.pop();
+        else if (!part.endsWith('/>')) {
+          pile.push(/type=["']application\/ld\+json["']/i.test(part) ? 'ld' : 'saut');
+        }
+      }
       return part;
     }
-    if (skip > 0 || !part.trim()) return part;
-    let t = part.replace(UNIT, (_, d) => (count++, d + NB));
-    if (fr) t = t.replace(FR_BEFORE, () => (count++, NB)).replace(FR_AFTER, () => (count++, '«' + NB));
-    if (virgule) {
-      t = t.replace(DOT_DECIMAL, (m) => {
-        decimales++;
-        return m.replace('.', ',');
+    const dedans = pile[pile.length - 1];
+    if (dedans === 'saut' || !part.trim()) return part;
+    const ldJson = dedans === 'ld' ? 1 : 0;
+    const typographie = (texte) => {
+      let t = texte.replace(EM_DASH, () => (cadratins++, ', '));
+      t = t.replace(UNIT, (_, d) => (count++, d + NB));
+      if (fr) t = t.replace(FR_BEFORE, () => (count++, NB)).replace(FR_AFTER, () => (count++, '«' + NB));
+      if (virgule) t = t.replace(DOT_DECIMAL, (m) => (decimales++, m.replace('.', ',')));
+      return t;
+    };
+    // Dans un JSON-LD, seul le contenu des chaînes est du texte : corriger un
+    // nombre nu (« "annualPercentageRate": 0.32 ») produirait un JSON invalide,
+    // donc un balisage ignoré en entier (rightetf.com, 2026-09-25).
+    if (ldJson > 0) {
+      return part.replace(/"(?:[^"\\]|\\.)*"/g, (chaine) => {
+        const interieur = chaine.slice(1, -1);
+        // Une clé JSON n'est pas du texte lisible : on ne touche qu'aux valeurs,
+        // reconnaissables à ce qu'elles ne sont pas suivies d'un deux-points.
+        return '"' + typographie(interieur) + '"';
       });
     }
-    return t;
+    return typographie(part);
   }).join('');
-  return { out, count, decimales };
+  return { out, count, decimales, cadratins };
 }
 
 // Toute décimale à point, unité ou non (« 13.18 € », « 0.5 maand », « divisé par 111.8 »),
@@ -76,7 +115,7 @@ const DOT_DECIMAL = /(?<![\d.,’'\w])(?<!(?:art\.?|artikel|Art\.?|§|Abs\.?|al\
 /** Texte réellement lu par le visiteur : hors script, style et code. */
 function texteVisible(html) {
   let skip = 0;
-  return html.split(/(<[^>]+>)/).map((part) => {
+  return html.split(/(<[a-zA-Z!\/][^>]*>)/).map((part) => {
     if (part.startsWith('<')) {
       const m = part.match(/^<(\/?)(script|style|pre|textarea|astro-island|code|kbd)\b/i);
       if (m) skip += m[1] ? -1 : (part.endsWith('/>') ? 0 : 1);
@@ -104,12 +143,15 @@ function dotDecimals(html) {
   return { lang, hits };
 }
 
+// « Employee Tax Credit », « Employee PRSI » : noms propres de dispositifs
+// étrangers, cités tels quels dans un texte français. Un mot capitalisé suivi
+// d'un terme anglais du même nom composé n'est pas un accent oublié.
 // Mots qui n'existent pas sans accent en français correct (liste volontairement sûre : pas de
 // « a », « ou », « ete », « du » qui ont un sens sans accent).
 // Frontières Unicode : avec \b, JavaScript verrait « tres » dans « mètres ». Un nom de domaine
 // (« impots.gouv.fr ») n'est pas une faute. Minuscules seulement : l'accent sur une capitale
 // (« Epargne ») est recommandé mais toléré.
-const NO_ACCENT = /(?<![\p{L}\p{N}])(epargnes?|epargner|fiscalites?|interets?|strategies?|impots?|annees?|periodes?|detaille(?:e|s|es)?|securite|necessaires?|reel(?:le|s|les)?|deja|tres|apres|beneficiaires?|societes?|systemes?|economies?|precaution|electriques?|vehicules?|resume|credit(?:s)? immobiliers?|prelevements?|deduction|remuneration|independants?|debutants?|methodes?|categories?|reduction|generale?s?|necessite|equipe|etape|etapes|criteres?|specifique|scenario|scenarios|numero|zero|a partir|(?<!\b(?:qui|il|elle|on|n'y|y) )a la|(?<!\b(?:qui|il|elle|on) )a l'|au dela)(?![\p{L}\p{N}]|\.[a-z])/gu;
+const NO_ACCENT = /(?<![\p{L}\p{N}])(epargnes?|epargner|fiscalites?|interets?|strategies?|impots?|annees?|periodes?|detaille(?:e|s|es)?|securite|necessaires?|reel(?:le|s|les)?|deja|tres|apres|beneficiaires?|societes?|systemes?|economies?|precaution|electriques?|vehicules?|resume|credit(?:s)? immobiliers?|prelevements?|deduction|remuneration|independants?|debutants?|methodes?|categories?|reduction|generale?s?|necessite|equipe|etape|etapes|criteres?|specifique|scenario|scenarios|numero|zero|a partir|(?<!\b(?:qui|il|elle|on|n'y|y) )a la|(?<!\b(?:qui|il|elle|on) )a l'|au dela|indemnites?|indemnisee?s?|preavis|conges|payes|anciennete|salaries?|(?<![A-Z])employee?s?(?! (?:Tax|Credit|PRSI|PAYE|Benefit))|economiques?|references?|durees?|prevues?|donnees|liees?|reglements?|calculees?|versees?|percues?)(?![\p{L}\p{N}]|\.[a-z]|-[\p{L}\p{N}-]*\.[a-z]{2,})/gu;
 // Accents ajoutés à tort par un vieux script de correction : « vià », « centrès », « Titrès »,
 // « succèssion » (1 012 occurrences sur cartegrisesimple.fr, 2026-09-19). Liste blanche des
 // vrais mots en consonne + « rès » ; « è » devant une consonne doublée n'existe pas.
@@ -132,12 +174,25 @@ function missingAccents(html) {
   return hits.some((m) => !ambigu(m)) ? hits : [];
 }
 
+// Une page réhydratée par React ne peut pas être retouchée après le rendu :
+// le client reconstruit le même arbre à partir de son propre code, compare le
+// texte servi au texte qu'il produit, et une virgule mise à la place d'un tiret
+// cadratin lui suffit pour lever l'erreur #418 et jeter le HTML reçu. Relevé sur
+// dosageguide.com le 2026-09-25 : 639 pages, une erreur d'hydratation sur
+// chacune, causée par ce script. Sur ces sites, la typographie se corrige dans
+// les sources ; ici on ne touche à rien et on le dit.
+const HYDRATE = /self\.__next_f|__NEXT_DATA__|window\.__remixContext|data-reactroot/;
+
 let total = 0, files = 0, dots = 0, corrigees = 0; const dotPages = [];
 let accents = 0; const accentPages = [];
+let tirets = 0; const tiretPages = [];
+let hydratees = 0;
 for await (const f of walk(dist)) {
   const html = await readFile(f, 'utf8');
-  const { out, count, decimales } = fix(html);
-  if (count || decimales) { total += count; corrigees += decimales; files++; if (!CHECK) await writeFile(f, out); }
+  if (HYDRATE.test(html)) { hydratees++; continue; }
+  const { out, count, decimales, cadratins } = fix(html);
+  if (count || decimales || cadratins) { total += count; corrigees += decimales; files++; if (!CHECK) await writeFile(f, out); }
+  if (cadratins) { tirets += cadratins; if (tiretPages.length < 10) tiretPages.push(`${f} : ${cadratins}`); }
   if (CHECK) {
     const { lang, hits } = dotDecimals(html);
     if (hits.length) { dots += hits.length; dotPages.push(`${f} : ${hits.slice(0, 3).join(', ')}`); }
@@ -147,12 +202,19 @@ for await (const f of walk(dist)) {
     if (miss.length) { accents += miss.length; accentPages.push(`${f} : ${[...new Set(miss)].slice(0, 4).join(', ')}`); }
   }
 }
+if (hydratees) {
+  console.log(`typo-nbsp: ${hydratees} page(s) réhydratées par React, laissées intactes `
+    + `— les retoucher après le rendu casse l'hydratation (React #418). `
+    + `Corriger la typographie dans les sources.`);
+}
 console.log(`typo-nbsp: ${total} espace(s) ${CHECK ? 'à corriger' : 'rendue(s) insécable(s)'} dans ${files} page(s)`);
 if (!CHECK && corrigees) console.log(`typo-nbsp: ${corrigees} décimale(s) passée(s) à la virgule`);
+if (tirets) console.log(`typo-nbsp: ${tirets} tiret(s) cadratin ${CHECK ? 'à remplacer' : 'remplacé(s) par une virgule'}`);
+if (CHECK) tiretPages.forEach((l) => console.log('  ' + l));
 if (CHECK) {
   console.log(`typo-nbsp: ${dots} décimale(s) avec un point dans une langue à virgule`);
   dotPages.slice(0, 10).forEach((l) => console.log('  ' + l));
   console.log(`typo-nbsp: ${accents} mot(s) français sans accent ou avec un accent faux`);
   accentPages.slice(0, 10).forEach((l) => console.log('  ' + l));
 }
-if (CHECK && (total || dots || accents)) process.exit(1);
+if (CHECK && (total || dots || accents || tirets)) process.exit(1);
