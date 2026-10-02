@@ -219,7 +219,7 @@ const MyCardLanding = () => {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8">
         <div className="container mx-auto px-6 text-center text-slate-400">
-          <p>© 2025 MyCard by <span onClick={() => navigate("/")} className="text-blue-400 hover:text-blue-300 cursor-pointer">75tools</span>. All rights reserved.</p>
+          <p>© 2026 MyCard by <span onClick={() => navigate("/")} className="text-blue-400 hover:text-blue-300 cursor-pointer">75tools</span>. All rights reserved.</p>
         </div>
       </footer>
     </div>

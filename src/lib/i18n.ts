@@ -45,7 +45,7 @@ export const translations = {
       comingSoon: "Bientôt",
     },
     footer: {
-      copyright: "© 2025 75tools. Tous droits réservés.",
+      copyright: "© 2026 75tools. Tous droits réservés.",
     },
   },
   en: {
@@ -92,7 +92,7 @@ export const translations = {
       comingSoon: "Soon",
     },
     footer: {
-      copyright: "© 2025 75tools. All rights reserved.",
+      copyright: "© 2026 75tools. All rights reserved.",
     },
   },
 } as const;
