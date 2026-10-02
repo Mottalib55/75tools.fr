@@ -46,6 +46,7 @@ export const translations = {
     },
     footer: {
       copyright: "© 2026 75tools. Tous droits réservés.",
+      privacy: "Confidentialité et cookies",
     },
   },
   en: {
@@ -93,6 +94,7 @@ export const translations = {
     },
     footer: {
       copyright: "© 2026 75tools. All rights reserved.",
+      privacy: "Privacy and cookies (in French)",
     },
   },
 } as const;

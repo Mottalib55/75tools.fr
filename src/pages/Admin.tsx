@@ -220,7 +220,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div data-clarity-mask="true" className="min-h-screen bg-slate-900">
       <SEO
         title="Admin - 75tools"
         description="Panneau d'administration"

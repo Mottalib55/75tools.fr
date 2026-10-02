@@ -245,6 +245,7 @@ const Hub = ({ lang }: HubProps) => {
       <footer className="border-t border-neutral-800 py-8">
         <div className="container mx-auto px-6 text-center text-neutral-500 text-sm">
           <p>{t.footer.copyright}</p>
+          <p className="mt-2"><a href="/confidentialite/" className="hover:text-neutral-300 underline-offset-4 hover:underline">{t.footer.privacy}</a></p>
         </div>
       </footer>
     </div>

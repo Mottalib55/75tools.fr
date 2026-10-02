@@ -85,7 +85,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
+    <div data-clarity-mask="true" className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
       <SEO
         title="Create your card - MyCard"
         description="Create your free digital business card in seconds. Share your contact info with a QR code."

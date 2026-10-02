@@ -331,7 +331,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200">
+    <div data-clarity-mask="true" className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200">
       <SEO
         title="Dashboard - MyCard"
         description="Manage your digital business card, view your stats and customize your profile."
