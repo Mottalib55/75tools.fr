@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Confidentialité et cookies : données MyCard, Clarity, RGPD</title>
-  <meta name="description" content="Données traitées par 75tools : comptes et cartes MyCard, statistiques de consultation des cartes, mesure d’audience Microsoft Clarity, et vos droits RGPD." />
+  <title>Confidentialité et cookies : MyCard, Clarity, Analytics</title>
+  <meta name="description" content="Données traitées par 75tools : comptes et cartes MyCard, statistiques des cartes, mesure d’audience Microsoft Clarity et Google Analytics, vos droits RGPD." />
   <link rel="canonical" href="https://75tools.fr/confidentialite/" />
   <meta property="og:url" content="https://75tools.fr/confidentialite/" />
-  <meta property="og:title" content="Confidentialité et cookies : données MyCard, Clarity, RGPD" />
+  <meta property="og:title" content="Confidentialité et cookies : MyCard, Clarity, Analytics" />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -19,6 +19,9 @@
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "yr1dpuley8");
   </script>
+  <!-- Google Analytics 4, decrit dans /confidentialite/ : pages vues standard uniquement. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNTVCQ9NEV"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LNTVCQ9NEV');</script>
   <style>
     :root { color-scheme: dark; }
     body { margin: 0; background: #0a0a0a; color: #d4d4d4; font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -49,14 +52,16 @@
   <p><strong>Statistiques des cartes.</strong> Quand quelqu’un consulte une carte ou clique sur l’un de ses liens, nous enregistrons le type d’action, la date, le navigateur utilisé et la page de provenance. Le titulaire de la carte voit le nombre de vues et de clics, jamais l’identité des visiteurs.</p>
   <p><strong>Planning GymSquad.</strong> Le prénom choisi et les créneaux réservés, visibles par les autres membres du groupe.</p>
   <p><strong>Mesure d’audience.</strong> Nous utilisons <strong>Microsoft Clarity</strong>, chargé dès l’ouverture des pages, sans bandeau préalable. Clarity enregistre les pages vues et leur adresse, les clics et le défilement, sous forme de sessions et de cartes de chaleur, ainsi que le type d’appareil et le pays. Le contenu des champs de saisie est masqué dans votre navigateur avant tout envoi, et le texte des pages de connexion, d’inscription et de l’espace personnel n’est pas enregistré.</p>
+  <p>Nous utilisons aussi <strong>Google Analytics 4</strong> (Google Ireland Limited ; Google LLC pour les transferts), chargé de la même façon dès l’ouverture des pages, sans bandeau préalable. Il ne reçoit que les pages vues standard : pages consultées, provenance de la visite, durée et engagement, type d’appareil et navigateur, localisation approximative (pays, ville) déduite de l’adresse IP, qui n’est pas conservée par Google Analytics 4. Aucune donnée de votre compte ni de votre carte ne lui est transmise.</p>
 
   <h2>3. Cookies et stockage dans le navigateur</h2>
   <ul>
     <li><strong>Microsoft Clarity</strong> dépose les cookies <code>_clck</code> (un an) et <code>_clsk</code> (un jour), qui relient les pages d’une même visite.</li>
+    <li><strong>Google Analytics 4</strong> dépose les cookies <code>_ga</code> (deux ans) et <code>_ga_&lt;identifiant&gt;</code> (deux ans), qui distinguent les visiteurs et relient les pages d’une même visite.</li>
     <li><strong>Session de connexion</strong> : votre jeton de connexion est gardé dans le stockage local du navigateur tant que vous restez connecté.</li>
     <li><strong>Préférences</strong> : le prénom choisi dans GymSquad reste dans votre navigateur.</li>
   </ul>
-  <p>Pour refuser Clarity, bloquez les cookies tiers ou le domaine <code>clarity.ms</code> dans les réglages de votre navigateur, ou utilisez un bloqueur de contenu. Le site reste entièrement utilisable.</p>
+  <p>Pour refuser Clarity, bloquez les cookies tiers ou le domaine <code>clarity.ms</code> dans les réglages de votre navigateur, ou utilisez un bloqueur de contenu. Pour refuser Google Analytics, bloquez les cookies tiers ou le domaine <code>google-analytics.com</code> dans votre navigateur, ou installez le <a href="https://tools.google.com/dlpage/gaoptout?hl=fr" rel="noopener">module officiel de désactivation de Google Analytics</a>. Le site reste entièrement utilisable.</p>
 
   <h2>4. Finalités et bases légales</h2>
   <ul>
@@ -70,18 +75,20 @@
     <li><strong>Supabase</strong> : base de données, authentification et stockage des photos.</li>
     <li><strong>GitHub Pages</strong> (GitHub, Inc., groupe Microsoft) : hébergement du site, données techniques de connexion.</li>
     <li><strong>Microsoft Clarity</strong> : données de navigation décrites plus haut.</li>
+    <li><strong>Google Analytics 4</strong> (Google Ireland Limited, Google LLC) : mesure d’audience décrite plus haut.</li>
     <li><strong>Google Fonts</strong> : chargement des polices, qui transmet votre adresse IP à Google.</li>
   </ul>
   <p>Aucune donnée n’est vendue ni utilisée pour de la publicité.</p>
 
   <h2>6. Transferts hors de l’Union européenne</h2>
-  <p>Microsoft, GitHub et Google peuvent traiter ces données aux États-Unis ; ces sociétés sont certifiées dans le cadre du Data Privacy Framework UE-États-Unis. Supabase s’appuie sur des clauses contractuelles types.</p>
+  <p>Microsoft, GitHub et Google peuvent traiter ces données aux États-Unis ; ces sociétés sont certifiées dans le cadre du Data Privacy Framework UE-États-Unis. Pour Google Analytics 4, les données sont transférées à Google LLC, certifiée dans ce même cadre. Supabase s’appuie sur des clauses contractuelles types.</p>
 
   <h2>7. Durées de conservation</h2>
   <ul>
     <li>Compte et carte : jusqu’à la suppression du compte.</li>
     <li>Statistiques des cartes : tant que la carte existe.</li>
     <li>Clarity : enregistrements de session trente jours, données agrégées treize mois au plus.</li>
+    <li>Google Analytics 4 : quatorze mois (durée réglée sur la propriété).</li>
     <li>E-mails échangés avec nous : douze mois après le dernier échange.</li>
   </ul>
 
