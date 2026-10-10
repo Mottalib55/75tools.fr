@@ -15,7 +15,7 @@ import Admin from "./pages/Admin";
 import PublicCard from "./pages/PublicCard";
 import GymSquad from "./pages/GymSquad";
 import NotFound from "./pages/NotFound";
-import LanguageRedirect from "./components/LanguageRedirect";
+import { detectBrowserLanguage } from "@/lib/i18n";
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -30,7 +30,7 @@ const App = () => (
           <BrowserRouter>
           <Routes>
             {/* Language redirect */}
-            <Route path="/" element={<LanguageRedirect />} />
+            <Route path="/" element={<Hub lang={detectBrowserLanguage()} />} />
 
             {/* French routes */}
             <Route path="/fr" element={<Hub lang="fr" />} />
