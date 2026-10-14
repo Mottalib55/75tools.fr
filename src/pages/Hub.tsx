@@ -203,9 +203,9 @@ const Hub = ({ lang }: HubProps) => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 md:py-28">
+      <section className="pt-6 pb-12 md:pb-16">
         <div className="container mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-neutral-900 text-neutral-300 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-neutral-800">
+          <div className="inline-flex items-center gap-2 bg-neutral-900 text-neutral-300 px-4 py-2 rounded-full text-sm font-medium mb-4 border border-neutral-800">
             <Sparkles className="w-4 h-4 text-yellow-500" />
             {t.hero.badge}
           </div>
