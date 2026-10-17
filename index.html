@@ -115,21 +115,15 @@
 
     <!-- Alternate Languages -->
 
-    <!-- Microsoft Clarity, decrit dans /confidentialite/. L'espace connecte (Admin,
-         Dashboard, Login, Register) porte data-clarity-mask : son texte n'est pas enregistre. -->
-    <script>
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "yr1dpuley8");
-    </script>
-    <!-- Google Analytics 4, decrit dans /confidentialite/ : pages vues standard uniquement. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNTVCQ9NEV"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LNTVCQ9NEV');</script>
-  </head>
+    <!-- Microsoft Clarity en mode sans cookie : consentv2 « denied » mis en file avant le script. -->
+<script>(function(){window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments);};window.clarity('consentv2',{ad_Storage:'denied',analytics_Storage:'denied'});var s=document.createElement('script');s.async=true;s.src='https://www.clarity.ms/tag/yr1dpuley8';document.head.appendChild(s);})();</script>
+<!-- Google Analytics 4, régime « sans bandeau » (décision de l'éditeur du 2026-10-17) : cookies _ga et _ga_<ID> de 13 mois au plus, publicité refusée, IP anonymisée, adresse de page sans paramètres. -->
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{analytics_storage:'granted',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',functionality_storage:'granted',security_storage:'granted'});</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LNTVCQ9NEV"></script>
+<script>gtag('js',new Date());gtag('config','G-LNTVCQ9NEV',{anonymize_ip:true,page_location:location.origin+location.pathname,cookie_expires:33696000,cookie_update:false,allow_google_signals:false,allow_ad_personalization_signals:false});</script>
+</head>
 
-  <body>
+  <body data-clarity-mask="true">
     <div id="root"></div>
     <!-- Date de mise à jour de l'accueil, la même que src/lib/last-updated.ts (RECETTE §8.4). -->
     <noscript><main><p style="text-align:center;padding:2rem 1rem">75tools s’affiche avec JavaScript : activez-le pour accéder aux outils.</p></main><footer><p style="text-align:center;font-size:.875rem;color:#737373">Mis à jour le <time datetime="2026-10-14">14 octobre 2026</time></p></footer></noscript>

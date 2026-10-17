@@ -247,7 +247,7 @@ const Hub = ({ lang }: HubProps) => {
         <div className="container mx-auto px-6 text-center text-neutral-500 text-sm">
           <p>{t.footer.copyright}</p>
           <p className="mt-2">{lang === "fr" ? "Mis à jour le" : "Updated on"} <time dateTime={LAST_UPDATED}>{displayDate(LAST_UPDATED, lang)}</time></p>
-          <p className="mt-2"><a href="/confidentialite/" className="hover:text-neutral-300 underline-offset-4 hover:underline">{t.footer.privacy}</a></p>
+          <p className="mt-2"><a href="/confidentialite/" className="hover:text-neutral-300 underline-offset-4 hover:underline">{t.footer.privacy}</a> · <a href="/mentions-legales/" className="hover:text-neutral-300 underline-offset-4 hover:underline">{lang === "fr" ? "Mentions légales" : "Legal notice (in French)"}</a></p>
         </div>
       </footer>
     </div>
