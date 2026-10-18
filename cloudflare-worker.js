@@ -63,8 +63,8 @@ export default {
     let profileTitle = '';
 
     try {
-      const supabaseUrl = 'https://olnptfkxzyshvdrmjkdw.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sbnB0Zmt4enlzaHZkcm1qa2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY1OTQ0ODQsImV4cCI6MjA1MjE3MDQ4NH0.L6KRjOLHwHMAmlw1TNbFyAL9g3vJERUjDT53gj0AXNE';
+      const supabaseUrl = 'https://sjdzzmkufruyhzyzrikm.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqZHp6bWt1ZnJ1eWh6eXpyaWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwOTk3MDEsImV4cCI6MjA4MzY3NTcwMX0.ywksQ3-UesUrnXi-kSoDxayw0J3GJuexc1tLKmhTTO8';
 
       const profileResponse = await fetch(
         `${supabaseUrl}/rest/v1/profiles?username=eq.${username}&select=first_name,last_name,title`,
