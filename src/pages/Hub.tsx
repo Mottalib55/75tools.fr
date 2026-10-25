@@ -154,8 +154,8 @@ const Hub = ({ lang }: HubProps) => {
   };
 
   const seoContent = lang === "fr" ? {
-    title: "75tools - Outils de productivité gratuits | Carte de visite digitale & plus",
-    description: "Des solutions 100% gratuites pour booster votre productivité. Créez votre carte de visite digitale MyCard avec QR code, calculez votre salaire net avec NetSalaire et découvrez nos autres outils professionnels.",
+    title: "75tools : outils gratuits, signature mail et carte de visite",
+    description: "Signature mail, carte de visite QR code ou NFC, modèles à imprimer : des outils gratuits pour les indépendants et petites structures, sans inscription.",
     keywords: "outils productivité gratuits, carte visite digitale, carte visite numérique, QR code professionnel, calculateur salaire net, MyCard, NetSalaire, 75tools, outils business, carte professionnelle en ligne",
     url: "https://75tools.fr/fr/",
     locale: "fr_FR" as const,
