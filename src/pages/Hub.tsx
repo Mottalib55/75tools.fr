@@ -11,6 +11,10 @@ import {
   Sparkles,
   Zap,
   Globe,
+  Mail,
+  QrCode,
+  IdCard,
+  Nfc,
 } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
@@ -26,7 +30,7 @@ interface Tool {
   href?: string;
   external?: boolean;
   available: boolean;
-  area: string;
+  area?: string;
 }
 
 interface HubProps {
@@ -50,7 +54,6 @@ const Hub = ({ lang }: HubProps) => {
       icon: <CreditCard className="h-5 w-5" />,
       href: "/mycard",
       available: true,
-      area: "md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]",
     },
     {
       id: "netsalaire",
@@ -60,7 +63,6 @@ const Hub = ({ lang }: HubProps) => {
       href: "https://www.netsalaire.com",
       external: true,
       available: true,
-      area: "md:[grid-area:1/7/2/13] xl:[grid-area:1/5/2/9]",
     },
     {
       id: "gym-squad",
@@ -69,7 +71,6 @@ const Hub = ({ lang }: HubProps) => {
       icon: <Dumbbell className="h-5 w-5" />,
       href: "/gym",
       available: true,
-      area: "md:[grid-area:2/1/3/7] xl:[grid-area:1/9/2/13]",
     },
     {
       id: "seo-dashboard",
@@ -79,7 +80,6 @@ const Hub = ({ lang }: HubProps) => {
       href: "https://seo-platform-sigma.vercel.app",
       external: true,
       available: true,
-      area: "md:[grid-area:2/7/3/13] xl:[grid-area:2/1/3/5]",
     },
     {
       id: "coming-1",
@@ -87,7 +87,7 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.timeManagement.description,
       icon: <Clock className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:3/1/4/7] xl:[grid-area:2/5/3/9]",
+      area: "xl:col-span-2",
     },
     {
       id: "coming-2",
@@ -95,9 +95,49 @@ const Hub = ({ lang }: HubProps) => {
       description: t.tools.aiAssistant.description,
       icon: <Sparkles className="h-5 w-5" />,
       available: false,
-      area: "md:[grid-area:3/7/4/13] xl:[grid-area:2/9/3/13]",
+      area: "xl:col-span-2",
     },
   ];
+
+  // Pages-outils en français seulement : signature mail, QR vCard, modèles, NFC ou QR.
+  if (lang === "fr") {
+    tools.splice(
+      4,
+      0,
+      {
+        id: "signature-mail",
+        name: "Signature mail",
+        description: "Générateur de signature mail gratuit, à copier dans Gmail, Outlook ou Apple Mail.",
+        icon: <Mail className="h-5 w-5" />,
+        href: "/signature-mail/",
+        available: true,
+      },
+      {
+        id: "qr-vcard",
+        name: "QR code vCard",
+        description: "Le QR code de votre carte de visite : on le scanne, le contact s'enregistre.",
+        icon: <QrCode className="h-5 w-5" />,
+        href: "/carte-de-visite-qr-code/",
+        available: true,
+      },
+      {
+        id: "modele-carte",
+        name: "Modèles de carte de visite",
+        description: "Dix modèles par métier, à adapter puis imprimer en planche A4 ou en PDF.",
+        icon: <IdCard className="h-5 w-5" />,
+        href: "/modele-carte-de-visite/",
+        available: true,
+      },
+      {
+        id: "nfc-ou-qr",
+        name: "Carte NFC ou QR code",
+        description: "Comparatif honnête et test en quatre questions pour choisir votre carte.",
+        icon: <Nfc className="h-5 w-5" />,
+        href: "/carte-de-visite-nfc/",
+        available: true,
+      }
+    );
+  }
 
   const handleToolClick = (tool: Tool) => {
     if (!tool.available || !tool.href) return;
@@ -183,7 +223,7 @@ const Hub = ({ lang }: HubProps) => {
             <div className="flex items-center gap-3">
               <span className="hidden sm:inline-flex items-center gap-2 text-sm text-neutral-400 bg-neutral-900 px-4 py-2 rounded-full border border-neutral-800">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                4 {t.header.toolsAvailable}
+                {tools.filter((x) => x.available).length} {t.header.toolsAvailable}
               </span>
               {/* Language Switcher */}
               <button
@@ -224,7 +264,7 @@ const Hub = ({ lang }: HubProps) => {
       {/* Tools Grid */}
       <section className="pb-24">
         <div className="container mx-auto px-6">
-          <ul className="grid grid-cols-1 gap-4 md:grid-cols-12 md:grid-rows-4 lg:gap-5 xl:max-h-[38rem] xl:grid-rows-2 max-w-6xl mx-auto">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-5 max-w-6xl mx-auto">
             {tools.map((tool) => (
               <GridItem
                 key={tool.id}
@@ -256,11 +296,26 @@ interface GridItemProps {
 }
 
 const GridItem = ({ tool, onClick, t }: GridItemProps) => {
+  // Un vrai lien <a href> pour chaque outil disponible : les robots suivent les liens, pas les onClick.
+  const Wrapper = tool.available && tool.href ? "a" : "div";
+  const lien =
+    tool.available && tool.href
+      ? tool.external
+        ? { href: tool.href, target: "_blank", rel: "noopener noreferrer" }
+        : {
+            href: tool.href,
+            onClick: (e: React.MouseEvent) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+              e.preventDefault();
+              onClick();
+            },
+          }
+      : {};
   return (
     <li className={cn("min-h-[14rem] list-none", tool.area)}>
-      <div
-        onClick={tool.available ? onClick : undefined}
-        className={cn(
+      <Wrapper
+        {...lien}
+        className={cn("block",
           "relative h-full rounded-[1.25rem] border-[0.75px] p-2 md:rounded-[1.5rem] md:p-3",
           tool.available
             ? "border-neutral-800 cursor-pointer"
@@ -339,7 +394,7 @@ const GridItem = ({ tool, onClick, t }: GridItemProps) => {
             )}
           </div>
         </div>
-      </div>
+      </Wrapper>
     </li>
   );
 };

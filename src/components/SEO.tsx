@@ -16,6 +16,7 @@ interface SEOProps {
   publishedTime?: string;
   modifiedTime?: string;
   appTitle?: string; // Custom title for "Add to Home Screen" on iOS
+  exactTitle?: boolean; // titre servi tel quel, sans « | 75tools » (titres calibrés 50-60 caractères)
 }
 
 const SEO = ({
@@ -34,8 +35,9 @@ const SEO = ({
   publishedTime,
   modifiedTime,
   appTitle,
+  exactTitle = false,
 }: SEOProps) => {
-  const fullTitle = title.includes("75tools") || title.includes("MyCard")
+  const fullTitle = exactTitle || title.includes("75tools") || title.includes("MyCard")
     ? title
     : `${title} | 75tools`;
 

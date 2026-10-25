@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- /fr/, /en/ et /mycard/ sont pre-rendues au build (scripts/prerender.mjs) : de vraies pages
+  <!-- /fr/, /en/, /mycard/ et les quatre pages-outils sont pre-rendues au build (scripts/prerender.mjs) : de vraies pages
        en 200. /gym, /card/... et les pages de compte restent des routes de l'application. -->
   <url>
     <loc>https://75tools.fr/fr/</loc>
@@ -10,6 +10,18 @@
   </url>
   <url>
     <loc>https://75tools.fr/mycard/</loc>
+  </url>
+  <url>
+    <loc>https://75tools.fr/signature-mail/</loc>
+  </url>
+  <url>
+    <loc>https://75tools.fr/carte-de-visite-qr-code/</loc>
+  </url>
+  <url>
+    <loc>https://75tools.fr/modele-carte-de-visite/</loc>
+  </url>
+  <url>
+    <loc>https://75tools.fr/carte-de-visite-nfc/</loc>
   </url>
   <url>
     <loc>https://75tools.fr/confidentialite/</loc>

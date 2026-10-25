@@ -18,7 +18,8 @@ import { existsSync } from 'node:fs';
 import { join, extname, resolve } from 'node:path';
 import { chromium } from 'playwright-core';
 
-const ROUTES = ['/', '/fr', '/en', '/mycard'];
+const ROUTES = ['/', '/fr', '/en', '/mycard',
+  '/signature-mail', '/carte-de-visite-qr-code', '/modele-carte-de-visite', '/carte-de-visite-nfc'];
 const dist = resolve(process.argv[2] || 'dist');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.json': 'application/json', '.ico': 'image/x-icon' };

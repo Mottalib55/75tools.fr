@@ -14,6 +14,10 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import PublicCard from "./pages/PublicCard";
 import GymSquad from "./pages/GymSquad";
+import SignatureMail from "./pages/outils/SignatureMail";
+import CarteVisiteQrCode from "./pages/outils/CarteVisiteQrCode";
+import ModeleCarteVisite from "./pages/outils/ModeleCarteVisite";
+import CarteVisiteNfc from "./pages/outils/CarteVisiteNfc";
 import NotFound from "./pages/NotFound";
 import { detectBrowserLanguage } from "@/lib/i18n";
 
@@ -45,6 +49,12 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/card/:username" element={<PublicCard />} />
+
+            {/* Pages-outils françaises (pré-rendues, voir scripts/prerender.mjs) */}
+            <Route path="/signature-mail" element={<SignatureMail />} />
+            <Route path="/carte-de-visite-qr-code" element={<CarteVisiteQrCode />} />
+            <Route path="/modele-carte-de-visite" element={<ModeleCarteVisite />} />
+            <Route path="/carte-de-visite-nfc" element={<CarteVisiteNfc />} />
 
             {/* Gym Squad */}
             <Route path="/gym" element={<GymSquad />} />
