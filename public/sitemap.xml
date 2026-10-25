@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Seule l'accueil repond 200 : /fr, /en, /mycard et /card/demo sont des routes de
-       l'application, servies par la page 404 de GitHub Pages. Les lister ici envoyait
-       Google sur des erreurs 404. A reintegrer le jour ou ces routes seront pre-rendues. -->
+  <!-- /fr/, /en/ et /mycard/ sont pre-rendues au build (scripts/prerender.mjs) : de vraies pages
+       en 200. /gym, /card/... et les pages de compte restent des routes de l'application. -->
   <url>
-    <loc>https://75tools.fr/</loc>
+    <loc>https://75tools.fr/fr/</loc>
+  </url>
+  <url>
+    <loc>https://75tools.fr/en/</loc>
+  </url>
+  <url>
+    <loc>https://75tools.fr/mycard/</loc>
   </url>
   <url>
     <loc>https://75tools.fr/confidentialite/</loc>

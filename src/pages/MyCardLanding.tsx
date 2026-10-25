@@ -39,7 +39,8 @@ const MyCardLanding = () => {
         title="MyCard - Free Digital Business Card | Create Yours in 30 Seconds"
         description="Create your free professional digital business card in 30 seconds. Share your contact info, social networks and generate a custom QR code. No complex signup, no hidden fees."
         keywords="free digital business card, digital vcard, online business card, professional qr code contact, free business card, MyCard, create business card, share contact, digital networking, modern business card"
-        url="https://75tools.fr/mycard"
+        url="https://75tools.fr/mycard/"
+        locale="en_US"
         type="website"
         imageAlt="MyCard - Create your free digital business card"
         jsonLd={[
@@ -55,13 +56,6 @@ const MyCardLanding = () => {
               price: "0",
               priceCurrency: "USD",
               availability: "https://schema.org/InStock",
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.8",
-              ratingCount: "150",
-              bestRating: "5",
-              worstRating: "1",
             },
             featureList: "QR Code, Contact sharing, Social networks, vCard, Custom design",
           },

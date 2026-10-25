@@ -117,18 +117,18 @@ const Hub = ({ lang }: HubProps) => {
     title: "75tools - Outils de productivité gratuits | Carte de visite digitale & plus",
     description: "Des solutions 100% gratuites pour booster votre productivité. Créez votre carte de visite digitale MyCard avec QR code, calculez votre salaire net avec NetSalaire et découvrez nos autres outils professionnels.",
     keywords: "outils productivité gratuits, carte visite digitale, carte visite numérique, QR code professionnel, calculateur salaire net, MyCard, NetSalaire, 75tools, outils business, carte professionnelle en ligne",
-    url: "https://75tools.fr/fr",
+    url: "https://75tools.fr/fr/",
     locale: "fr_FR" as const,
     alternateLocale: "en_US" as const,
-    alternateUrl: "https://75tools.fr/en",
+    alternateUrl: "https://75tools.fr/en/",
   } : {
     title: "75tools - Free Productivity Tools | Digital Business Card & more",
     description: "100% free solutions to boost your productivity. Create your digital business card MyCard with QR code, calculate your net salary with NetSalaire and discover our other professional tools.",
     keywords: "free productivity tools, digital business card, digital vcard, professional QR code, salary calculator, MyCard, NetSalaire, 75tools, business tools, online professional card",
-    url: "https://75tools.fr/en",
+    url: "https://75tools.fr/en/",
     locale: "en_US" as const,
     alternateLocale: "fr_FR" as const,
-    alternateUrl: "https://75tools.fr/fr",
+    alternateUrl: "https://75tools.fr/fr/",
   };
 
   return (
@@ -166,11 +166,6 @@ const Hub = ({ lang }: HubProps) => {
               "@type": "Offer",
               price: "0",
               priceCurrency: "EUR",
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.8",
-              ratingCount: "150",
             },
           },
         ]}
