@@ -1,21 +1,65 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Zap } from "lucide-react";
+import { Menu, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CATEGORIES, OUTILS, categorieDe, outilsDe } from "@/lib/outils";
 
 /**
- * Gabarit commun des pages-outils françaises (signature mail, QR vCard, modèles, NFC).
+ * Gabarit commun des pages-outils françaises. La liste des outils et leurs catégories vivent
+ * dans src/lib/outils.ts (menu, pied de page, renvois).
  * Fond neutral-950 comme l'accueil, titres en serif, une seule couleur d'accent (sky).
  * Les couleurs sont posées sur chaque élément : la feuille globale fixe la couleur des
  * h1/h2/h3 et l'emporterait sur une couleur héritée (RECETTE §10.4).
  */
 
-export const OUTILS = [
-  { href: "/signature-mail/", court: "Signature mail", long: "Générateur de signature mail" },
-  { href: "/carte-de-visite-qr-code/", court: "QR vCard", long: "QR code de carte de visite (vCard)" },
-  { href: "/modele-carte-de-visite/", court: "Modèles", long: "Modèles de carte de visite à imprimer" },
-  { href: "/carte-de-visite-nfc/", court: "NFC ou QR", long: "Carte de visite NFC ou QR code" },
-];
+/** Menu « Tous les outils » : les catégories et leurs outils, liens présents dans le HTML même fermé. */
+const MenuOutils = ({ actif }: { actif: (href: string) => boolean }) => {
+  const [ouvert, setOuvert] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => setOuvert(false), [pathname]);
+  return (
+    <>
+      <button
+        type="button"
+        aria-expanded={ouvert}
+        aria-controls="menu-outils"
+        onClick={() => setOuvert((o) => !o)}
+        className="inline-flex items-center gap-2 h-10 px-3 rounded-md border border-neutral-700 text-sm text-neutral-200 hover:border-neutral-500 whitespace-nowrap"
+      >
+        {ouvert ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
+        Tous les outils
+      </button>
+      <nav
+        id="menu-outils"
+        aria-label="Tous les outils"
+        className={cn(
+          "absolute left-0 right-0 top-full z-50 border-b border-neutral-800 bg-neutral-950 shadow-2xl",
+          ouvert ? "block" : "hidden"
+        )}
+      >
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-h-[80vh] overflow-y-auto">
+          {CATEGORIES.map((c) => (
+            <div key={c.id}>
+              <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2">{c.nom}</p>
+              <ul className="space-y-1 text-sm">
+                {outilsDe(c.id).map((o) => (
+                  <li key={o.href}>
+                    <Link
+                      to={o.href}
+                      className={cn("hover:text-white", actif(o.href) ? "text-white" : "text-neutral-300")}
+                    >
+                      {o.court}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </nav>
+    </>
+  );
+};
 
 export const OutilLayout = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
@@ -23,10 +67,12 @@ export const OutilLayout = ({ children }: { children: ReactNode }) => {
     window.scrollTo(0, 0);
   }, [pathname]);
   const actif = (href: string) => pathname === href || pathname + "/" === href;
+  const cat = categorieDe(pathname.endsWith("/") ? pathname : pathname + "/");
+  const categorie = CATEGORIES.find((c) => c.id === cat);
 
   return (
     <div className="min-h-screen bg-neutral-950 print:bg-white text-neutral-300 overflow-x-hidden">
-      <header className="border-b border-neutral-800 print:hidden">
+      <header className="relative border-b border-neutral-800 print:hidden">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <Link to="/fr/" className="flex items-center gap-2.5 whitespace-nowrap">
             <span className="w-8 h-8 bg-neutral-800 border border-neutral-700 rounded-lg flex items-center justify-center">
@@ -34,57 +80,47 @@ export const OutilLayout = ({ children }: { children: ReactNode }) => {
             </span>
             <span className="text-lg font-bold text-white">75tools</span>
           </Link>
-          <nav aria-label="Outils" className="hidden lg:flex items-center gap-1 text-sm">
-            {OUTILS.map((o) => (
-              <Link
-                key={o.href}
-                to={o.href}
-                className={cn(
-                  "whitespace-nowrap px-3 py-2 rounded-md transition-colors",
-                  actif(o.href) ? "text-white bg-neutral-900" : "text-neutral-400 hover:text-white"
-                )}
-              >
-                {o.court}
-              </Link>
-            ))}
-            <Link to="/mycard/" className="whitespace-nowrap px-3 py-2 text-neutral-400 hover:text-white">
-              MyCard
+          {categorie && (
+            <Link
+              to={`/fr/#${categorie.id}`}
+              className="hidden md:block mr-auto text-sm text-neutral-500 hover:text-white whitespace-nowrap"
+            >
+              {categorie.nom}
             </Link>
-          </nav>
-          <Link to="/fr/" className="lg:hidden whitespace-nowrap text-sm text-neutral-400 hover:text-white">
-            Tous les outils
-          </Link>
+          )}
+          <MenuOutils actif={actif} />
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6">{children}</main>
 
       <footer className="border-t border-neutral-800 mt-16 print:hidden">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 grid gap-8 sm:grid-cols-2 text-sm">
-          <div>
-            <p className="text-neutral-200 font-medium mb-3">Outils pour la carte de visite et la signature</p>
-            <ul className="space-y-2">
-              {OUTILS.map((o) => (
-                <li key={o.href}>
-                  <Link to={o.href} className="text-neutral-400 hover:text-white underline-offset-4 hover:underline">
-                    {o.long}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link to="/mycard/" className="text-neutral-400 hover:text-white underline-offset-4 hover:underline">
-                  MyCard, carte de visite en ligne
-                </Link>
-              </li>
-            </ul>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-sm">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {CATEGORIES.map((c) => (
+              <div key={c.id}>
+                <p className="text-neutral-200 font-medium mb-3">{c.nom}</p>
+                <ul className="space-y-2">
+                  {outilsDe(c.id).map((o) => (
+                    <li key={o.href}>
+                      <Link to={o.href} className="text-neutral-400 hover:text-white underline-offset-4 hover:underline">
+                        {o.long}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <div className="text-neutral-500 space-y-2">
+          <div className="mt-10 text-neutral-500 space-y-2">
             <p>
-              Ces outils fonctionnent dans votre navigateur : les coordonnées saisies ne sont ni envoyées ni
-              enregistrées par 75tools.
+              Ces outils fonctionnent dans votre navigateur : les textes, coordonnées et fichiers que vous y mettez
+              ne sont ni envoyés ni enregistrés par 75tools.
             </p>
             <p>
               <Link to="/fr/" className="hover:text-neutral-300 underline-offset-4 hover:underline">Accueil 75tools</Link>
+              {" · "}
+              <Link to="/mycard/" className="hover:text-neutral-300 underline-offset-4 hover:underline">MyCard</Link>
               {" · "}
               <a href="/confidentialite/" className="hover:text-neutral-300 underline-offset-4 hover:underline">Confidentialité</a>
               {" · "}
@@ -167,25 +203,32 @@ export const Sources = ({ sources }: { sources: Source[] }) => (
   </Section>
 );
 
-/** Renvois vers les autres outils de la famille, sauf la page courante. */
-export const AutresOutils = ({ courant }: { courant: string }) => (
-  <Section titre="Les autres outils">
-    <ul className="grid gap-3 sm:grid-cols-2">
-      {OUTILS.filter((o) => o.href !== courant).map((o) => (
-        <li key={o.href}>
-          <Link to={o.href} className="block border border-neutral-800 rounded-lg px-4 py-3 !no-underline hover:border-neutral-600">
-            <span className="text-neutral-100">{o.long}</span>
+/** Renvois vers les autres outils de la même catégorie, sauf la page courante. */
+export const AutresOutils = ({ courant }: { courant: string }) => {
+  const cat = categorieDe(courant);
+  const voisins = OUTILS.filter((o) => o.categorie === cat && o.href !== courant);
+  const categorie = CATEGORIES.find((c) => c.id === cat);
+  return (
+    <Section titre={categorie ? `Autres outils : ${categorie.nom.toLowerCase()}` : "Les autres outils"}>
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {voisins.map((o) => (
+          <li key={o.href}>
+            <Link to={o.href} className="block h-full border border-neutral-800 rounded-lg px-4 py-3 !no-underline hover:border-neutral-600">
+              <span className="block text-neutral-100">{o.long}</span>
+              <span className="block text-sm text-neutral-500 mt-1">{o.description}</span>
+            </Link>
+          </li>
+        ))}
+        <li>
+          <Link to="/fr/" className="block h-full border border-neutral-800 rounded-lg px-4 py-3 !no-underline hover:border-neutral-600">
+            <span className="block text-neutral-100">Tous les outils 75tools</span>
+            <span className="block text-sm text-neutral-500 mt-1">PDF, images, QR codes, documents, calculs, minuteur et texte.</span>
           </Link>
         </li>
-      ))}
-      <li>
-        <Link to="/mycard/" className="block border border-neutral-800 rounded-lg px-4 py-3 !no-underline hover:border-neutral-600">
-          <span className="text-neutral-100">MyCard : votre carte de visite en ligne, avec son lien et son QR code</span>
-        </Link>
-      </li>
-    </ul>
-  </Section>
-);
+      </ul>
+    </Section>
+  );
+};
 
 /** Champ de saisie sombre, 48 px de haut (RECETTE §10.3). */
 export const Champ = ({
@@ -227,17 +270,20 @@ export const Bouton = ({
   onClick,
   secondaire = false,
   type = "button",
+  disabled = false,
 }: {
   children: ReactNode;
   onClick?: () => void;
   secondaire?: boolean;
   type?: "button" | "submit";
+  disabled?: boolean;
 }) => (
   <button
     type={type}
     onClick={onClick}
+    disabled={disabled}
     className={cn(
-      "h-11 px-4 rounded-md text-sm font-medium whitespace-nowrap transition-colors",
+      "h-11 px-4 rounded-md text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed",
       secondaire
         ? "border border-neutral-700 text-neutral-200 hover:border-neutral-500"
         : "bg-sky-400 text-neutral-950 hover:bg-sky-300"

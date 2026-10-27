@@ -11,16 +11,13 @@ import {
   Sparkles,
   Zap,
   Globe,
-  Mail,
-  QrCode,
-  IdCard,
-  Nfc,
 } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
 import { Language, getTranslations, Translations } from "@/lib/i18n";
 import SEO from "@/components/SEO";
 import { LAST_UPDATED, displayDate } from "@/lib/last-updated";
+import { CATEGORIES, OUTILS, outilsDe } from "@/lib/outils";
 
 interface Tool {
   id: string;
@@ -99,46 +96,6 @@ const Hub = ({ lang }: HubProps) => {
     },
   ];
 
-  // Pages-outils en français seulement : signature mail, QR vCard, modèles, NFC ou QR.
-  if (lang === "fr") {
-    tools.splice(
-      4,
-      0,
-      {
-        id: "signature-mail",
-        name: "Signature mail",
-        description: "Générateur de signature mail gratuit, à copier dans Gmail, Outlook ou Apple Mail.",
-        icon: <Mail className="h-5 w-5" />,
-        href: "/signature-mail/",
-        available: true,
-      },
-      {
-        id: "qr-vcard",
-        name: "QR code vCard",
-        description: "Le QR code de votre carte de visite : on le scanne, le contact s'enregistre.",
-        icon: <QrCode className="h-5 w-5" />,
-        href: "/carte-de-visite-qr-code/",
-        available: true,
-      },
-      {
-        id: "modele-carte",
-        name: "Modèles de carte de visite",
-        description: "Dix modèles par métier, à adapter puis imprimer en planche A4 ou en PDF.",
-        icon: <IdCard className="h-5 w-5" />,
-        href: "/modele-carte-de-visite/",
-        available: true,
-      },
-      {
-        id: "nfc-ou-qr",
-        name: "Carte NFC ou QR code",
-        description: "Comparatif honnête et test en quatre questions pour choisir votre carte.",
-        icon: <Nfc className="h-5 w-5" />,
-        href: "/carte-de-visite-nfc/",
-        available: true,
-      }
-    );
-  }
-
   const handleToolClick = (tool: Tool) => {
     if (!tool.available || !tool.href) return;
 
@@ -154,8 +111,8 @@ const Hub = ({ lang }: HubProps) => {
   };
 
   const seoContent = lang === "fr" ? {
-    title: "75tools : outils gratuits, signature mail et carte de visite",
-    description: "Signature mail, carte de visite QR code ou NFC, modèles à imprimer : des outils gratuits pour les indépendants et petites structures, sans inscription.",
+    title: "75tools : outils gratuits en ligne, PDF, images et QR code",
+    description: "Outils gratuits en ligne : PDF, images, QR codes, facture, devis, CV, pourcentage, minuteur et compteur de mots. Sans inscription, et rien n'est envoyé.",
     keywords: "outils productivité gratuits, carte visite digitale, carte visite numérique, QR code professionnel, calculateur salaire net, MyCard, NetSalaire, 75tools, outils business, carte professionnelle en ligne",
     url: "https://75tools.fr/fr/",
     locale: "fr_FR" as const,
@@ -223,7 +180,7 @@ const Hub = ({ lang }: HubProps) => {
             <div className="flex items-center gap-3">
               <span className="hidden sm:inline-flex items-center gap-2 text-sm text-neutral-400 bg-neutral-900 px-4 py-2 rounded-full border border-neutral-800">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                {tools.filter((x) => x.available).length} {t.header.toolsAvailable}
+                {tools.filter((x) => x.available).length + (lang === "fr" ? OUTILS.length : 0)} {t.header.toolsAvailable}
               </span>
               {/* Language Switcher */}
               <button
@@ -238,6 +195,64 @@ const Hub = ({ lang }: HubProps) => {
         </div>
       </header>
 
+      {lang === "fr" ? (
+        <>
+          <section className="pt-8 pb-6">
+            <div className="container mx-auto px-6 max-w-6xl">
+              <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+                Outils gratuits en ligne
+              </h1>
+              <p className="mt-3 text-neutral-400 text-base md:text-lg max-w-3xl leading-relaxed">
+                PDF, images, QR codes, documents, calculs, minuteur et texte : {OUTILS.length} outils qui
+                fonctionnent dans votre navigateur, sans inscription. Vos fichiers ne quittent pas votre appareil.
+              </p>
+              <nav aria-label="Catégories" className="mt-5 flex flex-wrap gap-2">
+                {CATEGORIES.map((c) => (
+                  <a
+                    key={c.id}
+                    href={`#${c.id}`}
+                    className="text-sm text-neutral-300 border border-neutral-800 hover:border-neutral-600 rounded-full px-3 py-1.5 whitespace-nowrap"
+                  >
+                    {c.nom}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </section>
+
+          <div className="container mx-auto px-6 max-w-6xl pb-8 space-y-12">
+            {CATEGORIES.map((c) => (
+              <section key={c.id} id={c.id} className="scroll-mt-6">
+                <h2 className="text-2xl font-semibold text-white tracking-tight">{c.nom}</h2>
+                <p className="mt-1 text-neutral-500">{c.chapeau}</p>
+                <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {outilsDe(c.id).map((o) => (
+                    <li key={o.href}>
+                      <a
+                        href={o.href}
+                        onClick={(e) => {
+                          if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+                          e.preventDefault();
+                          navigate(o.href);
+                        }}
+                        className="block h-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 hover:border-neutral-600 transition-colors"
+                      >
+                        <span className="block text-white font-medium">{o.long}</span>
+                        <span className="block mt-1 text-sm text-neutral-400 leading-relaxed">{o.description}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+            <section id="applications" className="scroll-mt-6">
+              <h2 className="text-2xl font-semibold text-white tracking-tight">Applications 75tools</h2>
+              <p className="mt-1 text-neutral-500">Carte de visite en ligne MyCard, calcul du salaire net et autres services.</p>
+            </section>
+          </div>
+        </>
+      ) : (
+      <>
       {/* Hero Section */}
       <section className="pt-6 pb-12 md:pb-16">
         <div className="container mx-auto px-6 text-center">
@@ -260,6 +275,9 @@ const Hub = ({ lang }: HubProps) => {
           </p>
         </div>
       </section>
+
+      </>
+      )}
 
       {/* Tools Grid */}
       <section className="pb-24">
