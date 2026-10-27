@@ -4,6 +4,49 @@ import { DepotFichiers } from "@/components/outils/PageOutil";
 import { formatOctets, telecharger } from "@/lib/fichiers";
 import { creerZip } from "@/lib/zip";
 import { respirer } from "@/lib/image-lot";
+import { locale, useLangue } from "@/lib/langue";
+
+/** Textes de l'interface du lot, dans les deux langues. */
+const T = {
+  fr: {
+    convertir: "Convertir",
+    progression: (n: number, total: number, nom: string) => `Image ${n} sur ${total} : ${nom}`,
+    illisible: "Image illisible",
+    inchange: "poids inchangé",
+    pct: (p: string) => `${p} %`,
+    enCours: "Traitement en cours…",
+    lesN: (action: string, n: number) => `${action} les ${n} images`,
+    toutZip: (n: number) => `Tout télécharger (ZIP, ${n} images)`,
+    telecharger: "Télécharger",
+    vider: "Vider la liste",
+    total: (a: string, b: string, e: string) => `Total : ${a} avant, ${b} après (${e}).`,
+    fichiers: "Fichiers",
+    encoursEl: " · en cours…",
+    attenteEl: " · à traiter",
+    enregistrer: "Enregistrer",
+    retirer: (nom: string) => `Retirer ${nom}`,
+    attente: "Vos images converties s'afficheront ici, avec le poids avant et après et un bouton pour les enregistrer.",
+  },
+  en: {
+    convertir: "Convert",
+    progression: (n: number, total: number, nom: string) => `Image ${n} of ${total}: ${nom}`,
+    illisible: "Unreadable image",
+    inchange: "same size",
+    pct: (p: string) => `${p}%`,
+    enCours: "Processing…",
+    lesN: (action: string, n: number) => `${action} ${n} images`,
+    toutZip: (n: number) => `Download all (ZIP, ${n} images)`,
+    telecharger: "Download",
+    vider: "Clear the list",
+    total: (a: string, b: string, e: string) => `Total: ${a} before, ${b} after (${e}).`,
+    fichiers: "Files",
+    encoursEl: " · processing…",
+    attenteEl: " · waiting",
+    enregistrer: "Save",
+    retirer: (nom: string) => `Remove ${nom}`,
+    attente: "Your converted images will appear here, with the size before and after and a button to save each one.",
+  },
+};
 
 /**
  * Liste de fichiers image traités un par un (conversion, redimensionnement) : dépôt, réglages
@@ -32,10 +75,11 @@ export const ImageLot = ({
   reglages,
   cle,
   traiter,
-  libelleAction = "Convertir",
+  libelleAction,
   nomZip,
   avantTraitement,
   idPrefixe = "lot",
+  attente,
 }: {
   accept: string;
   libelleDepot: string;
@@ -47,7 +91,12 @@ export const ImageLot = ({
   nomZip: string;
   avantTraitement?: (fichiers: File[]) => Promise<string | null>; // message d'attente éventuel
   idPrefixe?: string;
+  attente?: string; // phrase affichée dans la zone de résultat avant le premier fichier
 }) => {
+  const lang = useLangue();
+  const t = T[lang];
+  const action = libelleAction ?? t.convertir;
+  const oct = (n: number) => formatOctets(n, lang);
   const [elements, setElements] = useState<Element[]>([]);
   const [enCours, setEnCours] = useState(false);
   const [progression, setProgression] = useState("");
@@ -106,7 +155,7 @@ export const ImageLot = ({
       while (file.current.length) {
         const el = file.current.shift()!;
         n++;
-        setProgression(`Image ${n} sur ${n + file.current.length} : ${el.fichier.name}`);
+        setProgression(t.progression(n, n + file.current.length, el.fichier.name));
         setElements((els) => els.map((e) => (e.id === el.id ? { ...e, etat: "encours", message: undefined } : e)));
         await respirer();
         try {
@@ -121,7 +170,7 @@ export const ImageLot = ({
             return els.map((e) => (e.id === el.id ? { ...e, etat: "fait", resultat: r, apercu, message: undefined } : e));
           });
         } catch (err) {
-          const message = err instanceof Error && err.message ? err.message : "Image illisible";
+          const message = err instanceof Error && err.message ? err.message : t.illisible;
           setElements((els) => els.map((e) => (e.id === el.id ? { ...e, etat: "erreur", message } : e)));
         }
       }
@@ -179,95 +228,110 @@ export const ImageLot = ({
   const ecart = (avant: number, apres: number) => {
     if (!avant) return "";
     const p = Math.round(((apres - avant) / avant) * 100);
-    return p === 0 ? "poids inchangé" : p < 0 ? `${p.toLocaleString("fr-FR")} %` : `+${p.toLocaleString("fr-FR")} %`;
+    return p === 0 ? t.inchange : p < 0 ? t.pct(p.toLocaleString(locale(lang))) : `+${t.pct(p.toLocaleString(locale(lang)))}`;
   };
 
+  // Téléphone : dépôt, résultat, réglages (le résultat reste juste sous le bouton de dépôt).
+  // Ordinateur : dépôt et réglages à gauche, résultat dans la colonne de droite.
   return (
-    <div className="space-y-5" id={`${idPrefixe}-outil`}>
-      <DepotFichiers accept={accept} multiple onFichiers={ajouter} libelle={libelleDepot} aide={aideDepot} />
+    <div
+      className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:grid-rows-[auto_1fr] items-start"
+      id={`${idPrefixe}-outil`}
+    >
+      <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+        <DepotFichiers accept={accept} multiple onFichiers={ajouter} libelle={libelleDepot} aide={aideDepot} />
+      </div>
 
-      {reglages && <div className="rounded-lg border border-neutral-800 bg-neutral-900/40 p-4">{reglages}</div>}
-
-      {elements.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <Bouton onClick={lancer} disabled={enCours || aFaire === 0}>
-              {enCours ? "Traitement en cours…" : aFaire > 1 ? `${libelleAction} les ${aFaire} images` : libelleAction}
-            </Bouton>
-            {faits.length > 0 && (
-              <Bouton secondaire onClick={toutTelecharger} disabled={enCours}>
-                {faits.length > 1 ? `Tout télécharger (ZIP, ${faits.length} images)` : "Télécharger"}
+      <div data-resultat className="min-w-0 space-y-3 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+        {elements.length === 0 ? (
+          <p className="rounded-lg border border-neutral-800 p-4 text-sm text-neutral-500">{attente ?? t.attente}</p>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              <Bouton onClick={lancer} disabled={enCours || aFaire === 0}>
+                {enCours ? t.enCours : aFaire > 1 ? t.lesN(action, aFaire) : action}
               </Bouton>
-            )}
-            <Bouton secondaire onClick={vider} disabled={enCours}>
-              Vider la liste
-            </Bouton>
-          </div>
-          <p role="status" aria-live="polite" className="text-sm text-sky-300 min-h-[1.25rem] [overflow-wrap:anywhere]">
-            {progression}
-            {note && <span className="block text-neutral-400">{note}</span>}
-          </p>
-          {faits.length > 1 && (
-            <p className="text-sm text-neutral-400 tabular-nums">
-              Total : {formatOctets(totalAvant)} avant, {formatOctets(totalApres)} après ({ecart(totalAvant, totalApres)}).
+              {faits.length > 0 && (
+                <Bouton secondaire onClick={toutTelecharger} disabled={enCours}>
+                  {faits.length > 1 ? t.toutZip(faits.length) : t.telecharger}
+                </Bouton>
+              )}
+              <Bouton secondaire onClick={vider} disabled={enCours}>
+                {t.vider}
+              </Bouton>
+            </div>
+            <p role="status" aria-live="polite" className="text-sm text-sky-300 min-h-[1.25rem] [overflow-wrap:anywhere]">
+              {progression}
+              {note && <span className="block text-neutral-400">{note}</span>}
             </p>
-          )}
-          <ul className="divide-y divide-neutral-800 border-y border-neutral-800" aria-label="Fichiers">
-            {elements.map((e) => (
-              <li key={e.id} className="py-3 flex items-center gap-3 min-w-0" data-etat={e.etat}>
-                <div className="w-14 h-14 shrink-0 rounded bg-neutral-900 border border-neutral-800 overflow-hidden grid place-items-center bg-[length:12px_12px] bg-[conic-gradient(#262626_25%,#171717_0_50%,#262626_0_75%,#171717_0)]">
-                  {e.apercu ? (
-                    <img src={e.apercu} alt="" className="max-w-full max-h-full object-contain" />
-                  ) : (
-                    <span className="text-[0.65rem] text-neutral-500 uppercase">
-                      {e.fichier.name.split(".").pop()?.slice(0, 4)}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1 text-sm">
-                  <p className="text-neutral-100 truncate" title={e.fichier.name}>
-                    {e.fichier.name}
-                  </p>
-                  <p className="text-neutral-500 tabular-nums [overflow-wrap:anywhere]">
-                    {formatOctets(e.fichier.size)}
-                    {e.etat === "fait" && e.resultat && (
-                      <>
-                        {" → "}
-                        <span className="text-neutral-200">{formatOctets(e.resultat.blob.size)}</span> (
-                        {ecart(e.fichier.size, e.resultat.blob.size)})
-                      </>
+            {faits.length > 1 && (
+              <p className="text-sm text-neutral-400 tabular-nums">
+                {t.total(oct(totalAvant), oct(totalApres), ecart(totalAvant, totalApres))}
+              </p>
+            )}
+            <ul className="divide-y divide-neutral-800 border-y border-neutral-800" aria-label={t.fichiers}>
+              {elements.map((e) => (
+                <li key={e.id} className="py-3 flex items-center gap-3 min-w-0" data-etat={e.etat}>
+                  <div className="w-14 h-14 shrink-0 rounded bg-neutral-900 border border-neutral-800 overflow-hidden grid place-items-center bg-[length:12px_12px] bg-[conic-gradient(#262626_25%,#171717_0_50%,#262626_0_75%,#171717_0)]">
+                    {e.apercu ? (
+                      <img src={e.apercu} alt="" className="max-w-full max-h-full object-contain" />
+                    ) : (
+                      <span className="text-[0.65rem] text-neutral-500 uppercase">
+                        {e.fichier.name.split(".").pop()?.slice(0, 4)}
+                      </span>
                     )}
-                    {e.etat === "encours" && <span className="text-sky-300"> · en cours…</span>}
-                    {e.etat === "attente" && <span> · à traiter</span>}
-                  </p>
-                  {e.etat === "fait" && e.resultat?.detail && (
-                    <p className="text-neutral-500 text-xs [overflow-wrap:anywhere]">{e.resultat.detail}</p>
-                  )}
-                  {e.etat === "erreur" && <p className="text-amber-300 text-xs [overflow-wrap:anywhere]">{e.message}</p>}
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  {e.etat === "fait" && e.resultat && (
+                  </div>
+                  <div className="min-w-0 flex-1 text-sm">
+                    <p className="text-neutral-100 truncate" title={e.fichier.name}>
+                      {e.fichier.name}
+                    </p>
+                    <p className="text-neutral-500 tabular-nums [overflow-wrap:anywhere]">
+                      {oct(e.fichier.size)}
+                      {e.etat === "fait" && e.resultat && (
+                        <>
+                          {" → "}
+                          <span className="text-neutral-200">{oct(e.resultat.blob.size)}</span> (
+                          {ecart(e.fichier.size, e.resultat.blob.size)})
+                        </>
+                      )}
+                      {e.etat === "encours" && <span className="text-sky-300">{t.encoursEl}</span>}
+                      {e.etat === "attente" && <span>{t.attenteEl}</span>}
+                    </p>
+                    {e.etat === "fait" && e.resultat?.detail && (
+                      <p className="text-neutral-500 text-xs [overflow-wrap:anywhere]">{e.resultat.detail}</p>
+                    )}
+                    {e.etat === "erreur" && <p className="text-amber-300 text-xs [overflow-wrap:anywhere]">{e.message}</p>}
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    {e.etat === "fait" && e.resultat && (
+                      <button
+                        type="button"
+                        onClick={() => telecharger(e.resultat!.nom, e.resultat!.blob)}
+                        className="h-10 px-3 rounded-md text-sm border border-neutral-700 text-neutral-200 hover:border-neutral-500"
+                      >
+                        {t.enregistrer}
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={() => telecharger(e.resultat!.nom, e.resultat!.blob)}
-                      className="h-10 px-3 rounded-md text-sm border border-neutral-700 text-neutral-200 hover:border-neutral-500"
+                      onClick={() => retirer(e.id)}
+                      disabled={enCours}
+                      aria-label={t.retirer(e.fichier.name)}
+                      className="h-10 w-10 rounded-md text-neutral-400 hover:text-white disabled:opacity-40"
                     >
-                      Enregistrer
+                      ×
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => retirer(e.id)}
-                    disabled={enCours}
-                    aria-label={`Retirer ${e.fichier.name}`}
-                    className="h-10 w-10 rounded-md text-neutral-400 hover:text-white disabled:opacity-40"
-                  >
-                    ×
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+
+      {reglages && (
+        <div className="min-w-0 rounded-lg border border-neutral-800 bg-neutral-900/40 p-4 lg:col-start-1 lg:row-start-2">
+          {reglages}
         </div>
       )}
     </div>
@@ -283,11 +347,13 @@ export const ReglageQualite = ({
   valeur: number; // 10 à 100
   onChange: (v: number) => void;
   id?: string;
-}) => (
+}) => {
+  const en = useLangue() === "en";
+  return (
   <label className="block min-w-0" htmlFor={id}>
     <span className="flex justify-between text-sm text-neutral-300 mb-1">
-      <span>Qualité</span>
-      <span className="tabular-nums text-neutral-100">{valeur} %</span>
+      <span>{en ? "Quality" : "Qualité"}</span>
+      <span className="tabular-nums text-neutral-100">{en ? `${valeur}%` : `${valeur} %`}</span>
     </span>
     <input
       id={id}
@@ -300,19 +366,24 @@ export const ReglageQualite = ({
       className="w-full h-12 accent-sky-400"
     />
     <span className="block text-xs text-neutral-500">
-      85 % convient à presque toutes les photos ; au-dessus de 92 %, le poids grimpe sans gain visible.
+      {en
+        ? "85% suits almost every photo; above 92%, the file grows with no visible gain."
+        : "85 % convient à presque toutes les photos ; au-dessus de 92 %, le poids grimpe sans gain visible."}
     </span>
   </label>
-);
+  );
+};
 
 /** Couleur de fond qui remplace la transparence (le JPEG n'en a pas). */
-export const ReglageFond = ({ valeur, onChange }: { valeur: string; onChange: (v: string) => void }) => (
+export const ReglageFond = ({ valeur, onChange }: { valeur: string; onChange: (v: string) => void }) => {
+  const en = useLangue() === "en";
+  return (
   <div className="min-w-0">
-    <span className="block text-sm text-neutral-300 mb-1">Fond des zones transparentes</span>
+    <span className="block text-sm text-neutral-300 mb-1">{en ? "Background for transparent areas" : "Fond des zones transparentes"}</span>
     <div className="flex flex-wrap items-center gap-2">
       {[
-        ["#ffffff", "Blanc"],
-        ["#000000", "Noir"],
+        ["#ffffff", en ? "White" : "Blanc"],
+        ["#000000", en ? "Black" : "Noir"],
       ].map(([c, nom]) => (
         <button
           key={c}
@@ -327,8 +398,9 @@ export const ReglageFond = ({ valeur, onChange }: { valeur: string; onChange: (v
       ))}
       <label className="h-12 px-3 rounded-md border border-neutral-700 text-sm text-neutral-300 inline-flex items-center gap-2 cursor-pointer">
         <input type="color" value={valeur} onChange={(e) => onChange(e.target.value)} className="w-7 h-7 bg-transparent" />
-        Autre couleur
+        {en ? "Other colour" : "Autre couleur"}
       </label>
     </div>
   </div>
-);
+  );
+};

@@ -4,6 +4,7 @@ import { Bouton } from "@/components/outils/OutilLayout";
 import { classeChamp, classeSelect, classeZoneTexte } from "@/components/outils/PageOutil";
 import { telecharger } from "@/lib/fichiers";
 import { cn } from "@/lib/utils";
+import { locale, useLangue, type Langue } from "@/lib/langue";
 import {
   Client,
   Document,
@@ -85,25 +86,30 @@ const Nombre = ({ label, value, onChange, min, max, signaler, aide, suffixe, cla
   className?: string;
   name?: string;
 }) => {
+  const lang = useLangue();
+  const en = lang === "en";
+  const fmt = (n: number) => n.toLocaleString(locale(lang));
   const verifier = () => {
     if (!value.trim()) return;
     const v = lireNombre(value);
-    const fr = (n: number) => n.toLocaleString("fr-FR");
     if (!Number.isFinite(v)) {
       onChange("");
-      signaler(`${label} : « ${value} » n'est pas un nombre, le champ a été vidé.`);
+      signaler(en ? `${label}: "${value}" is not a number, the field was cleared.` : `${label} : « ${value} » n'est pas un nombre, le champ a été vidé.`);
     } else if (v < min) {
-      onChange(fr(min));
-      signaler(`${label} : ${fr(v)} est en dessous du minimum, valeur ramenée à ${fr(min)}.`);
+      onChange(fmt(min));
+      signaler(en ? `${label}: ${fmt(v)} is below the minimum, set to ${fmt(min)}.` : `${label} : ${fmt(v)} est en dessous du minimum, valeur ramenée à ${fmt(min)}.`);
     } else if (v > max) {
-      onChange(fr(max));
-      signaler(`${label} : ${fr(v)} dépasse le maximum, valeur ramenée à ${fr(max)}.`);
+      onChange(fmt(max));
+      signaler(en ? `${label}: ${fmt(v)} is above the maximum, set to ${fmt(max)}.` : `${label} : ${fmt(v)} dépasse le maximum, valeur ramenée à ${fmt(max)}.`);
     }
   };
   const id = useId();
   const v = lireNombre(value);
+  const borne = v > max ? max : min;
   const hors = value.trim() && Number.isFinite(v) && (v > max || v < min)
-    ? `${v > max ? "Maximum" : "Minimum"} : ${(v > max ? max : min).toLocaleString("fr-FR")}, la valeur sera ramenée en quittant le champ.`
+    ? en
+      ? `${v > max ? "Maximum" : "Minimum"}: ${fmt(borne)}, the value will be adjusted when you leave the field.`
+      : `${v > max ? "Maximum" : "Minimum"} : ${fmt(borne)}, la valeur sera ramenée en quittant le champ.`
     : "";
   return (
     <div className={cn("min-w-0", className)}>
@@ -354,12 +360,259 @@ const Apercu = ({ d, e, c }: { d: Document; e: Emetteur; c: Client }) => {
   );
 };
 
+/* ------------------------------------------------------------------ textes de l'interface */
+
+/**
+ * Textes de l'éditeur. L'interface suit la langue de la page ; le document produit (aperçu et PDF)
+ * reste en français dans les deux cas, avec les mentions légales françaises.
+ */
+const T = {
+  fr: {
+    formulaire: (f: boolean) => (f ? "Votre facture" : "Votre devis"),
+    allerApercu: "Aperçu et PDF, plus bas",
+    vous: "Vous (émetteur)",
+    forme: "Forme de l'entreprise",
+    formes: { micro: "Micro-entrepreneur", ei: "Entrepreneur individuel", societe: "Société" },
+    denomination: "Dénomination sociale",
+    nomPrenom: "Nom et prénom",
+    aideEI: "La mention « EI » est ajoutée après votre nom.",
+    formeJuridique: "Forme juridique",
+    formeJuridiquePh: "SARL, SAS…",
+    capital: "Capital social",
+    telephone: "Téléphone",
+    siren: "SIREN",
+    sirenAide: "9 chiffres",
+    siret: "SIRET (facultatif)",
+    siretAide: "14 chiffres : SIREN + établissement",
+    adresse: "Adresse",
+    adresseSiege: "Adresse du siège social",
+    registre: "Immatriculation (RCS, RNE…)",
+    registrePh: (soc: boolean) => (soc ? "RCS Lyon" : "facultatif"),
+    registreAide: "Le SIREN est ajouté à la suite.",
+    tvaIntra: "N° de TVA intracommunautaire",
+    email: "E-mail",
+    iban: "IBAN (facultatif)",
+    franchise: "Franchise en base de TVA (pas de TVA facturée)",
+    franchiseAide: "Ajoute « TVA non applicable, art. 293 B du CGI » et retire les colonnes de TVA.",
+    debits: "Option pour le paiement de la TVA d'après les débits",
+    debitsAide: "Seulement si vous avez choisi cette option auprès des impôts (prestations de services).",
+    assurance: "Assurance professionnelle (activité artisanale)",
+    assurancePh: "Assureur, coordonnées, couverture géographique",
+    assuranceAide: "Obligatoire pour une activité artisanale ; laissez vide sinon.",
+    memoriser: "Mémoriser l'émetteur et le dernier numéro dans ce navigateur",
+    memoriserAide: "Stocké seulement sur cet appareil (stockage local du navigateur), jamais envoyé.",
+    client: "Client",
+    typeClient: "Type de client",
+    particulier: "Particulier",
+    pro: "Professionnel",
+    nomEntreprise: "Nom de l'entreprise",
+    sirenClient: "SIREN du client",
+    adresseFact: "Adresse de facturation",
+    tvaClient: "N° de TVA du client",
+    tvaClientAide: "S'il est redevable de la TVA.",
+    livraison: "Adresse de livraison, si différente",
+    blocDoc: (f: boolean) => (f ? "Facture" : "Devis"),
+    numero: (f: boolean) => (f ? "Numéro de facture" : "Numéro de devis"),
+    dernier: (n: string) => `Dernier numéro utilisé ici : ${n}`,
+    numeroAide: "Chronologique et continu, sans trou",
+    dateEmission: "Date d'émission",
+    datePrestation: "Date de la prestation",
+    datePrestationAide: "Ou de la vente",
+    dateEcheance: "Date d'échéance",
+    bonCommande: "N° de bon de commande",
+    bonCommandeAide: "Si le client en a émis un",
+    validite: "Durée de validité",
+    jours: "jours",
+    debut: "Début prévu des travaux",
+    duree: "Durée estimée",
+    dureePh: "3 jours",
+    frais: "Frais de déplacement HT",
+    nature: "Nature des opérations",
+    natures: { services: "Prestations de services", biens: "Livraisons de biens", mixte: "Biens et services" },
+    lieu: "Lieu d'exécution",
+    lieuPh: "Adresse du chantier, si différente",
+    lignes: "Lignes",
+    designation: (i: number) => `Ligne ${i} : désignation`,
+    monter: (i: number) => `Monter la ligne ${i}`,
+    descendre: (i: number) => `Descendre la ligne ${i}`,
+    supprimer: (i: number) => `Supprimer la ligne ${i}`,
+    quantite: "Quantité",
+    unite: "Unité",
+    unitePh: "h, jour, m²…",
+    prix: "Prix unitaire HT",
+    tva: "TVA",
+    sansTva: "sans TVA",
+    remise: "Remise",
+    totalLigne: "Total HT de la ligne : ",
+    ajouter: "Ajouter une ligne",
+    paiement: "Paiement et mentions",
+    conditions: "Conditions de paiement",
+    conditionsAide: (f: boolean) => (f ? "Moyen et délai : « virement à 30 jours », « à réception »…" : "Acompte, échéancier, moyen de paiement"),
+    penalites: "Taux annuel des pénalités de retard",
+    penalitesAide: "12,40 % = taux de la BCE au 1er juillet 2026 (2,40 %) + 10 points. Minimum : 3 fois le taux d'intérêt légal.",
+    escompte: "Escompte pour paiement anticipé",
+    escomptePh: "néant",
+    escompteAide: "Vide = « néant », la mention est écrite quand même.",
+    acompte: "Acompte à la signature",
+    gratuit: "Devis gratuit",
+    gratuitAide: "Décoché, la mention « Devis payant » est écrite.",
+    autoliq: "Autoliquidation : la TVA est due par le client",
+    autoliqAide: "Seulement quand c'est le client qui est redevable de la TVA. Ajoute la mention « Autoliquidation » et la TVA n'est pas facturée.",
+    garantie: "Biens couverts par la mention de garantie légale de conformité",
+    garantieAide: "Électroménager, informatique, téléphonie, jouets, articles de sport, meubles… : la facture à un particulier mentionne la garantie de deux ans.",
+    mentionsLibres: "Mentions complémentaires (une par ligne)",
+    mentionsLibresPh: "Membre d'une association agréée, le règlement par chèque et carte bancaire est accepté",
+    netAPayer: "Net à payer",
+    total: "Total",
+    totalTTC: "Total TTC",
+    dontTVA: "dont TVA",
+    creation: "Création…",
+    telecharger: (f: boolean) => (f ? "Télécharger la facture PDF" : "Télécharger le devis PDF"),
+    suivant: (f: boolean) => (f ? "Facture suivante" : "Devis suivant"),
+    effacer: "Tout effacer",
+    attente: "Le total se met à jour à chaque saisie ; l'aperçu du document est juste dessous.",
+    langueDoc: "",
+    confidentialite: "Le PDF est fabriqué par votre navigateur : ni vos coordonnées ni celles du client ne sont envoyées à 75tools.",
+    aVerifier: "À vérifier avant d'envoyer",
+    apercu: "",
+    pdfCree: (nom: string, num: string, f: boolean, mem: boolean) =>
+      `PDF « ${nom} » créé${mem ? ` ; numéro ${num} mémorisé comme dernier ${f ? "numéro de facture" : "numéro de devis"}` : ""}.`,
+    pdfEchec: "La création du PDF a échoué : ",
+    nouveau: (n: string) => `Nouveau document : numéro ${n}, client et lignes vidés, émetteur conservé.`,
+    efface: "Tout est effacé : formulaire vidé et données retirées de ce navigateur. La mémorisation est désactivée.",
+  },
+  en: {
+    formulaire: (f: boolean) => (f ? "Your invoice" : "Your quote"),
+    allerApercu: "Preview and PDF, below",
+    vous: "You (the seller, émetteur)",
+    forme: "Business status",
+    formes: { micro: "Micro-entrepreneur", ei: "Sole trader (EI)", societe: "Company (société)" },
+    denomination: "Company name (dénomination sociale)",
+    nomPrenom: "First name and surname",
+    aideEI: "French law requires « EI » (entrepreneur individuel) after your name: it is added for you.",
+    formeJuridique: "Legal form",
+    formeJuridiquePh: "SARL, SAS…",
+    capital: "Share capital",
+    telephone: "Phone",
+    siren: "SIREN number",
+    sirenAide: "9-digit French business ID from INSEE",
+    siret: "SIRET (optional)",
+    siretAide: "14 digits: SIREN + establishment code",
+    adresse: "Business address",
+    adresseSiege: "Registered office address (siège social)",
+    registre: "Registration (RCS, RNE…)",
+    registrePh: (soc: boolean) => (soc ? "RCS Lyon" : "optional"),
+    registreAide: "Your SIREN is added after it, as French invoices show it.",
+    tvaIntra: "EU VAT number (n° de TVA intracommunautaire)",
+    email: "Email",
+    iban: "IBAN (optional)",
+    franchise: "VAT exemption: franchise en base de TVA (no VAT charged)",
+    franchiseAide: "For businesses under the French VAT threshold. Adds « TVA non applicable, art. 293 B du CGI » (VAT not applicable, article 293 B of the French tax code) and removes the VAT columns.",
+    debits: "Option to pay VAT on invoicing (option pour les débits)",
+    debitsAide: "Only if you chose this option with the French tax office (services).",
+    assurance: "Professional insurance (craft trades, artisans)",
+    assurancePh: "Insurer, contact details, geographical cover",
+    assuranceAide: "Mandatory for a craft trade such as plumbing or building work; leave empty otherwise. Written in French on the document.",
+    memoriser: "Remember the seller and the last number in this browser",
+    memoriserAide: "Kept only on this device (browser local storage), never sent anywhere.",
+    client: "Client",
+    typeClient: "Client type",
+    particulier: "Private individual",
+    pro: "Business",
+    nomEntreprise: "Company name",
+    sirenClient: "Client's SIREN",
+    adresseFact: "Billing address",
+    tvaClient: "Client's VAT number",
+    tvaClientAide: "If the client is registered for VAT.",
+    livraison: "Delivery address, if different",
+    blocDoc: (f: boolean) => (f ? "Invoice (facture)" : "Quote (devis)"),
+    numero: (f: boolean) => (f ? "Invoice number" : "Quote number"),
+    dernier: (n: string) => `Last number used here: ${n}`,
+    numeroAide: "Chronological and continuous, with no gaps",
+    dateEmission: "Issue date",
+    datePrestation: "Date of service",
+    datePrestationAide: "Or of the sale",
+    dateEcheance: "Payment due date",
+    bonCommande: "Purchase order number",
+    bonCommandeAide: "If the client issued one",
+    validite: "Validity period",
+    jours: "days",
+    debut: "Planned start of work",
+    duree: "Estimated duration",
+    dureePh: "3 jours",
+    frais: "Travel costs excl. VAT",
+    nature: "Type of transactions",
+    natures: { services: "Services", biens: "Sale of goods", mixte: "Goods and services" },
+    lieu: "Place of work (lieu d'exécution)",
+    lieuPh: "Site address, if different",
+    lignes: "Lines",
+    designation: (i: number) => `Line ${i}: description (in French)`,
+    monter: (i: number) => `Move line ${i} up`,
+    descendre: (i: number) => `Move line ${i} down`,
+    supprimer: (i: number) => `Delete line ${i}`,
+    quantite: "Quantity",
+    unite: "Unit",
+    unitePh: "h, jour, m²…",
+    prix: "Unit price excl. VAT",
+    tva: "VAT",
+    sansTva: "no VAT",
+    remise: "Discount",
+    totalLigne: "Line total excl. VAT: ",
+    ajouter: "Add a line",
+    paiement: "Payment and mentions",
+    conditions: "Payment terms (in French)",
+    conditionsAide: (f: boolean) => (f ? "Method and deadline, e.g. « virement à 30 jours » (bank transfer within 30 days)" : "Deposit, schedule, payment method"),
+    penalites: "Annual late-payment penalty rate",
+    penalitesAide: "Mandatory on French invoices. 12.40% = ECB rate on 1 July 2026 (2.40%) + 10 points. Minimum: 3 times the French legal interest rate.",
+    escompte: "Early-payment discount (escompte)",
+    escomptePh: "néant",
+    escompteAide: "Empty = « néant » (none): French law still wants the line written.",
+    acompte: "Deposit on signature",
+    gratuit: "Free quote",
+    gratuitAide: "Unticked, the quote says « Devis payant » (paid quote).",
+    autoliq: "Reverse charge (autoliquidation): the client pays the VAT",
+    autoliqAide: "Only when the client is liable for VAT. Adds « Autoliquidation » and no VAT is charged.",
+    garantie: "Goods covered by the legal conformity guarantee",
+    garantieAide: "Household appliances, computers, phones, toys, sports goods, furniture…: an invoice to a private client mentions the two-year guarantee.",
+    mentionsLibres: "Extra mentions, in French (one per line)",
+    mentionsLibresPh: "Membre d'une association agréée, le règlement par chèque et carte bancaire est accepté",
+    netAPayer: "Amount due",
+    total: "Total",
+    totalTTC: "Total incl. VAT",
+    dontTVA: "of which VAT",
+    creation: "Creating…",
+    telecharger: (f: boolean) => (f ? "Download the invoice PDF" : "Download the quote PDF"),
+    suivant: (f: boolean) => (f ? "Next invoice" : "Next quote"),
+    effacer: "Clear everything",
+    attente: "The total updates as you type; the document preview is just below.",
+    langueDoc: "The document itself is written in French with the French legal mentions, which is what French clients and the tax office (impots.gouv.fr) expect. This page explains each field in English.",
+    confidentialite: "Your browser builds the PDF: neither your details nor your client's are sent to 75tools.",
+    aVerifier: "Check before sending",
+    apercu: "Preview of the French document",
+    pdfCree: (nom: string, num: string, f: boolean, mem: boolean) =>
+      `PDF "${nom}" created${mem ? `; number ${num} saved as the last ${f ? "invoice" : "quote"} number` : ""}.`,
+    pdfEchec: "The PDF could not be created: ",
+    nouveau: (n: string) => `New document: number ${n}, client and lines cleared, seller kept.`,
+    efface: "Everything is cleared: form emptied and data removed from this browser. Remembering is now off.",
+  },
+};
+
+/** Montant affiché dans l'interface (pas dans le document) : « 1 234,56 € » ou « €1,234.56 ». */
+const montantUi = (c: number, lang: Langue) =>
+  lang === "en" ? (c / 100).toLocaleString("en-GB", { style: "currency", currency: "EUR" }) : montant(c);
+
 /* ------------------------------------------------------------------ éditeur */
 
 export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exemple: ExempleFactureDevis }) => {
+  const lang = useLangue();
+  const tx = T[lang];
   const [e, setE] = useState<Emetteur>(exemple.emetteur);
   const [c, setC] = useState<Client>(exemple.client);
-  const [d, setD] = useState<Document>(() => documentInitial(type, exemple));
+  const [d, setD] = useState<Document>(() => {
+    const doc = documentInitial(type, exemple);
+    // Saisie anglaise : point décimal dans le champ (le document l'écrit à la française).
+    return lang === "en" ? { ...doc, tauxPenalites: doc.tauxPenalites.replace(",", ".") } : doc;
+  });
   const [memoriser, setMemoriser] = useState(true);
   const [charge, setCharge] = useState(false);
   const [statut, setStatut] = useState("");
@@ -393,13 +646,16 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
 
   // Mémorise l'émetteur sur cet appareil, si la case est cochée.
   useEffect(() => {
-    if (!charge || !memoriser) return;
+    // L'exemple prérempli n'est jamais mémorisé : seul un émetteur saisi ou déjà mémorisé l'est
+    // (sinon l'exemple de la facture réapparaissait comme émetteur sur la page du devis).
+    if (!charge || !memoriser || e === exemple.emetteur) return;
     const m = lireMemoire();
     ecrireMemoire({ ...m, emetteur: e });
-  }, [e, memoriser, charge]);
+  }, [e, memoriser, charge, exemple.emetteur]);
 
   const t = useMemo(() => calculer(d, e), [d, e]);
-  const points = alertes(d, e, c, t);
+  const points = alertes(d, e, c, t, lang);
+  const mt = (x: number) => montantUi(x, lang);
 
   const signaler = (m: string) => setStatut(m);
 
@@ -419,15 +675,16 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
     setEnCours(true);
     try {
       const octets = await genererPdf(d, e, c);
-      telecharger(nomFichier(d, c), new Blob([octets], { type: "application/pdf" }));
+      const nom = nomFichier(d, c, lang);
+      telecharger(nom, new Blob([octets], { type: "application/pdf" }));
       if (memoriser) {
         const m = lireMemoire();
         ecrireMemoire({ ...m, emetteur: e, dernier: { ...(m.dernier ?? {}), [type]: d.numero } });
       }
       setDernier(d.numero);
-      setStatut(`PDF « ${nomFichier(d, c)} » créé${memoriser ? ` ; numéro ${d.numero} mémorisé comme dernier ${type === "facture" ? "numéro de facture" : "numéro de devis"}` : ""}.`);
+      setStatut(tx.pdfCree(nom, d.numero, type === "facture", memoriser));
     } catch (err) {
-      setStatut("La création du PDF a échoué : " + (err instanceof Error ? err.message : String(err)));
+      setStatut(tx.pdfEchec + (err instanceof Error ? err.message : String(err)));
     } finally {
       setEnCours(false);
     }
@@ -447,7 +704,7 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
       lieu: "",
       fraisDeplacement: "",
     }));
-    setStatut(`Nouveau document : numéro ${numeroSuivant(dernier || d.numero)}, client et lignes vidés, émetteur conservé.`);
+    setStatut(tx.nouveau(numeroSuivant(dernier || d.numero)));
   };
 
   const toutEffacer = () => {
@@ -455,142 +712,153 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
     setMemoriser(false);
     setE({ ...EMETTEUR_VIDE });
     setC({ type: "particulier", nom: "", adresse: "", siren: "", tva: "", adresseLivraison: "" });
-    setD((x) => ({ ...x, numero: `${prefixe(type)}-${aujourdhui().slice(0, 4)}-001`, bonCommande: "", lignes: [{ id: idSuivant.current++, designation: "", quantite: "1", unite: "u", prix: "", tva: 20, remise: "" }] }));
+    setD((x) => ({ ...x, numero: `${prefixe(type)}-${aujourdhui().slice(0, 4)}-001`, bonCommande: "", autoliquidation: false, lignes: [{ id: idSuivant.current++, designation: "", quantite: "1", unite: "u", prix: "", tva: 20, remise: "" }] }));
     setDernier("");
-    setStatut("Tout est effacé : formulaire vidé et données retirées de ce navigateur. La mémorisation est désactivée.");
+    setStatut(tx.efface);
   };
 
   const estFacture = type === "facture";
+  const libelleTotal = t.sansTVA ? (estFacture ? tx.netAPayer : tx.total) : tx.totalTTC;
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] items-start">
-      <form className="space-y-5 min-w-0" onSubmit={(ev) => ev.preventDefault()} aria-label={estFacture ? "Votre facture" : "Votre devis"}>
-        <a href="#actions-document" className="xl:hidden inline-flex items-center h-11 px-4 rounded-md border border-neutral-700 text-sm text-neutral-200 hover:border-neutral-500 !no-underline">
-          Aller à l'aperçu et au téléchargement
+      <div role="group" className="space-y-5 min-w-0" aria-label={tx.formulaire(estFacture)}>
+        <a
+          href="#actions-document"
+          className="xl:hidden flex flex-wrap items-center justify-between gap-x-3 gap-y-1 min-h-11 px-4 py-2 rounded-md border border-neutral-700 text-sm text-neutral-200 hover:border-neutral-500 !no-underline tabular-nums"
+        >
+          <span>
+            {libelleTotal}
+            {lang === "en" ? ": " : " : "}
+            <strong className="text-white">{mt(t.totalTTC)}</strong>
+          </span>
+          <span className="text-sky-300">{tx.allerApercu}</span>
         </a>
-        <Bloc titre="Vous (émetteur)">
+        <Bloc titre={tx.vous}>
           <Choix
-            nom="Forme de l'entreprise"
+            nom={tx.forme}
             valeur={e.forme}
             onChange={(v) => setE((x) => ({ ...x, forme: v, franchise: v === "societe" ? false : x.franchise }))}
             options={[
-              ["micro", "Micro-entrepreneur"],
-              ["ei", "Entrepreneur individuel"],
-              ["societe", "Société"],
+              ["micro", tx.formes.micro],
+              ["ei", tx.formes.ei],
+              ["societe", tx.formes.societe],
             ]}
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <Texte
-              label={e.forme === "societe" ? "Dénomination sociale" : "Nom et prénom"}
+              label={e.forme === "societe" ? tx.denomination : tx.nomPrenom}
               name="emetteur-nom"
               value={e.nom}
               onChange={majE("nom")}
-              aide={e.forme !== "societe" ? "La mention « EI » est ajoutée après votre nom." : undefined}
+              aide={e.forme !== "societe" ? tx.aideEI : undefined}
             />
             {e.forme === "societe" ? (
               <div className="grid grid-cols-2 gap-3">
-                <Texte label="Forme juridique" value={e.formeJuridique} onChange={majE("formeJuridique")} placeholder="SARL, SAS…" />
-                <Nombre label="Capital social" value={e.capital} onChange={majE("capital")} min={0} max={1e12} signaler={signaler} suffixe="€" />
+                <Texte label={tx.formeJuridique} value={e.formeJuridique} onChange={majE("formeJuridique")} placeholder={tx.formeJuridiquePh} />
+                <Nombre label={tx.capital} value={e.capital} onChange={majE("capital")} min={0} max={1e12} signaler={signaler} suffixe="€" />
               </div>
             ) : (
-              <Texte label="Téléphone" type="tel" value={e.telephone} onChange={majE("telephone")} autoComplete="tel" />
+              <Texte label={tx.telephone} type="tel" value={e.telephone} onChange={majE("telephone")} autoComplete="tel" />
             )}
-            <Texte label="SIREN" name="emetteur-siren" value={e.siren} onChange={majE("siren")} placeholder="123 456 789" aide="9 chiffres" />
-            <Texte label="SIRET (facultatif)" value={e.siret} onChange={majE("siret")} placeholder="123 456 789 00012" aide="14 chiffres : SIREN + établissement" />
-            <Zone label="Adresse" value={e.adresse} onChange={majE("adresse")} lignes={2} placeholder={"12 rue des Lilas\n69003 Lyon"} aide={e.forme === "societe" ? "Adresse du siège social" : undefined} />
-            <Texte label="Immatriculation (RCS, RNE…)" value={e.registre} onChange={majE("registre")} placeholder={e.forme === "societe" ? "RCS Lyon" : "facultatif"} aide="Le SIREN est ajouté à la suite." />
-            {!e.franchise && <Texte label="N° de TVA intracommunautaire" value={e.tva} onChange={majE("tva")} placeholder="FR 12 345678901" />}
-            <Texte label="E-mail" type="email" value={e.email} onChange={majE("email")} autoComplete="email" />
-            {e.forme === "societe" && <Texte label="Téléphone" type="tel" value={e.telephone} onChange={majE("telephone")} autoComplete="tel" />}
-            <Texte label="IBAN (facultatif)" value={e.iban} onChange={majE("iban")} placeholder="FR76 …" />
+            <Texte label={tx.siren} name="emetteur-siren" value={e.siren} onChange={majE("siren")} placeholder="123 456 789" aide={tx.sirenAide} />
+            <Texte label={tx.siret} value={e.siret} onChange={majE("siret")} placeholder="123 456 789 00012" aide={tx.siretAide} />
+            <Zone label={tx.adresse} value={e.adresse} onChange={majE("adresse")} lignes={2} placeholder={"12 rue des Lilas\n69003 Lyon"} aide={e.forme === "societe" ? tx.adresseSiege : undefined} />
+            <Texte label={tx.registre} value={e.registre} onChange={majE("registre")} placeholder={tx.registrePh(e.forme === "societe")} aide={tx.registreAide} />
+            {!e.franchise && <Texte label={tx.tvaIntra} value={e.tva} onChange={majE("tva")} placeholder="FR 12 345678901" />}
+            <Texte label={tx.email} type="email" value={e.email} onChange={majE("email")} autoComplete="email" />
+            {e.forme === "societe" && <Texte label={tx.telephone} type="tel" value={e.telephone} onChange={majE("telephone")} autoComplete="tel" />}
+            <Texte label={tx.iban} value={e.iban} onChange={majE("iban")} placeholder="FR76 …" />
           </div>
-          {e.forme !== "societe" && (
-            <Case
-              name="franchise"
-              label="Franchise en base de TVA (pas de TVA facturée)"
-              checked={e.franchise}
-              onChange={majE("franchise")}
-              aide="Ajoute « TVA non applicable, art. 293 B du CGI » et retire les colonnes de TVA."
-            />
-          )}
-          {!e.franchise && (
-            <Case label="Option pour le paiement de la TVA d'après les débits" checked={e.optionDebits} onChange={majE("optionDebits")} aide="Seulement si vous avez choisi cette option auprès des impôts (prestations de services)." />
-          )}
-          <Zone label="Assurance professionnelle (activité artisanale)" value={e.assurance} onChange={majE("assurance")} lignes={2} placeholder="Assureur, coordonnées, couverture géographique" aide="Obligatoire pour une activité artisanale ; laissez vide sinon." />
+          {/* La franchise en base vaut pour toute entreprise sous les seuils, société comprise (Service Public, F21746). */}
           <Case
-            label="Mémoriser l'émetteur et le dernier numéro dans ce navigateur"
+            name="franchise"
+            label={tx.franchise}
+            checked={e.franchise}
+            onChange={(v) => {
+              majE("franchise")(v);
+              if (v) setD((x) => ({ ...x, autoliquidation: false }));
+            }}
+            aide={tx.franchiseAide}
+          />
+          {!e.franchise && <Case label={tx.debits} checked={e.optionDebits} onChange={majE("optionDebits")} aide={tx.debitsAide} />}
+          <Zone label={tx.assurance} value={e.assurance} onChange={majE("assurance")} lignes={2} placeholder={tx.assurancePh} aide={tx.assuranceAide} />
+          <Case
+            label={tx.memoriser}
             checked={memoriser}
             onChange={(v) => {
               setMemoriser(v);
               if (!v) effacerMemoire();
             }}
-            aide="Stocké seulement sur cet appareil (stockage local du navigateur), jamais envoyé."
+            aide={tx.memoriserAide}
           />
         </Bloc>
 
-        <Bloc titre="Client">
+        <Bloc titre={tx.client}>
           <Choix
-            nom="Type de client"
+            nom={tx.typeClient}
             valeur={c.type}
-            onChange={(v) => setC((x) => ({ ...x, type: v }))}
+            onChange={(v) => {
+              setC((x) => ({ ...x, type: v }));
+              // L'autoliquidation ne vaut que pour un client professionnel : on la retire pour un particulier.
+              if (v === "particulier") setD((x) => ({ ...x, autoliquidation: false }));
+            }}
             options={[
-              ["particulier", "Particulier"],
-              ["pro", "Professionnel"],
+              ["particulier", tx.particulier],
+              ["pro", tx.pro],
             ]}
           />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Texte label={c.type === "pro" ? "Nom de l'entreprise" : "Nom et prénom"} name="client-nom" value={c.nom} onChange={majC("nom")} />
-            {c.type === "pro" && <Texte label="SIREN du client" name="client-siren" value={c.siren} onChange={majC("siren")} placeholder="987 654 321" />}
-            <Zone label="Adresse de facturation" name="client-adresse" value={c.adresse} onChange={majC("adresse")} lignes={2} />
-            {c.type === "pro" && <Texte label="N° de TVA du client" value={c.tva} onChange={majC("tva")} aide="S'il est redevable de la TVA." />}
-            {c.type === "pro" && (
-              <Zone label="Adresse de livraison, si différente" value={c.adresseLivraison} onChange={majC("adresseLivraison")} lignes={2} />
-            )}
+            <Texte label={c.type === "pro" ? tx.nomEntreprise : tx.nomPrenom} name="client-nom" value={c.nom} onChange={majC("nom")} />
+            {c.type === "pro" && <Texte label={tx.sirenClient} name="client-siren" value={c.siren} onChange={majC("siren")} placeholder="987 654 321" />}
+            <Zone label={tx.adresseFact} name="client-adresse" value={c.adresse} onChange={majC("adresse")} lignes={2} />
+            {c.type === "pro" && <Texte label={tx.tvaClient} value={c.tva} onChange={majC("tva")} aide={tx.tvaClientAide} />}
+            {c.type === "pro" && <Zone label={tx.livraison} value={c.adresseLivraison} onChange={majC("adresseLivraison")} lignes={2} />}
           </div>
         </Bloc>
 
-        <Bloc titre={estFacture ? "Facture" : "Devis"}>
+        <Bloc titre={tx.blocDoc(estFacture)}>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Texte
-              label={estFacture ? "Numéro de facture" : "Numéro de devis"}
+              label={tx.numero(estFacture)}
               name="numero"
               value={d.numero}
               onChange={majD("numero")}
-              aide={dernier ? `Dernier numéro utilisé ici : ${dernier}` : "Chronologique et continu, sans trou"}
+              aide={dernier ? tx.dernier(dernier) : tx.numeroAide}
             />
-            <Texte label="Date d'émission" type="date" name="date-emission" value={d.dateEmission} onChange={majD("dateEmission")} />
+            <Texte label={tx.dateEmission} type="date" name="date-emission" value={d.dateEmission} onChange={majD("dateEmission")} />
             {estFacture ? (
               <>
-                <Texte label="Date de la prestation" aide="Ou de la vente" type="date" value={d.dateVente} onChange={majD("dateVente")} />
-                <Texte label="Date d'échéance" type="date" name="date-echeance" value={d.dateEcheance} onChange={majD("dateEcheance")} />
-                <Texte label="N° de bon de commande" value={d.bonCommande} onChange={majD("bonCommande")} aide="Si le client en a émis un" />
+                <Texte label={tx.datePrestation} aide={tx.datePrestationAide} type="date" value={d.dateVente} onChange={majD("dateVente")} />
+                <Texte label={tx.dateEcheance} type="date" name="date-echeance" value={d.dateEcheance} onChange={majD("dateEcheance")} />
+                <Texte label={tx.bonCommande} value={d.bonCommande} onChange={majD("bonCommande")} aide={tx.bonCommandeAide} />
               </>
             ) : (
               <>
-                <Nombre label="Durée de validité" value={d.validiteJours} onChange={majD("validiteJours")} min={1} max={365} signaler={signaler} suffixe="jours" />
-                <Texte label="Début prévu des travaux" type="date" value={d.dateDebut} onChange={majD("dateDebut")} />
-                <Texte label="Durée estimée" value={d.duree} onChange={majD("duree")} placeholder="3 jours" />
-                <Nombre label="Frais de déplacement HT" name="frais" value={d.fraisDeplacement} onChange={majD("fraisDeplacement")} min={0} max={100000} signaler={signaler} suffixe="€" />
+                <Nombre label={tx.validite} value={d.validiteJours} onChange={majD("validiteJours")} min={1} max={365} signaler={signaler} suffixe={tx.jours} />
+                <Texte label={tx.debut} type="date" value={d.dateDebut} onChange={majD("dateDebut")} />
+                <Texte label={tx.duree} value={d.duree} onChange={majD("duree")} placeholder={tx.dureePh} />
+                <Nombre label={tx.frais} name="frais" value={d.fraisDeplacement} onChange={majD("fraisDeplacement")} min={0} max={100000} signaler={signaler} suffixe="€" />
               </>
             )}
-            <Etiquette label="Nature des opérations">
+            <Etiquette label={tx.nature}>
               <select value={d.nature} onChange={(ev) => majD("nature")(ev.target.value as Document["nature"])} className={classeSelect}>
-                <option value="services">Prestations de services</option>
-                <option value="biens">Livraisons de biens</option>
-                <option value="mixte">Biens et services</option>
+                <option value="services">{tx.natures.services}</option>
+                <option value="biens">{tx.natures.biens}</option>
+                <option value="mixte">{tx.natures.mixte}</option>
               </select>
             </Etiquette>
           </div>
-          {!estFacture && <Zone label="Lieu d'exécution" value={d.lieu} onChange={majD("lieu")} lignes={2} placeholder="Adresse du chantier, si différente" />}
+          {!estFacture && <Zone label={tx.lieu} value={d.lieu} onChange={majD("lieu")} lignes={2} placeholder={tx.lieuPh} />}
         </Bloc>
 
-        <Bloc titre="Lignes">
+        <Bloc titre={tx.lignes}>
           <ol className="space-y-4">
             {d.lignes.map((l, i) => (
               <li key={l.id} className="rounded-md border border-neutral-800 p-3 space-y-3 ligne-doc">
                 <div className="flex items-start gap-2">
                   <Zone
-                    label={`Ligne ${i + 1} : désignation`}
+                    label={tx.designation(i + 1)}
                     name={`designation-${i}`}
                     value={l.designation}
                     onChange={majL(l.id, "designation")}
@@ -598,63 +866,59 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
                     className="flex-1"
                   />
                   <div className="flex flex-col gap-1 pt-6">
-                    <button type="button" aria-label={`Monter la ligne ${i + 1}`} disabled={i === 0} onClick={() => deplacer(i, -1)} className="h-9 w-9 grid place-items-center rounded border border-neutral-700 disabled:opacity-30 hover:border-neutral-500">
+                    <button type="button" aria-label={tx.monter(i + 1)} disabled={i === 0} onClick={() => deplacer(i, -1)} className="h-9 w-9 grid place-items-center rounded border border-neutral-700 disabled:opacity-30 hover:border-neutral-500">
                       <ArrowUp className="w-4 h-4" aria-hidden="true" />
                     </button>
-                    <button type="button" aria-label={`Descendre la ligne ${i + 1}`} disabled={i === d.lignes.length - 1} onClick={() => deplacer(i, 1)} className="h-9 w-9 grid place-items-center rounded border border-neutral-700 disabled:opacity-30 hover:border-neutral-500">
+                    <button type="button" aria-label={tx.descendre(i + 1)} disabled={i === d.lignes.length - 1} onClick={() => deplacer(i, 1)} className="h-9 w-9 grid place-items-center rounded border border-neutral-700 disabled:opacity-30 hover:border-neutral-500">
                       <ArrowDown className="w-4 h-4" aria-hidden="true" />
                     </button>
-                    <button type="button" aria-label={`Supprimer la ligne ${i + 1}`} onClick={() => supprimer(l.id)} className="h-9 w-9 grid place-items-center rounded border border-neutral-700 hover:border-red-400 hover:text-red-300">
+                    <button type="button" aria-label={tx.supprimer(i + 1)} onClick={() => supprimer(l.id)} className="h-9 w-9 grid place-items-center rounded border border-neutral-700 hover:border-red-400 hover:text-red-300">
                       <Trash2 className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
-                <div className="grid gap-3 grid-cols-2 sm:grid-cols-5">
-                  <Nombre label="Quantité" name={`quantite-${i}`} value={l.quantite} onChange={majL(l.id, "quantite")} min={0} max={1000000} signaler={signaler} />
-                  <Texte label="Unité" value={l.unite} onChange={majL(l.id, "unite")} placeholder="h, jour, m²…" />
-                  <Nombre label="Prix unitaire HT" name={`prix-${i}`} value={l.prix} onChange={majL(l.id, "prix")} min={0} max={10000000} signaler={signaler} suffixe="€" />
+                <div className="grid gap-3 grid-cols-2 sm:grid-cols-5 items-end">
+                  <Nombre label={tx.quantite} name={`quantite-${i}`} value={l.quantite} onChange={majL(l.id, "quantite")} min={0} max={1000000} signaler={signaler} />
+                  <Texte label={tx.unite} value={l.unite} onChange={majL(l.id, "unite")} placeholder={tx.unitePh} />
+                  <Nombre label={tx.prix} name={`prix-${i}`} value={l.prix} onChange={majL(l.id, "prix")} min={0} max={10000000} signaler={signaler} suffixe="€" />
                   {e.franchise ? (
-                    <Etiquette label="TVA">
-                      <span className={cn(classeChamp, "flex items-center text-neutral-500")}>sans TVA</span>
+                    <Etiquette label={tx.tva}>
+                      <span className={cn(classeChamp, "flex items-center text-neutral-500")}>{tx.sansTva}</span>
                     </Etiquette>
                   ) : (
-                    <Etiquette label="TVA">
+                    <Etiquette label={tx.tva}>
                       <select name={`tva-${i}`} value={l.tva} onChange={(ev) => majL(l.id, "tva")(Number(ev.target.value))} className={classeSelect}>
                         {TAUX_TVA.map((x) => (
                           <option key={x} value={x}>
-                            {taux(x)}
+                            {lang === "en" ? `${x.toLocaleString("en-GB")}%` : taux(x)}
                           </option>
                         ))}
                       </select>
                     </Etiquette>
                   )}
-                  <Nombre label="Remise" name={`remise-${i}`} value={l.remise} onChange={majL(l.id, "remise")} min={0} max={100} signaler={signaler} suffixe="%" />
+                  <Nombre label={tx.remise} name={`remise-${i}`} value={l.remise} onChange={majL(l.id, "remise")} min={0} max={100} signaler={signaler} suffixe="%" />
                 </div>
                 <p className="text-sm text-neutral-400 text-right tabular-nums">
-                  Total HT de la ligne : <span className="text-neutral-100">{montant(t.lignes.find((x) => x.ligne.id === l.id)?.totalHT ?? 0)}</span>
+                  {tx.totalLigne}
+                  <span className="text-neutral-100">{mt(t.lignes.find((x) => x.ligne.id === l.id)?.totalHT ?? 0)}</span>
                 </p>
               </li>
             ))}
           </ol>
           <Bouton secondaire onClick={ajouterLigne}>
             <span className="inline-flex items-center gap-2">
-              <Plus className="w-4 h-4" aria-hidden="true" /> Ajouter une ligne
+              <Plus className="w-4 h-4" aria-hidden="true" /> {tx.ajouter}
             </span>
           </Bouton>
         </Bloc>
 
-        <Bloc titre="Paiement et mentions">
+        <Bloc titre={tx.paiement}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Texte
-              label="Conditions de paiement"
-              value={d.conditionsPaiement}
-              onChange={majD("conditionsPaiement")}
-              aide={estFacture ? "Moyen et délai : « virement à 30 jours », « à réception »…" : "Acompte, échéancier, moyen de paiement"}
-            />
+            <Texte label={tx.conditions} value={d.conditionsPaiement} onChange={majD("conditionsPaiement")} aide={tx.conditionsAide(estFacture)} />
             {estFacture ? (
               <>
                 <Nombre
-                  label="Taux annuel des pénalités de retard"
+                  label={tx.penalites}
                   name="penalites"
                   value={d.tauxPenalites}
                   onChange={majD("tauxPenalites")}
@@ -662,64 +926,56 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
                   max={100}
                   signaler={signaler}
                   suffixe="%"
-                  aide="12,40 % = taux de la BCE au 1er juillet 2026 (2,40 %) + 10 points. Minimum : 3 fois le taux d'intérêt légal."
+                  aide={tx.penalitesAide}
                 />
-                <Texte label="Escompte pour paiement anticipé" value={d.escompte} onChange={majD("escompte")} placeholder="néant" aide="Vide = « néant », la mention est écrite quand même." />
+                <Texte label={tx.escompte} value={d.escompte} onChange={majD("escompte")} placeholder={tx.escomptePh} aide={tx.escompteAide} />
               </>
             ) : (
               <>
-                <Nombre label="Acompte à la signature" name="acompte" value={d.acompte} onChange={majD("acompte")} min={0} max={100} signaler={signaler} suffixe="%" />
-                <Case label="Devis gratuit" checked={d.devisGratuit} onChange={majD("devisGratuit")} aide="Décoché, la mention « Devis payant » est écrite." />
+                <Nombre label={tx.acompte} name="acompte" value={d.acompte} onChange={majD("acompte")} min={0} max={100} signaler={signaler} suffixe="%" />
+                <Case label={tx.gratuit} checked={d.devisGratuit} onChange={majD("devisGratuit")} aide={tx.gratuitAide} />
               </>
             )}
           </div>
           {c.type === "pro" && !e.franchise && (
-            <Case
-              label="Autoliquidation : la TVA est due par le client"
-              checked={d.autoliquidation}
-              onChange={majD("autoliquidation")}
-              aide="Seulement quand c'est le client qui est redevable de la TVA. Ajoute la mention « Autoliquidation » et la TVA n'est pas facturée."
-            />
+            <Case label={tx.autoliq} checked={d.autoliquidation} onChange={majD("autoliquidation")} aide={tx.autoliqAide} />
           )}
           {estFacture && c.type === "particulier" && d.nature !== "services" && (
-            <Case
-              label="Biens couverts par la mention de garantie légale de conformité"
-              checked={d.garantieConformite}
-              onChange={majD("garantieConformite")}
-              aide="Électroménager, informatique, téléphonie, jouets, articles de sport, meubles… : la facture à un particulier mentionne la garantie de deux ans."
-            />
+            <Case label={tx.garantie} checked={d.garantieConformite} onChange={majD("garantieConformite")} aide={tx.garantieAide} />
           )}
-          <Zone label="Mentions complémentaires (une par ligne)" value={d.mentionsLibres} onChange={majD("mentionsLibres")} lignes={2} placeholder="Membre d'une association agréée, le règlement par chèque et carte bancaire est accepté" />
+          <Zone label={tx.mentionsLibres} value={d.mentionsLibres} onChange={majD("mentionsLibres")} lignes={2} placeholder={tx.mentionsLibresPh} />
         </Bloc>
-      </form>
+      </div>
 
-      <div id="actions-document" className="xl:sticky xl:top-4 space-y-4 min-w-0 scroll-mt-4">
-        <div className="rounded-lg border border-neutral-800 p-4 space-y-3">
-          <p className="text-neutral-200 tabular-nums">
-            {t.sansTVA ? (estFacture ? "Net à payer" : "Total") : "Total TTC"} : <strong className="text-white text-lg" id="total-ttc">{montant(t.totalTTC)}</strong>
-            {!t.sansTVA && <span className="text-neutral-500 text-sm"> dont TVA {montant(t.totalTVA)}</span>}
+      <div id="actions-document" className="xl:sticky xl:top-4 space-y-4 min-w-0 scroll-mt-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
+        <div data-resultat className="rounded-lg border border-neutral-800 p-4 space-y-3">
+          <p className="text-neutral-200 tabular-nums" role="status" aria-live="polite">
+            {libelleTotal}
+            {lang === "en" ? ": " : " : "}
+            <strong className="text-white text-lg" id="total-ttc">{mt(t.totalTTC)}</strong>
+            {!t.sansTVA && <span className="text-neutral-500 text-sm"> {tx.dontTVA} {mt(t.totalTVA)}</span>}
           </p>
           <div className="flex flex-wrap gap-2">
             <Bouton onClick={pdf} disabled={enCours}>
-              {enCours ? "Création…" : estFacture ? "Télécharger la facture PDF" : "Télécharger le devis PDF"}
+              {enCours ? tx.creation : tx.telecharger(estFacture)}
             </Bouton>
             <Bouton secondaire onClick={nouveau}>
-              {estFacture ? "Facture suivante" : "Devis suivant"}
+              {tx.suivant(estFacture)}
             </Bouton>
             <Bouton secondaire onClick={toutEffacer}>
-              Tout effacer
+              {tx.effacer}
             </Bouton>
           </div>
-          <p role="status" aria-live="polite" className="text-sm text-sky-300 min-h-[1.25rem] [overflow-wrap:anywhere]">
+          <p role="status" aria-live="polite" className="text-sm text-sky-300 [overflow-wrap:anywhere] empty:hidden">
             {statut}
           </p>
-          <p className="text-xs text-neutral-500">
-            Le PDF est fabriqué par votre navigateur : ni vos coordonnées ni celles du client ne sont envoyées à 75tools.
-          </p>
+          {!statut && <p className="text-xs text-neutral-500">{tx.attente}</p>}
+          {tx.langueDoc && <p className="text-xs text-amber-200/90">{tx.langueDoc}</p>}
+          <p className="text-xs text-neutral-500">{tx.confidentialite}</p>
         </div>
         {points.length > 0 && (
           <div className="rounded-lg border border-amber-400/40 p-4 text-sm">
-            <p className="text-amber-200 font-medium mb-2">À vérifier avant d'envoyer</p>
+            <p className="text-amber-200 font-medium mb-2">{tx.aVerifier}</p>
             <ul className="list-disc pl-5 space-y-1 text-neutral-300">
               {points.map((p) => (
                 <li key={p}>{p}</li>
@@ -727,7 +983,10 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
             </ul>
           </div>
         )}
-        <Apercu d={d} e={e} c={c} />
+        {tx.apercu && <p className="text-xs uppercase tracking-wider text-neutral-500">{tx.apercu}</p>}
+        <div lang="fr">
+          <Apercu d={d} e={e} c={c} />
+        </div>
       </div>
     </div>
   );

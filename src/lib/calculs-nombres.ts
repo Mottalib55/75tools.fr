@@ -3,13 +3,25 @@
  * pourcentage, HT/TTC et marge commerciale. Fonctions pures, testées hors navigateur.
  */
 
-/** Lit « 1 234,56 », « 1234.56 », « 12 % » ou « 40 € » ; null si vide ou illisible. */
-export const lireNombre = (s: string): number | null => {
+type Langue = "fr" | "en";
+const loc = (l: Langue) => (l === "en" ? "en-GB" : "fr-FR");
+
+/**
+ * Lit « 1 234,56 », « 1234.56 », « 1,234.56 », « 12 % » ou « 40 € » ; null si vide ou illisible.
+ * Virgule et point sont acceptés comme décimale dans les deux langues. Quand les deux figurent, le
+ * dernier est la décimale. En anglais, « 1,500 » (groupes de trois) se lit 1 500 ; en français 1,5.
+ */
+export const lireNombre = (s: string, lang: Langue = "fr"): number | null => {
   if (s == null) return null;
-  const t = String(s)
-    .replace(/[\s  ]/g, "")
-    .replace(/[%€]/g, "")
-    .replace(",", ".");
+  let t = String(s)
+    .replace(/[\s\u00a0\u202f'’]/g, "")
+    .replace(/[%€£$]/g, "")
+    .replace(/\u2212/g, "-");
+  const v = t.lastIndexOf(","), p = t.lastIndexOf(".");
+  if (v >= 0 && p >= 0) t = v > p ? t.replace(/\./g, "").replace(",", ".") : t.replace(/,/g, "");
+  else if (/^[+-]?\d{1,3}(,\d{3}){2,}$/.test(t) || (lang === "en" && /^[+-]?\d{1,3}(,\d{3})+$/.test(t))) t = t.replace(/,/g, "");
+  else if (/^[+-]?\d{1,3}(\.\d{3}){2,}$/.test(t)) t = t.replace(/\./g, "");
+  else t = t.replace(",", ".");
   if (t === "" || t === "-" || t === "+" || t === ".") return null;
   if (!/^[+-]?(\d+\.?\d*|\.\d+)$/.test(t)) return null;
   const n = Number(t);
@@ -22,22 +34,24 @@ export const arrondi2 = (x: number): number => {
   return (s * Math.round(Math.abs(x) * 100 + 1e-7)) / 100;
 };
 
-/** Nombre à la française, jusqu'à `dec` décimales (zéros inutiles retirés). */
-export const fmt = (n: number, dec = 2): string => {
+/** Nombre dans la langue de la page, jusqu'à `dec` décimales (zéros inutiles retirés). */
+export const fmt = (n: number, dec = 2, lang: Langue = "fr"): string => {
   if (!Number.isFinite(n)) return "–";
   const r = Number(n.toFixed(dec));
-  return (Object.is(r, -0) ? 0 : r).toLocaleString("fr-FR", { maximumFractionDigits: dec });
+  return (Object.is(r, -0) ? 0 : r).toLocaleString(loc(lang), { maximumFractionDigits: dec });
 };
 
-/** Montant en euros, toujours deux décimales : « 1 234,50 € ». */
-export const fmtEuro = (n: number): string => {
+/** Montant en euros, toujours deux décimales : « 1 234,50 € » en français, « €1,234.50 » en anglais. */
+export const fmtEuro = (n: number, lang: Langue = "fr"): string => {
   if (!Number.isFinite(n)) return "–";
   const r = arrondi2(n);
-  return (Object.is(r, -0) ? 0 : r).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  const z = Object.is(r, -0) ? 0 : r;
+  if (lang === "en") return z.toLocaleString("en-GB", { style: "currency", currency: "EUR" });
+  return z.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 };
 
-/** Pourcentage affiché : « 12,5 % ». */
-export const fmtPct = (n: number, dec = 2): string => `${fmt(n, dec)} %`;
+/** Pourcentage affiché : « 12,5 % » en français, « 12.5% » en anglais. */
+export const fmtPct = (n: number, dec = 2, lang: Langue = "fr"): string => (lang === "en" ? `${fmt(n, dec, lang)}%` : `${fmt(n, dec, lang)} %`);
 
 /* ---------- Pourcentages ---------- */
 

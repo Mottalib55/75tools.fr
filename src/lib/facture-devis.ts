@@ -3,6 +3,7 @@
  * Tout se passe dans le navigateur : rien n'est envoyé.
  */
 import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from "pdf-lib";
+import type { Langue } from "@/lib/langue";
 
 export type TypeDocument = "facture" | "devis";
 export type FormeEmetteur = "micro" | "ei" | "societe";
@@ -250,9 +251,12 @@ export function mentions(d: Document, e: Emetteur, c: Client, t: Totaux): string
     if (espaces(d.conditionsPaiement)) m.push(`Conditions de paiement : ${espaces(d.conditionsPaiement)}`);
     const esc = espaces(d.escompte);
     m.push(`Escompte pour paiement anticipé : ${esc || "néant"}`);
-    const tp = espaces(d.tauxPenalites);
+    const tp = espaces(d.tauxPenalites).replace(/\s*%$/, "");
+    const vtp = lireNombre(tp);
+    // Le taux est écrit à la française sur le document, qu'il ait été tapé « 12,40 » ou « 12.40 ».
+    const tpFr = Number.isFinite(vtp) ? vtp.toLocaleString("fr-FR", { minimumFractionDigits: vtp % 1 ? 2 : 0, maximumFractionDigits: 2 }) : tp;
     m.push(
-      `En cas de retard de paiement, pénalités au taux annuel de ${tp ? tp.replace(/\s*%$/, "") + " %" : "[taux à préciser]"}, exigibles sans qu'un rappel soit nécessaire.`
+      `En cas de retard de paiement, pénalités au taux annuel de ${tp ? tpFr + " %" : "[taux à préciser]"}, exigibles sans qu'un rappel soit nécessaire.`
     );
     if (c.type === "pro") m.push("Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.");
     if (c.type === "particulier" && d.garantieConformite && d.nature !== "services")
@@ -269,26 +273,39 @@ export function mentions(d: Document, e: Emetteur, c: Client, t: Totaux): string
   return m;
 }
 
-/** Points à vérifier avant d'émettre (affichés sous l'aperçu, jamais bloquants). */
-export function alertes(d: Document, e: Emetteur, c: Client, t: Totaux): string[] {
+/** Points à vérifier avant d'émettre (affichés sous l'aperçu, jamais bloquants), dans la langue de l'interface. */
+export function alertes(d: Document, e: Emetteur, c: Client, t: Totaux, lang: Langue = "fr"): string[] {
+  const en = lang === "en";
   const a: string[] = [];
-  if (!e.nom.trim()) a.push("Indiquez le nom de l'émetteur.");
-  if (!espaces(e.siren) && !espaces(e.siret)) a.push("Le numéro SIREN (ou SIRET) de l'émetteur est obligatoire. En cours d'immatriculation : « Siret en cours d'attribution ».");
+  const dire = (fr: string, ang: string) => a.push(en ? ang : fr);
+  if (!e.nom.trim()) dire("Indiquez le nom de l'émetteur.", "Enter your name or company name.");
+  if (!espaces(e.siren) && !espaces(e.siret))
+    dire(
+      "Le numéro SIREN (ou SIRET) de l'émetteur est obligatoire. En cours d'immatriculation : « Siret en cours d'attribution ».",
+      "Your SIREN (or SIRET) number is mandatory. Still being registered: type « Siret en cours d'attribution » (SIRET being allocated)."
+    );
   const sir = espaces(e.siren).replace(/\s/g, "");
-  if (sir && !/^\d{9}$/.test(sir)) a.push("Un SIREN compte 9 chiffres.");
+  if (sir && !/^\d{9}$/.test(sir)) dire("Un SIREN compte 9 chiffres.", "A SIREN number has 9 digits.");
   const sirt = espaces(e.siret).replace(/\s/g, "");
-  if (sirt && !/^\d{14}$/.test(sirt)) a.push("Un SIRET compte 14 chiffres.");
-  if (e.forme === "societe" && (!espaces(e.formeJuridique) || !n0(e.capital))) a.push("Pour une société, indiquez la forme juridique et le capital social.");
-  if (!e.franchise && !espaces(e.tva) && t.totalHT > 15000) a.push("Le numéro de TVA intracommunautaire est attendu au-delà de 150 € HT.");
-  if (!e.adresse.trim()) a.push("Indiquez l'adresse de l'émetteur.");
-  if (!c.nom.trim()) a.push("Indiquez le nom du client.");
-  if (c.type === "particulier" && !c.adresse.trim()) a.push("L'adresse du client particulier figure sur la facture, sauf s'il s'y oppose.");
-  if (c.type === "pro" && !espaces(c.siren)) a.push("Le SIREN du client professionnel devient obligatoire avec la facturation électronique.");
-  if (!d.numero.trim()) a.push(d.type === "facture" ? "Le numéro de facture est obligatoire." : "Donnez un numéro au devis.");
-  if (!t.lignes.length) a.push("Ajoutez au moins une ligne.");
-  if (d.type === "facture" && !d.dateEcheance) a.push("Indiquez la date d'échéance du paiement.");
-  if (d.type === "facture" && !espaces(d.tauxPenalites)) a.push("Le taux des pénalités de retard est une mention obligatoire.");
-  if (d.autoliquidation && c.type === "pro" && !espaces(c.tva)) a.push("En autoliquidation, indiquez le numéro de TVA du client.");
+  if (sirt && !/^\d{14}$/.test(sirt)) dire("Un SIRET compte 14 chiffres.", "A SIRET number has 14 digits.");
+  if (e.forme === "societe" && (!espaces(e.formeJuridique) || !n0(e.capital)))
+    dire("Pour une société, indiquez la forme juridique et le capital social.", "For a company, enter the legal form (SARL, SAS…) and the share capital.");
+  if (!e.franchise && !espaces(e.tva) && t.totalHT > 15000)
+    dire("Le numéro de TVA intracommunautaire est attendu au-delà de 150 € HT.", "Above €150 excluding VAT, your EU VAT number is expected on the invoice.");
+  if (!e.adresse.trim()) dire("Indiquez l'adresse de l'émetteur.", "Enter your business address.");
+  if (!c.nom.trim()) dire("Indiquez le nom du client.", "Enter the client's name.");
+  if (c.type === "particulier" && !c.adresse.trim())
+    dire("L'adresse du client particulier figure sur la facture, sauf s'il s'y oppose.", "A private client's address goes on the invoice unless they object.");
+  if (c.type === "pro" && !espaces(c.siren))
+    dire("Le SIREN du client professionnel devient obligatoire avec la facturation électronique.", "The business client's SIREN becomes mandatory with French e-invoicing.");
+  if (!d.numero.trim())
+    dire(d.type === "facture" ? "Le numéro de facture est obligatoire." : "Donnez un numéro au devis.", d.type === "facture" ? "The invoice number is mandatory." : "Give the quote a number.");
+  if (!t.lignes.length) dire("Ajoutez au moins une ligne.", "Add at least one line.");
+  if (d.type === "facture" && !d.dateEcheance) dire("Indiquez la date d'échéance du paiement.", "Enter the payment due date.");
+  if (d.type === "facture" && !espaces(d.tauxPenalites))
+    dire("Le taux des pénalités de retard est une mention obligatoire.", "The late-payment penalty rate is a mandatory mention.");
+  if (d.autoliquidation && c.type === "pro" && !espaces(c.tva))
+    dire("En autoliquidation, indiquez le numéro de TVA du client.", "With reverse charge (autoliquidation), enter the client's VAT number.");
   return a;
 }
 
@@ -622,8 +639,9 @@ export function effacerMemoire() {
   }
 }
 
-export const nomFichier = (d: Document, c: Client) =>
-  `${d.type}-${(d.numero || "sans-numero") + (c.nom ? "-" + c.nom : "")}`
+/** Nom du fichier téléchargé : « facture-… » en français, « invoice-… » / « quote-… » en anglais. */
+export const nomFichier = (d: Document, c: Client, lang: Langue = "fr") =>
+  `${lang === "en" ? (d.type === "facture" ? "invoice" : "quote") : d.type}-${(d.numero || "sans-numero") + (c.nom ? "-" + c.nom : "")}`
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-zA-Z0-9-]+/g, "-")

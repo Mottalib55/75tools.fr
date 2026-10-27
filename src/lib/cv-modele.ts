@@ -1,4 +1,11 @@
-/** Modèle de CV : données, exemple fictif et brouillon local (localStorage, sans la photo). */
+/**
+ * Modèle de CV : données, exemples fictifs (français et anglais) et brouillon local (localStorage, sans la
+ * photo), un brouillon par langue d'interface. Le CV lui-même peut être rédigé en français ou en anglais
+ * (`langueCv`), quelle que soit la langue de la page : un CV n'est pas un document administratif.
+ */
+
+/** Langue de l'interface ou du document. */
+export type LangueDoc = "fr" | "en";
 
 export type ModeleVisuel = "classique" | "colonnes" | "moderne";
 
@@ -45,7 +52,11 @@ export interface Cv {
   interets: string;
   modele: ModeleVisuel;
   accent: string;
+  langueCv?: LangueDoc; // langue des titres de rubriques ; par défaut celle de la page
 }
+
+/** Alias explicite d'une ligne « langue parlée » (évite la confusion avec la langue de l'interface). */
+export type LangueCv = Langue;
 
 export const NIVEAUX_CECRL: [string, string][] = [
   ["Langue maternelle", "Langue maternelle"],
@@ -56,6 +67,19 @@ export const NIVEAUX_CECRL: [string, string][] = [
   ["A2", "A2, intermédiaire"],
   ["A1", "A1, découverte"],
 ];
+
+export const NIVEAUX_CECRL_EN: [string, string][] = [
+  ["Langue maternelle", "Native speaker"],
+  ["C2", "C2, proficient"],
+  ["C1", "C1, advanced"],
+  ["B2", "B2, upper intermediate"],
+  ["B1", "B1, intermediate"],
+  ["A2", "A2, elementary"],
+  ["A1", "A1, beginner"],
+];
+
+/** Niveaux CECRL (CEFR) dans la langue voulue ; la valeur enregistrée reste la même. */
+export const niveaux = (l: LangueDoc = "fr") => (l === "en" ? NIVEAUX_CECRL_EN : NIVEAUX_CECRL);
 
 export const COULEURS_ACCENT = ["#1d4ed8", "#0f766e", "#b45309", "#be123c", "#6d28d9", "#334155"];
 
@@ -123,6 +147,71 @@ export const CV_EXEMPLE: Cv = {
   accent: "#0f766e",
 };
 
+export const CV_EXEMPLE_EN: Cv = {
+  prenom: "Hannah",
+  nom: "Walsh",
+  titre: "Product Marketing Manager",
+  email: "hannah.walsh@example.com",
+  telephone: "+33 6 23 45 67 89",
+  ville: "Paris",
+  lien: "linkedin.com/in/hannah-walsh-example",
+  mobilite: "EU citizen, right to work in France",
+  profil:
+    "Product marketer with six years in B2B software, the last two in Paris. I turn product features into launches, sales material and campaigns that sales teams actually use. Looking for a role leading product marketing for an international team.",
+  experiences: [
+    {
+      id: 1,
+      poste: "Product Marketing Manager",
+      employeur: "Lumen Analytics, data software",
+      lieu: "Paris",
+      debut: "2024",
+      fin: "present",
+      description:
+        "Led the launch of three product lines across France, Germany and the UK, 1,200 new trials in the first quarter\nWrote the sales playbook in English and French, used by a team of 40\nCut the cost per qualified lead by 28% by moving budget from trade shows to webinars",
+    },
+    {
+      id: 2,
+      poste: "Marketing Executive",
+      employeur: "Northbridge Software",
+      lieu: "Manchester",
+      debut: "2020",
+      fin: "2024",
+      description:
+        "Ran email and paid campaigns for two products, budget of £300,000 a year\nBuilt the monthly performance report for the leadership team\nCoached two graduates on copywriting",
+    },
+  ],
+  formations: [
+    {
+      id: 1,
+      diplome: "MSc Marketing",
+      etablissement: "University of Leeds",
+      lieu: "Leeds",
+      debut: "2018",
+      fin: "2019",
+      description: "Dissertation: pricing pages and free-trial conversion",
+    },
+    {
+      id: 2,
+      diplome: "BA (Hons) French and Business",
+      etablissement: "University of Bristol",
+      lieu: "Bristol",
+      debut: "2014",
+      fin: "2018",
+      description: "Year abroad at Sciences Po Lyon",
+    },
+  ],
+  competences: "Product launches and positioning\nSales enablement\nEmail, paid search and LinkedIn campaigns\nHubSpot, Salesforce, Google Analytics\nPresenting to clients in English and French",
+  langues: [
+    { id: 1, langue: "English", niveau: "Langue maternelle" },
+    { id: 2, langue: "French", niveau: "C1" },
+    { id: 3, langue: "German", niveau: "A2" },
+  ],
+  interets: "Trail running (two races a year), volunteer English tutor with a Paris literacy charity",
+  modele: "colonnes",
+  accent: "#1d4ed8",
+  langueCv: "en",
+};
+
 export const CV_VIDE: Cv = {
   prenom: "",
   nom: "",
@@ -142,11 +231,12 @@ export const CV_VIDE: Cv = {
   accent: "#1d4ed8",
 };
 
-const CLE = "75tools-cv-brouillon-v1";
+/** Un brouillon par langue d'interface (la clé française reste celle d'avant). */
+const cle = (l: LangueDoc) => (l === "en" ? "75tools-cv-brouillon-en-v1" : "75tools-cv-brouillon-v1");
 
-export function lireBrouillon(): Cv | null {
+export function lireBrouillon(l: LangueDoc = "fr"): Cv | null {
   try {
-    const s = localStorage.getItem(CLE);
+    const s = localStorage.getItem(cle(l));
     if (!s) return null;
     const v = JSON.parse(s);
     return v && typeof v === "object" ? { ...CV_VIDE, ...v } : null;
@@ -155,17 +245,17 @@ export function lireBrouillon(): Cv | null {
   }
 }
 
-export function ecrireBrouillon(cv: Cv) {
+export function ecrireBrouillon(cv: Cv, l: LangueDoc = "fr") {
   try {
-    localStorage.setItem(CLE, JSON.stringify(cv));
+    localStorage.setItem(cle(l), JSON.stringify(cv));
   } catch {
     /* stockage indisponible */
   }
 }
 
-export function effacerBrouillon() {
+export function effacerBrouillon(l: LangueDoc = "fr") {
   try {
-    localStorage.removeItem(CLE);
+    localStorage.removeItem(cle(l));
   } catch {
     /* rien */
   }

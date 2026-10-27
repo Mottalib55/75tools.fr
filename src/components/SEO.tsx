@@ -17,7 +17,36 @@ interface SEOProps {
   modifiedTime?: string;
   appTitle?: string; // Custom title for "Add to Home Screen" on iOS
   exactTitle?: boolean; // titre servi tel quel, sans « | 75tools » (titres calibrés 50-60 caractères)
+  /** hreflang complet (RECETTE §18) : chaque version, la page elle-même comprise, puis x-default. */
+  alternates?: { hrefLang: string; href: string }[];
 }
+
+/**
+ * L'éditeur, déclaré sur chaque page (RECETTE §8) : la société Radif Partners publie 75tools.
+ * foundingDate : création du domaine 75tools.fr (registre AFNIC, 2026-01-11).
+ */
+export const ORGANISATION = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://75tools.fr/#organisation",
+  name: "75tools",
+  legalName: "Radif Partners",
+  url: "https://75tools.fr/",
+  logo: "https://75tools.fr/favicon.svg",
+  email: "contact@75tools.fr",
+  foundingDate: "2026-01-11",
+  publishingPrinciples: "https://75tools.fr/mentions-legales/#methode",
+  knowsAbout: [
+    "PDF",
+    "Conversion d'images",
+    "QR code",
+    "Facturation en France",
+    "Signature électronique",
+    "Calcul de TVA",
+    "Outils web côté navigateur",
+  ],
+  description: "Outils gratuits en ligne qui fonctionnent dans le navigateur : PDF, images, QR codes, documents, calculs et texte.",
+};
 
 const SEO = ({
   title = "75tools - Outils de productivité gratuits",
@@ -36,21 +65,14 @@ const SEO = ({
   modifiedTime,
   appTitle,
   exactTitle = false,
+  alternates,
 }: SEOProps) => {
   const fullTitle = exactTitle || title.includes("75tools") || title.includes("MyCard")
     ? title
     : `${title} | 75tools`;
 
   // Default Organization schema (always included)
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "75tools",
-    url: "https://75tools.fr",
-    logo: "https://75tools.fr/favicon.svg",
-    description: "Hub d'outils de productivité gratuits pour professionnels",
-    sameAs: [],
-  };
+  const organizationSchema = ORGANISATION;
 
   // Default WebSite schema
   const websiteSchema = {
@@ -88,11 +110,14 @@ const SEO = ({
       <meta httpEquiv="content-language" content={locale === "fr_FR" ? "fr" : "en"} />
 
       {/* Alternate Languages (hreflang) */}
-      {alternateUrl && alternateLocale && (
+      {alternates?.map((a) => (
+        <link key={a.hrefLang} rel="alternate" hrefLang={a.hrefLang} href={a.href} />
+      ))}
+      {!alternates && alternateUrl && alternateLocale && (
         <>
           <link rel="alternate" hrefLang={locale === "fr_FR" ? "fr" : "en"} href={url} />
           <link rel="alternate" hrefLang={alternateLocale === "fr_FR" ? "fr" : "en"} href={alternateUrl} />
-          <link rel="alternate" hrefLang="x-default" href="https://75tools.fr" />
+          <link rel="alternate" hrefLang="x-default" href={locale === "fr_FR" ? url : alternateUrl} />
         </>
       )}
 
@@ -144,10 +169,6 @@ const SEO = ({
       <meta name="application-name" content={appTitle || "75tools"} />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="format-detection" content="telephone=no" />
-
-      {/* Geo (France) */}
-      <meta name="geo.region" content="FR" />
-      <meta name="geo.placename" content="France" />
 
       {/* Verification (add your own codes) */}
       {/* <meta name="google-site-verification" content="YOUR_CODE" /> */}

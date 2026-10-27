@@ -4,6 +4,7 @@
  * par l'appelant pour ne pas saturer la mémoire avec des photos de 12 Mpx.
  */
 import { canvasVersBlob, chargerImage } from "@/lib/fichiers";
+import { locale, type Langue } from "@/lib/langue";
 
 export type FormatSortie = "image/jpeg" | "image/png" | "image/webp";
 
@@ -21,7 +22,7 @@ export interface ImageDecodee {
 }
 
 /** Décode un fichier image avec le décodeur du navigateur (orientation EXIF appliquée). */
-export async function decoderImage(f: Blob): Promise<ImageDecodee> {
+export async function decoderImage(f: Blob, lang: Langue = "fr"): Promise<ImageDecodee> {
   if (typeof createImageBitmap === "function") {
     try {
       const b = await createImageBitmap(f, { imageOrientation: "from-image" } as ImageBitmapOptions);
@@ -31,7 +32,11 @@ export async function decoderImage(f: Blob): Promise<ImageDecodee> {
     }
   }
   const img = await chargerImage(f).catch(() => {
-    throw new Error("Image illisible par ce navigateur. Pour une photo HEIC d'iPhone, passez d'abord par la page HEIC en JPG.");
+    throw new Error(
+      lang === "en"
+        ? "This browser cannot read the image. For an iPhone HEIC photo, use the HEIC to JPG page first."
+        : "Image illisible par ce navigateur. Pour une photo HEIC d'iPhone, passez d'abord par la page HEIC en JPG."
+    );
   });
   const url = img.src;
   return {
@@ -141,11 +146,12 @@ export interface OptionsConversion {
   fond?: string; // couleur peinte sous l'image (transparence) ; obligatoire pour un JPEG
   largeur?: number;
   hauteur?: number;
+  lang?: Langue; // langue des messages d'erreur, "fr" par défaut
 }
 
 /** Conversion simple d'un fichier : décodage, fond éventuel, redimensionnement éventuel, encodage. */
 export async function convertirImage(f: Blob, o: OptionsConversion) {
-  const img = await decoderImage(f);
+  const img = await decoderImage(f, o.lang ?? "fr");
   try {
     const l = o.largeur ?? img.largeur;
     const h = o.hauteur ?? img.hauteur;
@@ -172,9 +178,10 @@ export async function viserPoids(
   type: "image/jpeg" | "image/webp",
   fond = "#ffffff",
   qualiteMin = 0.55,
-  qualiteMax = 0.92
+  qualiteMax = 0.92,
+  lang: Langue = "fr"
 ) {
-  const img = await decoderImage(f);
+  const img = await decoderImage(f, lang);
   try {
     let l = img.largeur;
     let h = img.hauteur;
@@ -237,11 +244,14 @@ export async function fixerDpiJpeg(jpeg: Blob, dpi: number): Promise<Blob> {
  * Lit un nombre saisi (virgule acceptée) et le ramène dans les bornes. `message` explique la
  * correction, à afficher dans un élément role="status".
  */
-export function lireNombre(saisie: string, min: number, max: number, unite = "") {
+export function lireNombre(saisie: string, min: number, max: number, unite = "", lang: Langue = "fr") {
   const n = parseFloat(saisie.replace(/\s/g, "").replace(",", "."));
-  if (saisie.trim() === "" || isNaN(n)) return { valeur: null as number | null, message: saisie.trim() ? "Saisissez un nombre." : "" };
+  const en = lang === "en";
+  if (saisie.trim() === "" || isNaN(n))
+    return { valeur: null as number | null, message: saisie.trim() ? (en ? "Enter a number." : "Saisissez un nombre.") : "" };
   const u = unite ? ` ${unite}` : "";
-  if (n < min) return { valeur: min, message: `Valeur ramenée au minimum : ${min.toLocaleString("fr-FR")}${u}.` };
-  if (n > max) return { valeur: max, message: `Valeur ramenée au maximum : ${max.toLocaleString("fr-FR")}${u}.` };
+  const nb = (x: number) => x.toLocaleString(locale(lang));
+  if (n < min) return { valeur: min, message: en ? `Value raised to the minimum: ${nb(min)}${u}.` : `Valeur ramenée au minimum : ${nb(min)}${u}.` };
+  if (n > max) return { valeur: max, message: en ? `Value lowered to the maximum: ${nb(max)}${u}.` : `Valeur ramenée au maximum : ${nb(max)}${u}.` };
   return { valeur: n, message: "" };
 }

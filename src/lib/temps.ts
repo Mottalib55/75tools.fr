@@ -1,15 +1,17 @@
-/** Utilitaires partagés par le chronomètre, le minuteur et le compte à rebours. */
+/** Utilitaires partagés par le chronomètre, le minuteur, le compte à rebours, le tirage et la roue. */
+import type { Langue } from "@/lib/langue";
 
 const d2 = (n: number) => String(n).padStart(2, "0");
 
-/** 3 723 456 ms → « 1:02:03,45 » ; sous une heure : « 02:03,45 ». */
-export function formatChrono(ms: number): string {
+/** 3 723 456 ms → « 1:02:03,45 » (fr) ou « 1:02:03.45 » (en) ; sous une heure : « 02:03,45 ». */
+export function formatChrono(ms: number, lang: Langue = "fr"): string {
+  const v = lang === "en" ? "." : ",";
   const total = Math.max(0, Math.floor(ms / 10)); // centièmes
   const c = total % 100;
   const s = Math.floor(total / 100) % 60;
   const m = Math.floor(total / 6000) % 60;
   const h = Math.floor(total / 360000);
-  return h > 0 ? `${h}:${d2(m)}:${d2(s)},${d2(c)}` : `${d2(m)}:${d2(s)},${d2(c)}`;
+  return h > 0 ? `${h}:${d2(m)}:${d2(s)}${v}${d2(c)}` : `${d2(m)}:${d2(s)}${v}${d2(c)}`;
 }
 
 /** Durée restante arrondie à la seconde supérieure : « 9:59 », « 1:00:00 ». */

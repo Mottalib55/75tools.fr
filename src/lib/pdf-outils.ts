@@ -15,27 +15,35 @@ export function estPdf(octets: Uint8Array): boolean {
 }
 
 /** Ouvre un PDF avec pdf-lib ; lève une erreur au message lisible (pas un PDF, chiffré, abîmé). */
-export async function chargerPdfLib(octets: Uint8Array, nom = "Ce fichier"): Promise<PDFDocument> {
-  if (!estPdf(octets)) throw new Error(`${nom} n'est pas un PDF (l'en-tête %PDF est absent).`);
+export async function chargerPdfLib(octets: Uint8Array, nom?: string, lang: "fr" | "en" = "fr"): Promise<PDFDocument> {
+  const en = lang === "en";
+  const n = nom ?? (en ? "This file" : "Ce fichier");
+  if (!estPdf(octets)) throw new Error(en ? `${n} is not a PDF (the %PDF header is missing).` : `${n} n'est pas un PDF (l'en-tête %PDF est absent).`);
   try {
     return await PDFDocument.load(octets, { updateMetadata: false });
   } catch (e) {
     const m = String((e as Error)?.message ?? e);
     if (/encrypt/i.test(m))
       throw new Error(
-        `${nom} est protégé (chiffré, souvent par un mot de passe) : ouvrez-le dans votre lecteur PDF, enregistrez-en une copie sans protection, puis réessayez.`
+        en
+          ? `${n} is protected (encrypted, usually with a password): open it in your PDF reader, save an unprotected copy, then try again.`
+          : `${n} est protégé (chiffré, souvent par un mot de passe) : ouvrez-le dans votre lecteur PDF, enregistrez-en une copie sans protection, puis réessayez.`
       );
-    throw new Error(`${nom} semble abîmé ou incomplet : il n'a pas pu être lu.`);
+    throw new Error(en ? `${n} looks damaged or incomplete: it could not be read.` : `${n} semble abîmé ou incomplet : il n'a pas pu être lu.`);
   }
 }
 
 /** Message lisible pour une erreur de pdf.js (getDocument). */
-export function messagePdfJs(e: unknown, nom = "Ce fichier"): string {
+export function messagePdfJs(e: unknown, nom?: string, lang: "fr" | "en" = "fr"): string {
+  const en = lang === "en";
+  const f = nom ?? (en ? "This file" : "Ce fichier");
   const n = (e as { name?: string })?.name ?? "";
   if (n === "PasswordException")
-    return `${nom} est protégé par un mot de passe : ouvrez-le dans votre lecteur PDF, enregistrez une copie sans mot de passe, puis réessayez.`;
-  if (n === "InvalidPDFException") return `${nom} n'est pas un PDF valide ou il est abîmé.`;
-  return `${nom} n'a pas pu être lu : il est peut-être abîmé, incomplet ou protégé.`;
+    return en
+      ? `${f} is password-protected: open it in your PDF reader, save a copy without the password, then try again.`
+      : `${f} est protégé par un mot de passe : ouvrez-le dans votre lecteur PDF, enregistrez une copie sans mot de passe, puis réessayez.`;
+  if (n === "InvalidPDFException") return en ? `${f} is not a valid PDF or it is damaged.` : `${f} n'est pas un PDF valide ou il est abîmé.`;
+  return en ? `${f} could not be read: it may be damaged, incomplete or protected.` : `${f} n'a pas pu être lu : il est peut-être abîmé, incomplet ou protégé.`;
 }
 
 /** Laisse le navigateur afficher la progression entre deux pages lourdes. */
@@ -54,7 +62,8 @@ export interface ResultatPlages {
  * Une page au-delà de la dernière est ramenée et signalée ; une plage entièrement hors du
  * document est retirée et signalée.
  */
-export function analyserPlages(texte: string, max: number): ResultatPlages {
+export function analyserPlages(texte: string, max: number, lang: "fr" | "en" = "fr"): ResultatPlages {
+  const en = lang === "en";
   const plages: Plage[] = [];
   const avertissements: string[] = [];
   const morceaux = texte
@@ -65,20 +74,20 @@ export function analyserPlages(texte: string, max: number): ResultatPlages {
     .filter(Boolean);
   for (const m of morceaux) {
     const r = /^(\d+)(?:-(\d*))?$/.exec(m);
-    if (!r) return { plages: [], avertissements, erreur: `« ${m} » n'est pas compris : écrivez par exemple 1-3, 5, 8-10.` };
+    if (!r) return { plages: [], avertissements, erreur: en ? `"${m}" is not understood: write for example 1-3, 5, 8-10.` : `« ${m} » n'est pas compris : écrivez par exemple 1-3, 5, 8-10.` };
     let a = parseInt(r[1], 10);
     let b = r[2] === undefined ? a : r[2] === "" ? max : parseInt(r[2], 10);
     if (a < 1) {
-      avertissements.push(`La page 0 n'existe pas : la numérotation commence à 1.`);
+      avertissements.push(en ? "Page 0 does not exist: numbering starts at 1." : `La page 0 n'existe pas : la numérotation commence à 1.`);
       a = 1;
     }
     if (b < 1) b = 1;
     if (Math.min(a, b) > max) {
-      avertissements.push(`« ${m} » est retiré : le document n'a que ${max} page${max > 1 ? "s" : ""}.`);
+      avertissements.push(en ? `"${m}" is removed: the document only has ${max} page${max > 1 ? "s" : ""}.` : `« ${m} » est retiré : le document n'a que ${max} page${max > 1 ? "s" : ""}.`);
       continue;
     }
     if (a > max || b > max) {
-      avertissements.push(`« ${m} » est ramené à la page ${max}, la dernière du document.`);
+      avertissements.push(en ? `"${m}" is cut back to page ${max}, the last page of the document.` : `« ${m} » est ramené à la page ${max}, la dernière du document.`);
       a = Math.min(a, max);
       b = Math.min(b, max);
     }

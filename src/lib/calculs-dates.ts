@@ -6,11 +6,22 @@
 
 const MS_JOUR = 86400000;
 
+type Langue = "fr" | "en";
+
 export const JOURS_SEMAINE = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 export const MOIS = [
   "janvier", "février", "mars", "avril", "mai", "juin",
   "juillet", "août", "septembre", "octobre", "novembre", "décembre",
 ];
+
+export const JOURS_SEMAINE_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const MOIS_EN = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** Nom du jour de la semaine (0 = dimanche) dans la langue. */
+export const nomJour = (js: number, lang: Langue = "fr") => (lang === "en" ? JOURS_SEMAINE_EN : JOURS_SEMAINE)[js];
 
 /** Jour (entier) d'une date du calendrier ; mois de 1 à 12. */
 export const jour = (a: number, m: number, j: number): number => {
@@ -43,11 +54,15 @@ export const versIso = (n: number) => {
   return `${String(a).padStart(4, "0")}-${deux(m)}-${deux(j)}`;
 };
 
-/** « vendredi 1er mai 2026 » */
-export const dateLongue = (n: number, avecJour = true) => {
+/** « vendredi 1er mai 2026 » ; en anglais (usage britannique) « Friday 1 May 2026 ». */
+export const dateLongue = (n: number, avecJour = true, lang: Langue = "fr") => {
   const { a, m, j, js } = decompose(n);
+  if (lang === "en") return `${avecJour ? JOURS_SEMAINE_EN[js] + " " : ""}${j} ${MOIS_EN[m - 1]} ${a}`;
   return `${avecJour ? JOURS_SEMAINE[js] + " " : ""}${j === 1 ? "1er" : j} ${MOIS[m - 1]} ${a}`;
 };
+
+/** Date courte : « 01/05/2026 » (même ordre jour/mois en français et en anglais britannique). */
+export const dateCourte = (n: number) => versIso(n).split("-").reverse().join("/");
 
 /** Dimanche de Pâques (calendrier grégorien), algorithme de Meeus, Jones et Butcher. */
 export const paques = (a: number): number => {
@@ -73,34 +88,51 @@ export interface Ferie {
   nom: string;
 }
 
+/** Noms des jours fériés : français, puis anglais avec le nom français entre parenthèses quand il sert. */
+const NOMS_FERIES: Record<string, [string, string]> = {
+  an: ["Jour de l'An", "New Year's Day"],
+  lundiPaques: ["Lundi de Pâques", "Easter Monday"],
+  travail: ["Fête du Travail", "Labour Day (Fête du Travail)"],
+  victoire: ["Victoire 1945", "Victory in Europe Day 1945"],
+  ascension: ["Ascension", "Ascension Day"],
+  pentecote: ["Lundi de Pentecôte", "Whit Monday (Lundi de Pentecôte)"],
+  nationale: ["Fête nationale", "Bastille Day (Fête nationale)"],
+  assomption: ["Assomption", "Assumption Day"],
+  toussaint: ["Toussaint", "All Saints' Day (Toussaint)"],
+  armistice: ["Armistice 1918", "Armistice Day 1918"],
+  noel: ["Noël", "Christmas Day"],
+  vendrediSaint: ["Vendredi saint (Alsace-Moselle)", "Good Friday (Alsace-Moselle)"],
+  saintEtienne: ["Saint-Étienne, 26 décembre (Alsace-Moselle)", "St Stephen's Day, 26 December (Alsace-Moselle)"],
+};
+
 /** Jours fériés d'une année, dans l'ordre ; Alsace-Moselle ajoute le Vendredi saint et le 26 décembre. */
-export const joursFeries = (a: number, alsaceMoselle = false): Ferie[] => {
+export const joursFeries = (a: number, alsaceMoselle = false, lang: Langue = "fr"): Ferie[] => {
   const p = paques(a);
-  const l: Ferie[] = [
-    { n: jour(a, 1, 1), nom: "Jour de l'An" },
-    { n: p + 1, nom: "Lundi de Pâques" },
-    { n: jour(a, 5, 1), nom: "Fête du Travail" },
-    { n: jour(a, 5, 8), nom: "Victoire 1945" },
-    { n: p + 39, nom: "Ascension" },
-    { n: p + 50, nom: "Lundi de Pentecôte" },
-    { n: jour(a, 7, 14), nom: "Fête nationale" },
-    { n: jour(a, 8, 15), nom: "Assomption" },
-    { n: jour(a, 11, 1), nom: "Toussaint" },
-    { n: jour(a, 11, 11), nom: "Armistice 1918" },
-    { n: jour(a, 12, 25), nom: "Noël" },
+  const l: [number, string][] = [
+    [jour(a, 1, 1), "an"],
+    [p + 1, "lundiPaques"],
+    [jour(a, 5, 1), "travail"],
+    [jour(a, 5, 8), "victoire"],
+    [p + 39, "ascension"],
+    [p + 50, "pentecote"],
+    [jour(a, 7, 14), "nationale"],
+    [jour(a, 8, 15), "assomption"],
+    [jour(a, 11, 1), "toussaint"],
+    [jour(a, 11, 11), "armistice"],
+    [jour(a, 12, 25), "noel"],
   ];
   if (alsaceMoselle) {
-    l.push({ n: p - 2, nom: "Vendredi saint (Alsace-Moselle)" });
-    l.push({ n: jour(a, 12, 26), nom: "Saint-Étienne, 26 décembre (Alsace-Moselle)" });
+    l.push([p - 2, "vendrediSaint"]);
+    l.push([jour(a, 12, 26), "saintEtienne"]);
   }
-  return l.sort((x, y) => x.n - y.n);
+  return l.map(([n, c]) => ({ n, nom: NOMS_FERIES[c][lang === "en" ? 1 : 0] })).sort((x, y) => x.n - y.n);
 };
 
 /** Fériés compris entre deux jours inclus. */
-export const feriesEntre = (debut: number, fin: number, alsaceMoselle = false): Ferie[] => {
+export const feriesEntre = (debut: number, fin: number, alsaceMoselle = false, lang: Langue = "fr"): Ferie[] => {
   const r: Ferie[] = [];
   for (let a = decompose(debut).a; a <= decompose(fin).a; a++) {
-    for (const f of joursFeries(a, alsaceMoselle)) if (f.n >= debut && f.n <= fin) r.push(f);
+    for (const f of joursFeries(a, alsaceMoselle, lang)) if (f.n >= debut && f.n <= fin) r.push(f);
   }
   return r;
 };

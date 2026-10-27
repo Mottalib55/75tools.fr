@@ -1,5 +1,7 @@
+import type { Langue } from "@/lib/outils";
+
 /**
- * Comptages de texte en français : mots, phrases, paragraphes, caractères (graphèmes),
+ * Comptages de texte en français et en anglais : mots, phrases, paragraphes, caractères (graphèmes),
  * octets UTF-8, SMS (GSM 7 bits / UCS-2) et décompte pondéré de X.
  * Fonctions pures, testées par un script Node (voir le compte rendu du lot « texte »).
  */
@@ -44,6 +46,8 @@ export const compterMotsElisionsSeparees = (texte: string) =>
 const ABREVIATIONS = new Set([
   "m", "mm", "mme", "mmes", "mlle", "mlles", "dr", "pr", "me", "mgr", "st", "ste", "cf", "ex", "p", "pp", "av",
   "apr", "j.-c", "n", "no", "vol", "chap", "fig", "éd", "env", "art", "al", "réf", "tél", "boul", "bd",
+  // anglais : Mr. Smith, e.g. this, vs. that
+  "mr", "mrs", "ms", "prof", "e.g", "i.e", "vs", "approx", "jr", "sr", "dept", "ft", "inc", "ltd",
 ]);
 
 /** Phrases : fin sur . ! ? ou … suivis d'un espace ou de la fin du texte, hors abréviations courantes. */
@@ -88,15 +92,30 @@ export const MOTS_VIDES = new Set(
   ).split(" ")
 );
 
+/** Mots vides de l'anglais, ajoutés à ceux du français quand le texte est en anglais. */
+export const MOTS_VIDES_EN = new Set(
+  (
+    "a an the and or but if then than so of to in on at by for from with without about into over under as is are " +
+    "was were be been being am do does did done have has had having i me my mine you your yours he him his she her " +
+    "hers it its we us our they them their this that these those there here what which who whom whose when where why " +
+    "how not no nor yes all any both each few more most other some such only own same too very can could will would " +
+    "shall should may might must just also up down out off again once don't it's i'm you're we're they're isn't " +
+    "aren't wasn't weren't doesn't didn't can't won't i've you've let's that's there's"
+  ).split(" ")
+);
+
 const formeLemme = (m: string) => m.toLowerCase().replace(/’/g, "'");
 
 /** Retire l'élision de tête (« l'homme » → « homme ») pour regrouper les occurrences. */
 const sansElision = (m: string) => m.replace(RE_ELISION, "");
 
-export const motsFrequents = (texte: string, n = 10): { mot: string; nb: number }[] => {
+/** Mots les plus fréquents, hors mots vides du français (et de l'anglais si `lang` vaut "en"). */
+export const motsFrequents = (texte: string, n = 10, lang: Langue = "fr"): { mot: string; nb: number }[] => {
   const compte = new Map<string, number>();
   for (const brut of listeMots(texte)) {
-    const m = sansElision(formeLemme(brut));
+    const forme = formeLemme(brut);
+    if (lang === "en" && MOTS_VIDES_EN.has(forme)) continue;
+    const m = lang === "en" ? forme : sansElision(forme);
     if (m.length < 2 || MOTS_VIDES.has(m) || /^[\p{N}.,]+$/u.test(m)) continue;
     compte.set(m, (compte.get(m) ?? 0) + 1);
   }
@@ -217,16 +236,28 @@ export const compterX = (texte: string) => {
 export const VITESSE_LECTURE = 214;
 export const VITESSE_VOIX_HAUTE = 180;
 
-/** Durée en minutes → « 2 min 30 s », « 45 s », « 1 h 05 min ». */
-export const formatDuree = (minutes: number) => {
+/**
+ * Vitesses par langue du texte (Brysbaert, 2019) : en anglais, 238 mots par minute en lecture
+ * silencieuse d'un texte documentaire et 183 à voix haute (résumé de l'article).
+ */
+export const VITESSES: Record<Langue, { lecture: number; voix: number }> = {
+  fr: { lecture: VITESSE_LECTURE, voix: VITESSE_VOIX_HAUTE },
+  en: { lecture: 238, voix: 183 },
+};
+
+/** Durée en minutes → « 2 min 30 s », « 45 s », « 1 h 05 min » ; en anglais « 2 min 30 sec », « 1 hr 05 min ». */
+export const formatDuree = (minutes: number, lang: Langue = "fr") => {
+  const u = lang === "en" ? { s: "sec", h: "hr" } : { s: "s", h: "h" };
   const s = Math.round(minutes * 60);
-  if (s === 0) return "0 s";
-  if (s < 60) return `${s} s`;
+  if (s === 0) return `0 ${u.s}`;
+  if (s < 60) return `${s} ${u.s}`;
   const h = Math.floor(s / 3600);
   const mn = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  if (h) return `${h} h ${String(mn).padStart(2, "0")} min`;
-  return sec ? `${mn} min ${String(sec).padStart(2, "0")} s` : `${mn} min`;
+  if (h) return `${h} ${u.h} ${String(mn).padStart(2, "0")} min`;
+  return sec ? `${mn} min ${String(sec).padStart(2, "0")} ${u.s}` : `${mn} min`;
 };
 
 export const nombreFr = (n: number) => n.toLocaleString("fr-FR");
+/** Nombre dans la langue de la page (1 234 en français, 1,234 en anglais). */
+export const nombreLangue = (n: number, lang: Langue = "fr") => n.toLocaleString(lang === "en" ? "en-GB" : "fr-FR");

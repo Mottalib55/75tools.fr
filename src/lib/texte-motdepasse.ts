@@ -3,6 +3,8 @@
  * tirage sans biais (rejet), entropie exacte en bits.
  */
 import { listeMotsFr } from "@/lib/texte-mots-fr";
+import { listeMotsEn } from "@/lib/texte-mots-en";
+import type { Langue } from "@/lib/langue";
 
 export const JEUX = {
   minuscules: "abcdefghijklmnopqrstuvwxyz",
@@ -96,12 +98,16 @@ export interface OptionsPhrase {
   separateur: string;
   majuscule: boolean; // première lettre de chaque mot en majuscule (n'ajoute pas d'entropie)
   chiffre: boolean; // un chiffre au hasard accolé à un mot tiré au hasard
+  langue?: Langue; // langue des mots tirés : "fr" (défaut) ou "en"
 }
 
+/** Liste de mots de la phrase de passe : français (avec ou sans accents) ou anglais. */
+export const listeMots = (langue: Langue = "fr", accents = false) => (langue === "en" ? listeMotsEn() : listeMotsFr(accents));
+
 export const genererPhrase = (o: OptionsPhrase, source?: (a: Uint32Array) => Uint32Array) => {
-  const liste = listeMotsFr(o.accents);
+  const liste = listeMots(o.langue, o.accents);
   const mots = Array.from({ length: o.nbMots }, () => liste[entierAleatoire(liste.length, source)]).map((m) =>
-    o.majuscule ? m.charAt(0).toLocaleUpperCase("fr-FR") + m.slice(1) : m
+    o.majuscule ? m.charAt(0).toLocaleUpperCase(o.langue === "en" ? "en-GB" : "fr-FR") + m.slice(1) : m
   );
   if (o.chiffre && mots.length) {
     const i = entierAleatoire(mots.length, source);
@@ -111,18 +117,20 @@ export const genererPhrase = (o: OptionsPhrase, source?: (a: Uint32Array) => Uin
 };
 
 export const entropiePhrase = (o: OptionsPhrase) => {
-  const n = listeMotsFr(o.accents).length;
+  const n = listeMots(o.langue, o.accents).length;
   let e = o.nbMots * Math.log2(n);
   if (o.chiffre && o.nbMots > 0) e += Math.log2(10) + Math.log2(o.nbMots);
   return e;
 };
 
-/** Niveau indicatif selon le tableau 3 du guide de l'ANSSI (≈ 65, ≈ 85, ≥ 100 bits). */
-export const niveau = (bits: number) =>
-  bits >= 100
-    ? { libelle: "Très fort", detail: "100 bits ou plus", couleur: "bg-emerald-400" }
+/** Niveau indicatif selon le tableau 3 du guide de l'ANSSI (≈ 65, ≈ 85, ≥ 100 bits) et le seuil de 80 bits de la CNIL. */
+export const niveau = (bits: number, lang: Langue = "fr") => {
+  const en = lang === "en";
+  return bits >= 100
+    ? { libelle: en ? "Very strong" : "Très fort", detail: en ? "100 bits or more" : "100 bits ou plus", couleur: "bg-emerald-400" }
     : bits >= 80
-      ? { libelle: "Fort", detail: "au moins 80 bits, minimum CNIL pour un mot de passe seul", couleur: "bg-emerald-500" }
+      ? { libelle: en ? "Strong" : "Fort", detail: en ? "at least 80 bits, the CNIL minimum for a password used alone" : "au moins 80 bits, minimum CNIL pour un mot de passe seul", couleur: "bg-emerald-500" }
       : bits >= 65
-        ? { libelle: "Moyen", detail: "entre 65 et 80 bits", couleur: "bg-amber-400" }
-        : { libelle: "Faible", detail: "moins de 65 bits", couleur: "bg-red-500" };
+        ? { libelle: en ? "Fair" : "Moyen", detail: en ? "between 65 and 80 bits" : "entre 65 et 80 bits", couleur: "bg-amber-400" }
+        : { libelle: en ? "Weak" : "Faible", detail: en ? "under 65 bits" : "moins de 65 bits", couleur: "bg-red-500" };
+};

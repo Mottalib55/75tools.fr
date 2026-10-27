@@ -1,0 +1,41 @@
+# Sources primaires propres à 75tools.fr (lues par check-seo.py, RECETTE §7 et §26 du 2026-10-16).
+# Les outils du site sont des outils techniques (PDF, images, QR codes, texte) : l'autorité, pour eux,
+# n'est pas une administration mais l'organisme qui publie la norme du format, ou l'éditeur du service
+# dont on explique le réglage. Les administrations françaises (service-public.fr, impots.gouv.fr,
+# cnil.fr, cyber.gouv.fr, ants.gouv.fr…) sont reconnues sans figurer ici.
+
+# W3C : normes du web (PNG, SVG, accessibilité) que les outils d'image et de QR code appliquent.
+w3.org
+
+# WHATWG : norme HTML et API du navigateur (fichiers, canvas, presse-papiers) sur lesquelles tournent tous les outils.
+whatwg.org
+
+# ISO : normes du PDF (ISO 32000), du QR code (ISO/IEC 18004) et des dates (ISO 8601).
+iso.org
+
+# PDF Association : publie en accès libre la norme PDF 2.0 (ISO 32000-2) et ses guides d'application.
+pdfa.org
+
+# IETF : RFC qui définissent la vCard (RFC 6350), les adresses URI et le format des e-mails.
+ietf.org
+
+# RFC Editor : éditeur officiel des RFC de l'IETF (mêmes textes, adresse de référence).
+rfc-editor.org
+
+# Unicode Consortium : règles de découpage des caractères, mots et emoji (UAX #29) du compteur de caractères.
+unicode.org
+
+# Google, aide officielle de Gmail et de la fiche d'établissement (signature, lien d'avis).
+support.google.com
+
+# Google, documentation officielle du format WebP, dont Google est l'auteur.
+developers.google.com
+
+# Microsoft, documentation officielle des signatures Outlook.
+support.microsoft.com
+
+# Apple, documentation officielle du format HEIF/HEIC des photos d'iPhone et d'Apple Mail.
+support.apple.com
+
+# WhatsApp, documentation officielle des liens wa.me (« click to chat »).
+faq.whatsapp.com

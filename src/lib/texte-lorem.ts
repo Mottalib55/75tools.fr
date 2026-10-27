@@ -1,6 +1,6 @@
 /**
- * Faux texte : lorem ipsum (vocabulaire du lorem ipsum classique, phrases tirées au hasard) ou faux
- * texte en français construit à partir de modèles de phrases et d'un vocabulaire écrit pour 75tools.
+ * Faux texte : lorem ipsum (vocabulaire du lorem ipsum classique, phrases tirées au hasard), ou faux
+ * texte en français ou en anglais construit à partir de modèles de phrases et d'un vocabulaire écrit pour 75tools.
  * Le tirage utilise un générateur à graine : même graine, même texte (rendu initial déterministe).
  */
 
@@ -93,12 +93,57 @@ const phraseFrancaise = (r: Hasard) => {
   return capitale(p) + ".";
 };
 
+/* ---------- Faux texte en anglais (vocabulaire écrit pour 75tools, aucun texte existant) ---------- */
+
+const SUBJECTS = [
+  "the project", "the board", "our team", "this document", "the committee", "the new version", "the support desk",
+  "each participant", "the home page", "the annual report", "this mock-up", "the schedule", "Monday's meeting",
+  "the site manager", "the online shop", "the form", "the workshop", "the first chapter", "the newsletter",
+  "the draft budget", "the association", "the shared garden", "the town hall", "the covered market", "the sales team",
+];
+const VERBS = [
+  "presents", "clarifies", "describes", "brings together", "highlights", "prepares", "supports", "simplifies", "completes",
+  "organises", "suggests", "sums up", "makes room for", "details", "announces", "improves", "reviews", "recalls",
+];
+const OBJECTS = [
+  "the main stages of the work", "the opening hours", "a more flexible timetable", "the quarterly results",
+  "several lines of work", "the most common questions", "an offer suited to everyone", "the sign-up process",
+  "the visitor journey", "what residents need", "a practical action plan", "this season's prices",
+  "the autumn updates", "the list of speakers", "the delivery terms", "a sample page layout",
+  "the house rules", "a first review", "the options chosen", "the key points in a few lines",
+];
+const WHEN = [
+  "from next week", "before the end of the month", "in time for September", "for the sake of clarity", "as an example",
+  "together with our partners", "with no commitment", "season after season", "depending on availability", "for every district",
+  "since the start of the year", "with help from volunteers", "from the spring", "as soon as possible",
+];
+const LINKS = ["Meanwhile,", "In addition,", "Next,", "What is more,", "Finally,", "In this context,", "For now,", "In practice,"];
+const CLAUSES = [
+  "so that everyone can find their way", "to keep the reading simple", "while leaving room for comments",
+  "which helps the work move forward", "even if a few points still need detail", "as agreed at the last meeting",
+  "without changing the current set-up", "to answer requests more quickly",
+];
+
+const phraseAnglaise = (r: Hasard) => {
+  const modele = entre(r, 0, 3);
+  const s = pioche(r, SUBJECTS);
+  const v = pioche(r, VERBS);
+  const c = pioche(r, OBJECTS);
+  let p: string;
+  if (modele === 0) p = `${s} ${v} ${c} ${pioche(r, WHEN)}`;
+  else if (modele === 1) p = `${pioche(r, LINKS)} ${s} ${v} ${c}, ${pioche(r, CLAUSES)}`;
+  else if (modele === 2) p = `${capitale(pioche(r, WHEN))}, ${s} ${v} ${c}`;
+  else p = `${s} ${v} ${c}`;
+  return capitale(p) + ".";
+};
+
+export type LangueLorem = "latin" | "francais" | "anglais";
 export type Unite = "paragraphes" | "phrases" | "mots";
 export interface OptionsLorem {
   unite: Unite;
   nombre: number;
   commencerClassique: boolean; // « Lorem ipsum dolor sit amet… » en tête (latin seulement)
-  langue: "latin" | "francais";
+  langue: LangueLorem;
   graine: number;
 }
 
@@ -106,14 +151,14 @@ export interface OptionsLorem {
 export const genererLorem = (o: OptionsLorem): string[] => {
   const r = prng(o.graine);
   const latin = o.langue === "latin";
-  const phrase = () => (latin ? phraseLatine(r) : phraseFrancaise(r));
+  const phrase = () => (latin ? phraseLatine(r) : o.langue === "anglais" ? phraseAnglaise(r) : phraseFrancaise(r));
   if (o.unite === "mots") {
     const vocab = latin ? LATIN : null;
     const mots: string[] = [];
     if (latin && o.commencerClassique) mots.push(..."lorem ipsum dolor sit amet".split(" "));
     while (mots.length < o.nombre) {
       if (vocab) mots.push(pioche(r, vocab));
-      else mots.push(...phrase().replace(/[.,]/g, "").toLowerCase().split(" "));
+      else mots.push(...phrase().replace(/[.,]/g, "").split(" ").map((m) => (m === "I" || /^Monday/.test(m) ? m : m.toLowerCase())));
     }
     const t = mots.slice(0, o.nombre).join(" ");
     return [capitale(t) + "."];

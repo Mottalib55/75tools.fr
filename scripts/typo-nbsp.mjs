@@ -114,8 +114,8 @@ function fix(html) {
 
 // Toute décimale à point, unité ou non (« 13.18 € », « 0.5 maand », « divisé par 111.8 »),
 // sauf numéros d'articles et de documents (« art. 22.2 », « artikel 11.7a », « Mémento 2.01 »), dates,
-// numéros de section (« 8.1 Responsable »), cylindrées (« 1.5 TSI ») et normes (« ECE 22.05 »).
-const DOT_DECIMAL = /(?<![\d.,’'\w])(?<!(?:art\.?|artikel|Art\.?|§|Abs\.?|al\.|Form\.?|art[ií]culos?|Art[ií]culos?|articles?|Articles?|artigos?|Artigos?)\s?)(?<!\d\.\d[\d.a-z)]*,?\s(?:y|e|et|and|und|o|ou)\s)(?<!(?:Mémento|Merkblatt|Memento)[^\d]{0,14})(?<!(?:ECE|norme|\^|Ducato|\d\.\d\d ou|version|TLS|ETH|RGAA|WCAG|HTTP|Web)\s?)(?:\d{1,3}(?:['’]\d{3})+|\d+)\.\d{1,2}(?![\d.\w])(?!\s(?:[A-Z][a-zé]|TSI|TDI|TFSI|TCe|PureTech|BlueHDi|dCi|HDi|THP|hybride|essence|diesel|ou\s\d))/g;
+// numéros de section (« 8.1 Responsable »), cylindrées (« 1.5 TSI »), normes (« ECE 22.05 ») et versions de format (« PDF 2.0 », « vCard 4.0 », 75tools 2026-10-27).
+const DOT_DECIMAL = /(?<![\d.,’'\w])(?<!(?:art\.?|artikel|Art\.?|§|Abs\.?|al\.|Form\.?|art[ií]culos?|Art[ií]culos?|articles?|Articles?|artigos?|Artigos?)\s?)(?<!\d\.\d[\d.a-z)]*,?\s(?:y|e|et|and|und|o|ou)\s)(?<!(?:Mémento|Merkblatt|Memento)[^\d]{0,14})(?<!(?:ECE|norme|\^|Ducato|\d\.\d\d ou|version|TLS|ETH|RGAA|WCAG|HTTP|Web|PDF|vCard|PNG|SVG|HTML)\s?)(?:\d{1,3}(?:['’]\d{3})+|\d+)\.\d{1,2}(?![\d.\w])(?!\s(?:[A-Z][a-zé]|TSI|TDI|TFSI|TCe|PureTech|BlueHDi|dCi|HDi|THP|hybride|essence|diesel|ou\s\d))/g;
 /** Texte réellement lu par le visiteur : hors script, style et code. */
 function texteVisible(html) {
   // Les blocs script et style partent d'abord, en bloc : un script minifié

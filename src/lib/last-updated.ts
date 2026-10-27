@@ -9,3 +9,9 @@ export function displayDate(iso: string, lang: 'fr' | 'en'): string {
   const s = new Date(`${iso}T00:00:00Z`).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
   return lang === 'fr' ? s.replace(/^1 /, '1er ') : s;
 }
+
+/**
+ * Date de mise à jour des pages-outils (contenu, sources relues, version anglaise), affichée en bas
+ * de chaque page en toutes lettres et déclarée dans WebPage.dateModified (RECETTE §8.4).
+ */
+export const OUTILS_MAJ = '2026-10-27';

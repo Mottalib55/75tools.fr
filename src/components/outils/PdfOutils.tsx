@@ -4,14 +4,17 @@ import { ArrowDown, ArrowUp, GripVertical, X } from "lucide-react";
 import { rendrePage, ouvrirPdf } from "@/lib/pdfjs";
 import { cn } from "@/lib/utils";
 import { classeSelect } from "@/components/outils/PageOutil";
+import { useLangue, locale, tr } from "@/lib/langue";
 
 type DocPdfJs = Awaited<ReturnType<typeof ouvrirPdf>>;
 
 /** Barre de progression annoncée aux lecteurs d'écran. */
-export const Progression = ({ texte, fait, total }: { texte: string; fait: number; total: number }) => (
+export const Progression = ({ texte, fait, total }: { texte: string; fait: number; total: number }) => {
+  const lang = useLangue();
+  return (
   <div role="status" aria-live="polite" className="space-y-2">
     <p className="text-sm text-neutral-300 tabular-nums">
-      {texte} {total > 0 && `(${fait.toLocaleString("fr-FR")} sur ${total.toLocaleString("fr-FR")})`}
+      {texte} {total > 0 && `(${fait.toLocaleString(locale(lang))} ${tr(lang, "sur", "of")} ${total.toLocaleString(locale(lang))})`}
     </p>
     <div className="h-2 rounded-full bg-neutral-800 overflow-hidden">
       <div
@@ -20,7 +23,8 @@ export const Progression = ({ texte, fait, total }: { texte: string; fait: numbe
       />
     </div>
   </div>
-);
+  );
+};
 
 export const Alerte = ({ children, ton = "erreur" }: { children: ReactNode; ton?: "erreur" | "info" }) => (
   <div
@@ -48,6 +52,7 @@ export function ListeOrdonnable<T extends { id: string }>({
   libelle: (e: T) => string;
   desactive?: boolean;
 }) {
+  const lang = useLangue();
   const [saisi, setSaisi] = useState<number | null>(null);
   const [cible, setCible] = useState<number | null>(null);
   const bouger = (i: number, j: number) => {
@@ -97,7 +102,7 @@ export function ListeOrdonnable<T extends { id: string }>({
           <GripVertical className="hidden sm:block w-4 h-4 shrink-0 text-neutral-600 cursor-grab" aria-hidden="true" />
           <span className="w-6 shrink-0 text-center text-sm text-neutral-500 tabular-nums">{i + 1}</span>
           <div className="flex-1 min-w-0">{rendu(e, i)}</div>
-          <button type="button" className={btn} disabled={desactive || i === 0} onClick={() => bouger(i, i - 1)} aria-label={`Monter ${libelle(e)}`}>
+          <button type="button" className={btn} disabled={desactive || i === 0} onClick={() => bouger(i, i - 1)} aria-label={`${tr(lang, "Monter", "Move up")} ${libelle(e)}`}>
             <ArrowUp className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
@@ -105,7 +110,7 @@ export function ListeOrdonnable<T extends { id: string }>({
             className={btn}
             disabled={desactive || i === elements.length - 1}
             onClick={() => bouger(i, i + 1)}
-            aria-label={`Descendre ${libelle(e)}`}
+            aria-label={`${tr(lang, "Descendre", "Move down")} ${libelle(e)}`}
           >
             <ArrowDown className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -114,7 +119,7 @@ export function ListeOrdonnable<T extends { id: string }>({
             className={btn}
             disabled={desactive}
             onClick={() => onChange(elements.filter((x) => x.id !== e.id))}
-            aria-label={`Retirer ${libelle(e)}`}
+            aria-label={`${tr(lang, "Retirer", "Remove")} ${libelle(e)}`}
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>

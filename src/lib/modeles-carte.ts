@@ -4,6 +4,8 @@
  * obligations affirmées sur la page sont celles citées avec leur source Service Public.
  */
 
+import type { Langue } from "@/lib/outils";
+
 export type Style = "sobre" | "bandeau" | "centre";
 
 export interface Modele {
@@ -182,3 +184,115 @@ export const MODELES: Modele[] = [
     ],
   },
 ];
+
+/**
+ * Les mêmes dix modèles pour la page anglaise, écrite pour un anglophone installé en France : textes
+ * de la carte et conseils en anglais, coordonnées fictives françaises, mentions françaises (EI, Siren,
+ * RCS) gardées telles quelles puisqu'elles relèvent du droit français.
+ */
+export const MODELES_EN: Modele[] = [
+  {
+    id: "artisan", metier: "Building tradesperson", nom: "Julien Morel", titre: "Plumber and heating engineer",
+    entreprise: "Morel Plomberie", lignes: ["06 12 34 56 78", "contact@example.com", "Call-outs: Rennes and 30 km"],
+    legal: "Julien Morel EI · Siren 000 000 000 · RNE", couleur: "#1d4ed8", style: "bandeau",
+    conseils: [
+      "Your trade in the client's words, \"plumber and heating engineer\", not just a company name.",
+      "The area you cover, which saves calls from too far away.",
+      "One number only, the one you answer on site.",
+      "Your French business identifiers (EI, SIREN, RNE) if the card is used to win clients: see the section on legal details.",
+    ],
+  },
+  {
+    id: "coach", metier: "Personal trainer", nom: "Inès Garnier", titre: "Qualified personal trainer",
+    entreprise: "Garnier Coaching", lignes: ["06 12 34 56 78", "example.com/sessions", "Home, park or video"],
+    legal: "", couleur: "#0f766e", style: "sobre",
+    conseils: [
+      "Where sessions take place (home, gym, outdoors, video), the first thing clients ask.",
+      "A direct link to your booking page rather than your home page.",
+      "Your qualification or professional card, if you mention it, exactly as it is titled.",
+    ],
+  },
+  {
+    id: "immobilier", metier: "Estate agent", nom: "Thomas Lefèvre", titre: "Sales negotiator",
+    entreprise: "Agence des Quais", lignes: ["06 12 34 56 78", "t.lefevre@example.com", "8 quai Victor-Hugo, 33000 Bordeaux"],
+    legal: "Carte professionnelle n° CPI 0000 0000 000 000 000", couleur: "#9a3412", style: "bandeau",
+    conseils: [
+      "The agency address: clients want to know where to drop by.",
+      "The professional card number (carte professionnelle), which the agency already displays on its premises.",
+      "For an independent agent, the network's name and your own status, with no ambiguity.",
+    ],
+  },
+  {
+    id: "consultant", metier: "Consultant", nom: "Claire Dubois", titre: "Organisation consultant",
+    entreprise: "Dubois Conseil", lignes: ["06 12 34 56 78", "claire@example.com", "linkedin.com/in/example"],
+    legal: "Dubois Conseil SAS au capital de 1 000 € · RCS Paris 000 000 000", couleur: "#111827", style: "sobre",
+    conseils: [
+      "A precise speciality rather than \"consulting\" alone.",
+      "Your LinkedIn profile, often viewed more than your website.",
+      "For a company, the identification line (legal form, share capital, RCS) in small print at the bottom or on the back.",
+    ],
+  },
+  {
+    id: "photographe", metier: "Photographer", nom: "Léa Fontaine", titre: "Wedding and portrait photographer",
+    entreprise: "Léa Fontaine Photography", lignes: ["06 12 34 56 78", "example.com/portfolio", "@example"],
+    legal: "", couleur: "#44403c", style: "centre",
+    conseils: [
+      "The link to your portfolio: that is what sells.",
+      "Your Instagram handle if that is where you post your work.",
+      "A photo on the back, printed at 300 dpi at the exact size with bleed.",
+    ],
+  },
+  {
+    id: "avocat", metier: "Lawyer", nom: "Maître Paul Renaud", titre: "Avocat au barreau de Lyon",
+    entreprise: "Cabinet Renaud", lignes: ["04 78 00 00 00", "office@example.com", "15 rue de la République, 69002 Lyon"],
+    legal: "", couleur: "#1e3a8a", style: "centre",
+    conseils: [
+      "The bar you are registered with, next to your title, in French as clients will expect it.",
+      "Your areas of practice, if any, in the terms your professional rules allow: lawyers' communication is regulated, so check with your bar.",
+      "The firm's switchboard rather than a personal mobile.",
+    ],
+  },
+  {
+    id: "restaurateur", metier: "Restaurant owner", nom: "Le Comptoir de Marie", titre: "Seasonal cooking",
+    entreprise: "Marie Lambert, head chef", lignes: ["05 56 00 00 00", "example.com/book", "Tue to Sat, 12-2 pm and 7-10 pm"],
+    legal: "", couleur: "#7c2d12", style: "centre",
+    conseils: [
+      "Opening days and hours: that is what guests look for once home.",
+      "The booking link, or the number that is answered during service.",
+      "The address with a landmark (\"opposite the market\") if the street is little known.",
+    ],
+  },
+  {
+    id: "infirmier", metier: "Self-employed nurse", nom: "Sophie Bernard", titre: "Infirmière libérale (registered nurse)",
+    entreprise: "Cabinet infirmier des Tilleuls", lignes: ["06 12 34 56 78", "Home visits and practice care", "3 place des Tilleuls, 44000 Nantes"],
+    legal: "", couleur: "#0e7490", style: "sobre",
+    conseils: [
+      "The phone number in large type: the card is mostly used to call.",
+      "How you provide care (home visits, practice) and the area covered.",
+      "Nurses' communication rules are set by the Ordre national des infirmiers: check them before adding a slogan or prices.",
+    ],
+  },
+  {
+    id: "coiffure", metier: "Mobile hairdresser", nom: "Amandine Roux", titre: "Mobile hairdresser",
+    entreprise: "Coiffure Amandine", lignes: ["06 12 34 56 78", "By appointment, Monday to Saturday", "Toulouse and surroundings"],
+    legal: "Amandine Roux EI · Siren 000 000 000", couleur: "#9d174d", style: "bandeau",
+    conseils: [
+      "How to book (phone, text, link), written in plain words.",
+      "The area you cover, for a home-visit business.",
+      "On the back, a loyalty card to stamp if you offer one.",
+    ],
+  },
+  {
+    id: "architecte", metier: "Interior designer", nom: "Hugo Perrin", titre: "Interior designer",
+    entreprise: "Atelier Perrin", lignes: ["06 12 34 56 78", "hugo@example.com", "example.com/projects"],
+    legal: "", couleur: "#3f3f46", style: "sobre",
+    conseils: [
+      "The link to your projects, before your about page.",
+      "A spacious layout: the card itself shows your taste.",
+      "Your exact title in full: in France, architecte d'intérieur and architecte do not name the same profession.",
+    ],
+  },
+];
+
+/** Les modèles dans la langue de la page. */
+export const modeles = (lang: Langue = "fr"): Modele[] => (lang === "en" ? MODELES_EN : MODELES);

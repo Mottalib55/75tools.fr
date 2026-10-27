@@ -1,9 +1,11 @@
 /**
  * Test de vitesse de frappe : textes français écrits pour 75tools (accents, ponctuation, majuscules,
  * sans caractère introuvable sur un clavier AZERTY : ni guillemets français, ni « œ », ni majuscule accentuée),
+ * textes anglais écrits pour la page anglaise (caractères ASCII seulement, apostrophe droite),
  * normalisation de la saisie et calcul des scores.
  */
 import { sansAccents } from "@/lib/texte-mots-fr";
+import type { Langue } from "@/lib/langue";
 
 export const TEXTES_FRAPPE = [
   "Le marché du samedi commence tôt. Dès sept heures, les maraîchers installent leurs étals de légumes : poireaux, carottes, courges et pommes de terre encore couvertes de terre. Une odeur de pain chaud vient de la boulangerie d'en face. Les premiers clients arrivent avec leurs paniers, comparent les prix et discutent de la météo, qui s'annonce plus douce que prévu.",
@@ -18,9 +20,23 @@ export const TEXTES_FRAPPE = [
   "Notre association organise sa fête annuelle le dimanche 8 juin, de 11 h à 18 h, dans le parc municipal. Au programme : jeux pour les enfants, concert de l'école de musique, vente de gâteaux et tournoi de pétanque. L'entrée est libre. Les bénévoles qui souhaitent aider au montage des stands peuvent se faire connaître auprès du secrétariat.",
 ];
 
+/** Textes anglais : tous les caractères se tapent directement sur un clavier QWERTY britannique ou américain. */
+export const TEXTES_FRAPPE_EN = [
+  "The bakery on the corner opens at seven, and by ten past there is already a queue. People order a baguette, sometimes two, and a few croissants for the children. The baker knows most of them by name. On Sundays the line reaches the pharmacy next door, but nobody seems to mind waiting a little for bread that is still warm.",
+  "Learning to type without looking at the keys takes patience more than talent. Ten minutes a day will do more than an hour once a week. Rest your index fingers on F and J, which have a small bump you can feel, and bring each finger back to its place after every stroke. Speed comes later; accuracy comes first.",
+  "The storm arrived just after lunch. Within minutes the sky over the harbour turned grey, the wind picked up and the small boats rocked against the pontoon. Cafe owners rushed to fold their umbrellas while tourists ran for cover. An hour later the sun was out again, and the streets smelled of wet stone and salt.",
+  "Thank you for your email of 14 March. I can confirm our meeting on Thursday at 10:30 in our office on the third floor. Could you please bring the signed quote and a copy of your passport? If that time no longer suits you, just give me a call and we will find another slot during the week.",
+  "The recipe is simple. Melt 100 g of butter with 200 g of dark chocolate, then stir in three eggs beaten with 150 g of sugar. Fold in 50 g of flour, pour the mixture into a buttered tin and bake for twenty minutes at 180 degrees. The cake should stay soft in the middle, so take it out a little early rather than late.",
+  "The 6:12 train was delayed by about a quarter of an hour. Passengers waited on the platform, some on the phone, others lost in a book. A small boy counted the carriages of a freight train rolling past on the next track. When the train finally pulled in, everyone looked for their coach and seat, glad to be heading home at last.",
+  "A good library is not measured by the number of books on its shelves. What matters is how easily you find what you are looking for, and how pleasant it is to get lost there. Librarians know this well: a clear system, bright reading tables and a quiet word of advice at the right moment do more than a thousand shelves.",
+  "Once upon a time an old lighthouse stood on a rock off the coast of Brittany. Its keeper, a patient and slightly grumpy man, climbed the one hundred and twelve steps of the spiral staircase every evening. At the top he cleaned the lens, checked the lamp and watched the sea. He used to say the storms had taught him everything, even caution.",
+  "Before setting off on a hike, check the weather forecast and tell someone where you are going. Take water, a warm layer, a map and something to eat. In the mountains the weather can change quickly, and a path that was easy in the morning may be slippery by the afternoon. Knowing when to turn back is part of being a good walker.",
+  "Our local association is holding its summer fair on Sunday 8 June, from 11 am to 6 pm, in the town park. There will be games for children, a concert by the music school, a cake stall and a petanque tournament. Entry is free. Volunteers who would like to help set up the stands are welcome to contact the office.",
+];
+
 /** Ordre de lecture des textes à partir d'une graine (mélange de Fisher-Yates). */
-export const melanger = (graine: number) => {
-  const idx = TEXTES_FRAPPE.map((_, i) => i);
+export const melanger = (graine: number, n = TEXTES_FRAPPE.length) => {
+  const idx = Array.from({ length: n }, (_, i) => i);
   let a = graine >>> 0 || 1;
   for (let i = idx.length - 1; i > 0; i--) {
     a = (Math.imul(a, 1664525) + 1013904223) >>> 0;
@@ -31,9 +47,10 @@ export const melanger = (graine: number) => {
 };
 
 /** Texte à taper : plusieurs passages à la suite, assez longs pour trois minutes à vive allure. */
-export const texteDuTest = (ordre: number[], accents: boolean) => {
-  const t = ordre.map((i) => TEXTES_FRAPPE[i]).join(" ");
-  return accents ? t : sansAccents(t);
+export const texteDuTest = (ordre: number[], accents: boolean, langue: Langue = "fr") => {
+  const textes = langue === "en" ? TEXTES_FRAPPE_EN : TEXTES_FRAPPE;
+  const t = ordre.filter((i) => i < textes.length).map((i) => textes[i]).join(" ");
+  return accents || langue === "en" ? t : sansAccents(t);
 };
 
 /** Ce qui se tape autrement selon l'appareil : apostrophe courbe, espaces insécables, guillemets. */

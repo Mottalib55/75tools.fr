@@ -7,9 +7,88 @@ import {
   Disposition,
   DonneesSignature,
 } from "@/lib/signature";
+import { useLangue } from "@/lib/langue";
 import { cn } from "@/lib/utils";
 
 const COULEURS = ["#1f6feb", "#0f766e", "#b45309", "#be123c", "#6d28d9", "#111111"];
+
+/** Textes de l'interface du générateur, dans les deux langues (la langue vient de PageOutil). */
+const T = {
+  fr: {
+    miseEnPage: "Mise en page",
+    apercu: "Aperçu dans un e-mail",
+    copier: "Copier la signature",
+    copierCode: "Copier le code HTML",
+    copie: "Signature copiée. Collez-la (Ctrl + V ou Cmd + V) dans le champ Signature de votre messagerie.",
+    refus: "Votre navigateur a refusé la copie : sélectionnez l'aperçu à la souris, puis copiez-le.",
+    codeCopie: "Code HTML copié. À coller dans un outil qui accepte du HTML (Thunderbird, outil de signature d'entreprise).",
+    refusCode: "Votre navigateur a refusé la copie du code.",
+    coordonnees: "Vos coordonnées",
+    nom: "Prénom et nom",
+    poste: "Poste",
+    entreprise: "Entreprise",
+    email: "E-mail",
+    mobile: "Mobile",
+    fixe: "Téléphone fixe",
+    site: "Site web",
+    sitePh: "www.votre-site.fr",
+    adresse: "Adresse (facultatif)",
+    adressePh: "12 rue des Lilas, 69003 Lyon",
+    linkedin: "Profil LinkedIn",
+    autreUrl: "Autre lien : adresse",
+    autreUrlPh: "Prise de rendez-vous, portfolio…",
+    autreTexte: "Autre lien : texte affiché",
+    autreTextePh: "Prendre rendez-vous",
+    photo: "Photo : adresse de l'image",
+    photoAide: "Image déjà en ligne, carrée de préférence.",
+    logo: "Logo : adresse de l'image",
+    logoAide: "Utilisé à gauche si pas de photo, ou dessous.",
+    couleur: "Couleur",
+    couleurX: (c: string) => `Couleur ${c}`,
+    autreCouleur: "Autre couleur",
+    mention: "Ligne légale (facultatif)",
+    mentionPh: "Atelier Martin EI · Siren 000 000 000 · RCS Lyon",
+    mentionAide: "Mentions d'identification de l'entreprise, voir plus bas.",
+    vider: "Vider les champs",
+  },
+  en: {
+    miseEnPage: "Layout",
+    apercu: "Preview in an email",
+    copier: "Copy signature",
+    copierCode: "Copy HTML code",
+    copie: "Signature copied. Paste it (Ctrl + V or Cmd + V) into the signature box of your email app.",
+    refus: "Your browser blocked the copy: select the preview with your mouse, then copy it.",
+    codeCopie: "HTML code copied. Paste it into a tool that accepts HTML (Thunderbird, a company signature manager).",
+    refusCode: "Your browser blocked copying the code.",
+    coordonnees: "Your details",
+    nom: "Full name",
+    poste: "Job title",
+    entreprise: "Company",
+    email: "Email",
+    mobile: "Mobile",
+    fixe: "Office phone",
+    site: "Website",
+    sitePh: "www.your-site.com",
+    adresse: "Address (optional)",
+    adressePh: "12 rue des Lilas, 69003 Lyon",
+    linkedin: "LinkedIn profile",
+    autreUrl: "Other link: address",
+    autreUrlPh: "Booking page, portfolio…",
+    autreTexte: "Other link: text shown",
+    autreTextePh: "Book a meeting",
+    photo: "Photo: image address",
+    photoAide: "An image already online, ideally square.",
+    logo: "Logo: image address",
+    logoAide: "Shown on the left if there is no photo, or below.",
+    couleur: "Colour",
+    couleurX: (c: string) => `Colour ${c}`,
+    autreCouleur: "Other colour",
+    mention: "Legal line (optional)",
+    mentionPh: "Jane Smith EI · SIREN 000 000 000",
+    mentionAide: "French business identifiers (SIREN, RCS, EI), see below.",
+    vider: "Clear fields",
+  },
+};
 
 export interface ContexteSignature {
   html: string;
@@ -20,16 +99,19 @@ export interface ContexteSignature {
 }
 
 /**
- * Générateur de signature mail : formulaire, aperçu en direct, copie riche (HTML + texte)
- * et copie du code. Partagé par /signature-mail/, /signature-outlook/ et /signature-gmail/.
+ * Générateur de signature mail : formulaire, aperçu en direct (`data-resultat`), copie riche
+ * (HTML + texte) et copie du code. Partagé par les pages signature mail, Outlook et Gmail, en
+ * français et en anglais : la signature produite est écrite dans la langue de la page.
+ * Mise en page : sur téléphone, les cinq premiers champs, puis l'aperçu, puis le reste du
+ * formulaire ; sur ordinateur, le formulaire à gauche et l'aperçu fixe à droite.
  */
 export const GenerateurSignature = ({
   exemple,
   dispositionInitiale = "classique",
-  messageCopie = "Signature copiée. Collez-la (Ctrl + V ou Cmd + V) dans le champ Signature de votre messagerie.",
+  messageCopie,
   boutonsApercu,
   sousApercu,
-  aideMention = "Mentions d'identification de l'entreprise, voir plus bas.",
+  aideMention,
 }: {
   exemple: DonneesSignature;
   dispositionInitiale?: Disposition;
@@ -41,11 +123,14 @@ export const GenerateurSignature = ({
   /** Aide sous le champ « Ligne légale ». */
   aideMention?: string;
 }) => {
+  const lang = useLangue();
+  const t = T[lang];
+  const msgCopie = messageCopie ?? t.copie;
   const [d, setD] = useState<DonneesSignature>(exemple);
   const [disp, setDisp] = useState<Disposition>(dispositionInitiale);
   const [etat, setEtat] = useState("");
   const apercu = useRef<HTMLDivElement>(null);
-  const html = useMemo(() => construireSignature(d, disp), [d, disp]);
+  const html = useMemo(() => construireSignature(d, disp, lang), [d, disp, lang]);
   const maj = (k: keyof DonneesSignature) => (v: string) => setD((x) => ({ ...x, [k]: v }));
   const ctx: ContexteSignature = { html, donnees: d, disposition: disp, signaler: setEtat };
 
@@ -73,40 +158,44 @@ export const GenerateurSignature = ({
       await navigator.clipboard.write([
         new ClipboardItem({
           "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([signatureTexte(d)], { type: "text/plain" }),
+          "text/plain": new Blob([signatureTexte(d, lang)], { type: "text/plain" }),
         }),
       ]);
-      setEtat(messageCopie);
+      setEtat(msgCopie);
     } catch {
-      setEtat(
-        copierParSelection()
-          ? messageCopie
-          : "Votre navigateur a refusé la copie : sélectionnez l'aperçu à la souris, puis copiez-le."
-      );
+      setEtat(copierParSelection() ? msgCopie : t.refus);
     }
   };
 
   const copierCode = async () => {
     try {
       await navigator.clipboard.writeText(html);
-      setEtat("Code HTML copié. À coller dans un outil qui accepte du HTML (Thunderbird, outil de signature d'entreprise).");
+      setEtat(t.codeCopie);
     } catch {
-      setEtat("Votre navigateur a refusé la copie du code.");
+      setEtat(t.refusCode);
     }
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start">
-      {/* Aperçu et copie : en premier sur téléphone */}
-      <div className="order-first lg:order-last lg:sticky lg:top-4 space-y-3">
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Mise en page">
+    <div className="grid gap-x-6 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start">
+      {/* Premiers champs : en tête sur téléphone, en haut à gauche sur ordinateur */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:col-start-1 lg:row-start-1">
+        <Champ label={t.nom} value={d.nom} onChange={maj("nom")} autoComplete="name" />
+        <Champ label={t.poste} value={d.poste} onChange={maj("poste")} autoComplete="organization-title" />
+        <Champ label={t.entreprise} value={d.entreprise} onChange={maj("entreprise")} autoComplete="organization" />
+        <Champ label={t.mobile} type="tel" value={d.mobile} onChange={maj("mobile")} autoComplete="tel" />
+      </div>
+
+      {/* Aperçu et copie : juste sous les premiers champs sur téléphone, colonne de droite sur ordinateur */}
+      <div data-resultat className="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-4 space-y-3">
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t.miseEnPage}>
           {DISPOSITIONS.map((x) => (
             <button
               key={x.id}
               type="button"
               role="radio"
               aria-checked={disp === x.id}
-              title={x.detail}
+              title={x.detail[lang]}
               onClick={() => setDisp(x.id)}
               className={cn(
                 "h-9 px-3 rounded-md text-sm border whitespace-nowrap",
@@ -115,20 +204,20 @@ export const GenerateurSignature = ({
                   : "border-neutral-700 text-neutral-400 hover:text-white"
               )}
             >
-              {x.nom}
+              {x.nom[lang]}
             </button>
           ))}
         </div>
         <div className="rounded-lg bg-white p-4 sm:p-6 overflow-x-auto">
           <p className="text-[11px] uppercase tracking-wider text-neutral-500 mb-3 select-none" aria-hidden="true">
-            Aperçu dans un e-mail
+            {t.apercu}
           </p>
           <div ref={apercu} id="apercu-signature" dangerouslySetInnerHTML={{ __html: html }} />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Bouton onClick={copier}>Copier la signature</Bouton>
+          <Bouton onClick={copier}>{t.copier}</Bouton>
           <Bouton secondaire onClick={copierCode}>
-            Copier le code HTML
+            {t.copierCode}
           </Bouton>
           {boutonsApercu?.(ctx)}
         </div>
@@ -138,42 +227,26 @@ export const GenerateurSignature = ({
         {sousApercu?.(ctx)}
       </div>
 
-      {/* Formulaire */}
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()} aria-label="Vos coordonnées">
+      {/* Suite du formulaire */}
+      <form className="space-y-4 lg:col-start-1 lg:row-start-2" onSubmit={(e) => e.preventDefault()} aria-label={t.coordonnees}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Champ label="Prénom et nom" value={d.nom} onChange={maj("nom")} autoComplete="name" />
-          <Champ label="Poste" value={d.poste} onChange={maj("poste")} autoComplete="organization-title" />
-          <Champ label="Entreprise" value={d.entreprise} onChange={maj("entreprise")} autoComplete="organization" />
-          <Champ label="E-mail" type="email" value={d.email} onChange={maj("email")} autoComplete="email" />
-          <Champ label="Mobile" type="tel" value={d.mobile} onChange={maj("mobile")} autoComplete="tel" />
-          <Champ label="Téléphone fixe" type="tel" value={d.telephone} onChange={maj("telephone")} />
-          <Champ label="Site web" value={d.site} onChange={maj("site")} placeholder="www.votre-site.fr" />
-          <Champ label="Adresse (facultatif)" value={d.adresse} onChange={maj("adresse")} placeholder="12 rue des Lilas, 69003 Lyon" />
-          <Champ label="Profil LinkedIn" value={d.linkedin} onChange={maj("linkedin")} placeholder="linkedin.com/in/..." />
-          <Champ label="Autre lien : adresse" value={d.lienUrl} onChange={maj("lienUrl")} placeholder="Prise de rendez-vous, portfolio…" />
-          <Champ label="Autre lien : texte affiché" value={d.lienLibelle} onChange={maj("lienLibelle")} placeholder="Prendre rendez-vous" />
-          <Champ
-            label="Photo : adresse de l'image"
-            value={d.photoUrl}
-            onChange={maj("photoUrl")}
-            placeholder="https://…/photo.jpg"
-            aide="Image déjà en ligne, carrée de préférence."
-          />
-          <Champ
-            label="Logo : adresse de l'image"
-            value={d.logoUrl}
-            onChange={maj("logoUrl")}
-            placeholder="https://…/logo.png"
-            aide="Utilisé à gauche si pas de photo, ou dessous."
-          />
+          <Champ label={t.email} type="email" value={d.email} onChange={maj("email")} autoComplete="email" />
+          <Champ label={t.fixe} type="tel" value={d.telephone} onChange={maj("telephone")} />
+          <Champ label={t.site} value={d.site} onChange={maj("site")} placeholder={t.sitePh} />
+          <Champ label={t.adresse} value={d.adresse} onChange={maj("adresse")} placeholder={t.adressePh} />
+          <Champ label={t.linkedin} value={d.linkedin} onChange={maj("linkedin")} placeholder="linkedin.com/in/..." />
+          <Champ label={t.autreUrl} value={d.lienUrl} onChange={maj("lienUrl")} placeholder={t.autreUrlPh} />
+          <Champ label={t.autreTexte} value={d.lienLibelle} onChange={maj("lienLibelle")} placeholder={t.autreTextePh} />
+          <Champ label={t.photo} value={d.photoUrl} onChange={maj("photoUrl")} placeholder="https://…/photo.jpg" aide={t.photoAide} />
+          <Champ label={t.logo} value={d.logoUrl} onChange={maj("logoUrl")} placeholder="https://…/logo.png" aide={t.logoAide} />
           <div>
-            <span className="block text-sm text-neutral-300 mb-1">Couleur</span>
+            <span className="block text-sm text-neutral-300 mb-1">{t.couleur}</span>
             <div className="flex items-center gap-2 h-12">
               {COULEURS.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  aria-label={`Couleur ${c}`}
+                  aria-label={t.couleurX(c)}
                   onClick={() => maj("couleur")(c)}
                   className={cn("w-8 h-8 rounded-full border-2", d.couleur === c ? "border-white" : "border-transparent")}
                   style={{ background: c }}
@@ -181,7 +254,7 @@ export const GenerateurSignature = ({
               ))}
               <input
                 type="color"
-                aria-label="Autre couleur"
+                aria-label={t.autreCouleur}
                 value={d.couleur}
                 onChange={(e) => maj("couleur")(e.target.value)}
                 className="w-12 h-12 bg-transparent border-0 p-0 cursor-pointer"
@@ -190,16 +263,19 @@ export const GenerateurSignature = ({
           </div>
         </div>
         <Champ
-          label="Ligne légale (facultatif)"
+          label={t.mention}
           value={d.mention}
           onChange={maj("mention")}
-          placeholder="Atelier Martin EI · Siren 000 000 000 · RCS Lyon"
-          aide={aideMention}
+          placeholder={t.mentionPh}
+          aide={aideMention ?? t.mentionAide}
         />
         <div className="flex flex-wrap gap-2 pt-1">
-          <Bouton onClick={copier}>Copier la signature</Bouton>
-          <Bouton secondaire onClick={() => setD({ ...exemple, nom: "", poste: "", entreprise: "", mobile: "", email: "", site: "" })}>
-            Vider les champs
+          <Bouton onClick={copier}>{t.copier}</Bouton>
+          <Bouton
+            secondaire
+            onClick={() => setD({ ...exemple, nom: "", poste: "", entreprise: "", mobile: "", email: "", site: "", telephone: "", lienUrl: "", lienLibelle: "" })}
+          >
+            {t.vider}
           </Bouton>
         </div>
       </form>

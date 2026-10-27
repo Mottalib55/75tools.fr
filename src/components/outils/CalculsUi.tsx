@@ -1,8 +1,11 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { classeChamp } from "@/components/outils/PageOutil";
 
-/** Champ numérique à la française : texte libre, clavier décimal, virgule acceptée. */
+/**
+ * Champ numérique : texte libre (le texte saisi reste la source de vérité, jamais réécrit), clavier
+ * décimal ; la page lit le nombre avec lireNombre(texte, lang), qui accepte virgule et point.
+ */
 export const ChampNombre = ({
   label,
   value,
@@ -114,7 +117,11 @@ export const Formule = ({ children }: { children: ReactNode }) => (
   </p>
 );
 
-/** Boutons à bascule (choix d'un taux, d'un sens). */
+/**
+ * Boutons à bascule (choix d'un taux, d'un sens), sur une seule rangée. Au-delà de cinq options ou
+ * avec des libellés longs, texte plus petit et marges réduites sur téléphone, pour qu'aucun libellé
+ * ne déborde de son bouton à 320 px.
+ */
 export const Bascule = <T extends string | number>({
   options,
   valeur,
@@ -125,30 +132,35 @@ export const Bascule = <T extends string | number>({
   valeur: T;
   onChange: (v: NoInfer<T>) => void;
   libelle: string;
-}) => (
-  <div
-    role="group"
-    aria-label={libelle}
-    className={cn("grid sm:gap-2", options.length > 5 ? "gap-1" : "gap-1.5")}
-    style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
-  >
-    {options.map((o) => (
-      <button
-        key={String(o.v)}
-        type="button"
-        aria-pressed={o.v === valeur}
-        onClick={() => onChange(o.v)}
-        className={cn(
-          "h-11 px-1 rounded-md sm:text-sm border whitespace-nowrap min-w-0",
-          options.length > 5 ? "text-xs" : "text-[13px]",
-          o.v === valeur ? "border-sky-400 bg-sky-400 text-neutral-950 font-medium" : "border-neutral-700 text-neutral-200 hover:border-neutral-500"
-        )}
-      >
-        {o.l}
-      </button>
-    ))}
-  </div>
-);
+}) => {
+  const n = options.length;
+  const serre = n > 5;
+  const long = Math.max(...options.map((o) => o.l.length)) * n > 30;
+  return (
+    <div
+      role="group"
+      aria-label={libelle}
+      className={cn("grid sm:gap-2", serre ? "gap-0.5" : "gap-1.5")}
+      style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+    >
+      {options.map((o) => (
+        <button
+          key={String(o.v)}
+          type="button"
+          aria-pressed={o.v === valeur}
+          onClick={() => onChange(o.v)}
+          className={cn(
+            "h-11 rounded-md sm:text-sm sm:px-1 border whitespace-nowrap min-w-0",
+            serre ? "text-[11px] px-0" : long ? "text-xs px-1" : "text-[13px] px-1",
+            o.v === valeur ? "border-sky-400 bg-sky-400 text-neutral-950 font-medium" : "border-neutral-700 text-neutral-200 hover:border-neutral-500"
+          )}
+        >
+          {o.l}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 /** Case à cocher lisible. */
 export const Case = ({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) => (

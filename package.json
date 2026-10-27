@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp dist/index.html dist/404.html && node scripts/prerender.mjs dist && node scripts/typo-nbsp.mjs dist",
+    "build": "vite build && cp dist/index.html dist/404.html && node scripts/prerender.mjs dist && node scripts/typo-nbsp.mjs dist && node scripts/sitemap.mjs dist && python3 scripts/check-snippets.py dist && node scripts/check-outils.mjs dist",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

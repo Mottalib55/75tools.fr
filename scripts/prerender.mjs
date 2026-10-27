@@ -18,54 +18,12 @@ import { existsSync } from 'node:fs';
 import { join, extname, resolve } from 'node:path';
 import { chromium } from 'playwright-core';
 
-const ROUTES = ['/', '/fr', '/en', '/mycard',
-  // Pages-outils : même liste que src/lib/outils.ts (contrôle : scripts/check-outils.mjs)
-  '/compresser-pdf',
-  '/fusionner-pdf',
-  '/separer-pdf',
-  '/jpg-en-pdf',
-  '/pdf-en-jpg',
-  '/signer-pdf',
-  '/heic-en-jpg',
-  '/png-en-jpg',
-  '/webp-en-jpg',
-  '/redimensionner-image',
-  '/supprimer-fond-image',
-  '/photo-identite',
-  '/creer-un-logo',
-  '/generateur-qr-code',
-  '/qr-code-wifi',
-  '/qr-code-pdf',
-  '/qr-code-whatsapp',
-  '/qr-code-avis-google',
-  '/lire-qr-code',
-  '/generateur-facture',
-  '/generateur-devis',
-  '/modele-cv',
-  '/lettre-de-resiliation',
-  '/attestation-hebergement',
-  '/attestation-sur-l-honneur',
-  '/signature-mail',
-  '/signature-outlook',
-  '/signature-gmail',
-  '/carte-de-visite-qr-code',
-  '/modele-carte-de-visite',
-  '/carte-de-visite-nfc',
-  '/calculer-un-pourcentage',
-  '/calcul-ht-ttc',
-  '/calcul-marge-commerciale',
-  '/nombre-de-jours-entre-deux-dates',
-  '/calculateur-age',
-  '/chronometre',
-  '/minuteur',
-  '/compte-a-rebours',
-  '/tirage-au-sort',
-  '/roue-de-la-chance',
-  '/compteur-de-mots',
-  '/compteur-de-caracteres',
-  '/generateur-mot-de-passe',
-  '/generateur-lorem-ipsum',
-  '/test-vitesse-de-frappe'];
+// Pages-outils : toutes les adresses (fr et en) du registre src/lib/outils.ts.
+const registre = await readFile(new URL('../src/lib/outils.ts', import.meta.url), 'utf8');
+const OUTILS = [...registre.matchAll(/href: "(\/[^"]+)\/"/g)].map((m) => m[1]);
+const TOUTES = ['/', '/fr', '/en', '/mycard', ...OUTILS];
+// PRERENDER_ROUTES="/compresser-pdf,/en/compress-pdf" : ne rendre que ces pages (essai local pendant un chantier).
+const ROUTES = process.env.PRERENDER_ROUTES ? process.env.PRERENDER_ROUTES.split(',') : TOUTES;
 const dist = resolve(process.argv[2] || 'dist');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.json': 'application/json', '.ico': 'image/x-icon' };

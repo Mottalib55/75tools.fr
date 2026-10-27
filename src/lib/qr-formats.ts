@@ -1,7 +1,11 @@
 /**
  * Contenus des QR codes spécialisés (wifi, WhatsApp, avis Google, lien vers un PDF) et
  * reconnaissance du type d'un contenu décodé. Fonctions pures, testables hors navigateur.
+ * Les fonctions qui produisent un message prennent un paramètre `lang` facultatif ("fr" par défaut).
  */
+import type { Langue } from "@/lib/langue";
+
+const tx = (lang: Langue, fr: string, en: string) => (lang === "en" ? en : fr);
 
 /* ---------- Wifi (format « WIFI: » décrit par ZXing, Barcode Contents) ---------- */
 
@@ -49,39 +53,41 @@ export function lireWifi(t: string): { ssid: string; motDePasse: string; securit
 export interface Pays {
   code: string; // indicatif sans +
   nom: string;
+  nomEn: string;
   zeroInitial: boolean; // le 0 national est retiré au format international
 }
 
 export const PAYS_WHATSAPP: Pays[] = [
-  { code: "33", nom: "France métropolitaine (+33)", zeroInitial: true },
-  { code: "262", nom: "La Réunion, Mayotte (+262)", zeroInitial: true },
-  { code: "590", nom: "Guadeloupe (+590)", zeroInitial: true },
-  { code: "596", nom: "Martinique (+596)", zeroInitial: true },
-  { code: "594", nom: "Guyane (+594)", zeroInitial: true },
-  { code: "32", nom: "Belgique (+32)", zeroInitial: true },
-  { code: "41", nom: "Suisse (+41)", zeroInitial: true },
-  { code: "352", nom: "Luxembourg (+352)", zeroInitial: false },
-  { code: "1", nom: "Canada, États-Unis (+1)", zeroInitial: false },
-  { code: "212", nom: "Maroc (+212)", zeroInitial: true },
-  { code: "213", nom: "Algérie (+213)", zeroInitial: true },
-  { code: "216", nom: "Tunisie (+216)", zeroInitial: false },
-  { code: "221", nom: "Sénégal (+221)", zeroInitial: false },
-  { code: "225", nom: "Côte d'Ivoire (+225)", zeroInitial: false },
-  { code: "44", nom: "Royaume-Uni (+44)", zeroInitial: true },
-  { code: "49", nom: "Allemagne (+49)", zeroInitial: true },
-  { code: "34", nom: "Espagne (+34)", zeroInitial: false },
-  { code: "351", nom: "Portugal (+351)", zeroInitial: false },
+  { code: "33", nom: "France métropolitaine (+33)", nomEn: "Metropolitan France (+33)", zeroInitial: true },
+  { code: "262", nom: "La Réunion, Mayotte (+262)", nomEn: "Réunion, Mayotte (+262)", zeroInitial: true },
+  { code: "590", nom: "Guadeloupe (+590)", nomEn: "Guadeloupe (+590)", zeroInitial: true },
+  { code: "596", nom: "Martinique (+596)", nomEn: "Martinique (+596)", zeroInitial: true },
+  { code: "594", nom: "Guyane (+594)", nomEn: "French Guiana (+594)", zeroInitial: true },
+  { code: "32", nom: "Belgique (+32)", nomEn: "Belgium (+32)", zeroInitial: true },
+  { code: "41", nom: "Suisse (+41)", nomEn: "Switzerland (+41)", zeroInitial: true },
+  { code: "352", nom: "Luxembourg (+352)", nomEn: "Luxembourg (+352)", zeroInitial: false },
+  { code: "1", nom: "Canada, États-Unis (+1)", nomEn: "Canada, United States (+1)", zeroInitial: false },
+  { code: "212", nom: "Maroc (+212)", nomEn: "Morocco (+212)", zeroInitial: true },
+  { code: "213", nom: "Algérie (+213)", nomEn: "Algeria (+213)", zeroInitial: true },
+  { code: "216", nom: "Tunisie (+216)", nomEn: "Tunisia (+216)", zeroInitial: false },
+  { code: "221", nom: "Sénégal (+221)", nomEn: "Senegal (+221)", zeroInitial: false },
+  { code: "225", nom: "Côte d'Ivoire (+225)", nomEn: "Côte d'Ivoire (+225)", zeroInitial: false },
+  { code: "44", nom: "Royaume-Uni (+44)", nomEn: "United Kingdom (+44)", zeroInitial: true },
+  { code: "353", nom: "Irlande (+353)", nomEn: "Ireland (+353)", zeroInitial: true },
+  { code: "49", nom: "Allemagne (+49)", nomEn: "Germany (+49)", zeroInitial: true },
+  { code: "34", nom: "Espagne (+34)", nomEn: "Spain (+34)", zeroInitial: false },
+  { code: "351", nom: "Portugal (+351)", nomEn: "Portugal (+351)", zeroInitial: false },
 ];
 
 /**
  * « 06 12 34 56 78 » + France → « 33612345678 ». Un numéro saisi avec + ou 00 garde son indicatif.
  * Renvoie aussi une remarque quand la saisie a été transformée ou paraît incomplète.
  */
-export function numeroInternational(saisie: string, pays: Pays): { numero: string; remarque: string } {
+export function numeroInternational(saisie: string, pays: Pays, lang: Langue = "fr"): { numero: string; remarque: string } {
   const brut = saisie.trim();
   if (!brut) return { numero: "", remarque: "" };
   const chiffres = brut.replace(/[^\d+]/g, "");
-  if (/[a-z]/i.test(brut)) return { numero: "", remarque: "Le numéro ne doit contenir que des chiffres." };
+  if (/[a-z]/i.test(brut)) return { numero: "", remarque: tx(lang, "Le numéro ne doit contenir que des chiffres.", "The number must contain digits only.") };
   let n: string;
   let remarque = "";
   if (chiffres.startsWith("+")) n = chiffres.slice(1).replace(/\+/g, "");
@@ -90,10 +96,19 @@ export function numeroInternational(saisie: string, pays: Pays): { numero: strin
     let national = chiffres.replace(/\+/g, "");
     if (pays.zeroInitial && national.startsWith("0")) national = national.slice(1);
     n = pays.code + national;
-    remarque = `Converti au format international : indicatif ${pays.code}${pays.zeroInitial ? ", sans le 0 initial" : ""}.`;
+    remarque = tx(
+      lang,
+      `Converti au format international : indicatif ${pays.code}${pays.zeroInitial ? ", sans le 0 initial" : ""}.`,
+      `Converted to international format: country code ${pays.code}${pays.zeroInitial ? ", leading 0 removed" : ""}.`
+    );
   }
-  if (n.length < 8) remarque = "Le numéro paraît incomplet.";
-  else if (n.length > 15) remarque = "Le numéro paraît trop long : un numéro international compte au plus 15 chiffres.";
+  if (n.length < 8) remarque = tx(lang, "Le numéro paraît incomplet.", "The number looks incomplete.");
+  else if (n.length > 15)
+    remarque = tx(
+      lang,
+      "Le numéro paraît trop long : un numéro international compte au plus 15 chiffres.",
+      "The number looks too long: an international number has at most 15 digits."
+    );
   return { numero: n, remarque };
 }
 
@@ -111,7 +126,7 @@ export type ResultatAvis =
   | { ok: true; lien: string; remarque: string; mode: "lien" | "placeid" }
   | { ok: false; erreur: string };
 
-export function lienAvisGoogle(saisie: string): ResultatAvis {
+export function lienAvisGoogle(saisie: string, lang: Langue = "fr"): ResultatAvis {
   const s = saisie.trim();
   if (!s) return { ok: false, erreur: "" };
   // Identifiant de lieu seul (souvent « ChIJ… »)
@@ -120,28 +135,42 @@ export function lienAvisGoogle(saisie: string): ResultatAvis {
       ok: true,
       mode: "placeid",
       lien: `https://search.google.com/local/writereview?placeid=${encodeURIComponent(s)}`,
-      remarque: "Lien construit à partir de l'identifiant de lieu. Scannez-le pour vérifier qu'il ouvre bien la fenêtre d'avis de votre établissement.",
+      remarque: tx(
+        lang,
+        "Lien construit à partir de l'identifiant de lieu. Scannez-le pour vérifier qu'il ouvre bien la fenêtre d'avis de votre établissement.",
+        "Link built from the Place ID. Scan it to check that it opens the review window of your business."
+      ),
     };
   }
   let u: URL;
   try {
     u = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
   } catch {
-    return { ok: false, erreur: "Ce n'est ni une adresse web ni un identifiant de lieu." };
+    return { ok: false, erreur: tx(lang, "Ce n'est ni une adresse web ni un identifiant de lieu.", "This is neither a web address nor a Place ID.") };
   }
   if (!HOTES_GOOGLE.test(u.hostname)) {
-    return { ok: false, erreur: `L'adresse mène à ${u.hostname}, pas à Google. Collez le lien copié depuis votre fiche d'établissement.` };
+    return {
+      ok: false,
+      erreur: tx(
+        lang,
+        `L'adresse mène à ${u.hostname}, pas à Google. Collez le lien copié depuis votre fiche d'établissement.`,
+        `This address leads to ${u.hostname}, not to Google. Paste the link copied from your Business Profile.`
+      ),
+    };
   }
   if (u.protocol === "http:") u.protocol = "https:";
   const placeid = u.searchParams.get("placeid");
-  let remarque = "Lien Google reconnu.";
+  let remarque = tx(lang, "Lien Google reconnu.", "Google link recognised.");
   if (/^maps\.app\.goo\.gl$/i.test(u.hostname) || /\/maps\//.test(u.pathname)) {
-    remarque =
-      "Ce lien ressemble à un lien de partage Google Maps : il ouvre la fiche, pas forcément la fenêtre d'avis. Préférez le lien d'avis copié depuis votre fiche d'établissement.";
+    remarque = tx(
+      lang,
+      "Ce lien ressemble à un lien de partage Google Maps : il ouvre la fiche, pas forcément la fenêtre d'avis. Préférez le lien d'avis copié depuis votre fiche d'établissement.",
+      "This looks like a Google Maps share link: it opens the listing, not necessarily the review window. Prefer the review link copied from your Business Profile."
+    );
   } else if (/writereview/.test(u.pathname) && placeid) {
-    remarque = "Lien d'avis avec identifiant de lieu reconnu.";
+    remarque = tx(lang, "Lien d'avis avec identifiant de lieu reconnu.", "Review link with a Place ID recognised.");
   } else if (/^g\.page$/i.test(u.hostname) && /\/review/.test(u.pathname)) {
-    remarque = "Lien d'avis fourni par Google reconnu.";
+    remarque = tx(lang, "Lien d'avis fourni par Google reconnu.", "Review link supplied by Google recognised.");
   }
   return { ok: true, mode: "lien", lien: u.toString(), remarque };
 }
@@ -161,7 +190,7 @@ export interface AnalysePdf {
   dropboxMode?: "dl0" | "dl1" | "raw1" | "aucun";
 }
 
-export function analyserLienPdf(saisie: string): AnalysePdf {
+export function analyserLienPdf(saisie: string, lang: Langue = "fr"): AnalysePdf {
   const s = saisie.trim();
   const alertes: string[] = [];
   if (!s) return { ok: false, lien: "", alertes };
@@ -170,25 +199,32 @@ export function analyserLienPdf(saisie: string): AnalysePdf {
       ok: false,
       lien: "",
       alertes,
-      erreur:
+      erreur: tx(
+        lang,
         "C'est l'emplacement du fichier sur votre ordinateur : un téléphone ne peut pas l'ouvrir. Mettez d'abord le PDF en ligne, puis collez son lien de partage.",
+        "This is where the file sits on your computer: a phone cannot open it. Put the PDF online first, then paste its sharing link."
+      ),
     };
   }
   let u: URL;
   try {
     u = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(s) ? s : `https://${s}`);
   } catch {
-    return { ok: false, lien: "", alertes, erreur: "Cette adresse n'est pas valide." };
+    return { ok: false, lien: "", alertes, erreur: tx(lang, "Cette adresse n'est pas valide.", "This address is not valid.") };
   }
   if (u.protocol !== "https:" && u.protocol !== "http:") {
-    return { ok: false, lien: "", alertes, erreur: "L'adresse doit commencer par https://." };
+    return { ok: false, lien: "", alertes, erreur: tx(lang, "L'adresse doit commencer par https://.", "The address must start with https://.") };
   }
   if (!u.hostname.includes(".")) {
-    return { ok: false, lien: "", alertes, erreur: "Le nom de domaine paraît incomplet." };
+    return { ok: false, lien: "", alertes, erreur: tx(lang, "Le nom de domaine paraît incomplet.", "The domain name looks incomplete.") };
   }
   if (u.protocol === "http:") {
     alertes.push(
-      "L'adresse commençait par http:// : elle a été passée en https://. Vérifiez qu'elle s'ouvre toujours, sinon le navigateur du téléphone affichera un avertissement."
+      tx(
+        lang,
+        "L'adresse commençait par http:// : elle a été passée en https://. Vérifiez qu'elle s'ouvre toujours, sinon le navigateur du téléphone affichera un avertissement.",
+        "The address started with http://: it has been switched to https://. Check that it still opens, otherwise the phone's browser will show a warning."
+      )
     );
     u.protocol = "https:";
   }
@@ -207,11 +243,21 @@ export function analyserLienPdf(saisie: string): AnalysePdf {
     else dropboxMode = "aucun";
   }
   if (service === "drive" && /\/edit/.test(u.pathname)) {
-    alertes.push("Le lien se termine par /edit : c'est l'adresse de modification. Vérifiez que le rôle donné aux visiteurs est « Lecteur ».");
+    alertes.push(
+      tx(
+        lang,
+        "Le lien se termine par /edit : c'est l'adresse de modification. Vérifiez que le rôle donné aux visiteurs est « Lecteur ».",
+        "The link ends in /edit: that is the editing address. Check that visitors are given the Viewer role."
+      )
+    );
   }
   if (service === "transfert") {
     alertes.push(
-      "Les services d'envoi de fichiers donnent en général des liens à durée limitée : une fois le lien expiré, le QR code imprimé ne mènera plus à rien. Hébergez plutôt le PDF sur un espace de stockage ou sur votre site."
+      tx(
+        lang,
+        "Les services d'envoi de fichiers donnent en général des liens à durée limitée : une fois le lien expiré, le QR code imprimé ne mènera plus à rien. Hébergez plutôt le PDF sur un espace de stockage ou sur votre site.",
+        "File transfer services usually give links that expire: once the link is dead, the printed QR code leads nowhere. Host the PDF on a cloud drive or on your website instead."
+      )
     );
   }
   return { ok: true, lien: u.toString(), alertes, service, hote: h, pdf, dropboxMode };

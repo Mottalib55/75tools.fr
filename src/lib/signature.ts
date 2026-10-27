@@ -4,6 +4,8 @@
  * transforment en pièces jointes). Les images (photo, logo) sont appelées par leur adresse.
  */
 
+import type { Langue } from "@/lib/outils";
+
 export type Disposition = "classique" | "compacte" | "logo" | "filet";
 
 export interface DonneesSignature {
@@ -24,12 +26,18 @@ export interface DonneesSignature {
   mention: string;
 }
 
-export const DISPOSITIONS: { id: Disposition; nom: string; detail: string }[] = [
-  { id: "classique", nom: "Classique", detail: "photo ou logo à gauche, filet vertical" },
-  { id: "compacte", nom: "Compacte", detail: "trois lignes, sans image" },
-  { id: "logo", nom: "Logo dessous", detail: "texte puis logo de l'entreprise" },
-  { id: "filet", nom: "Filet de couleur", detail: "filet horizontal au-dessus" },
+export const DISPOSITIONS: { id: Disposition; nom: Record<Langue, string>; detail: Record<Langue, string> }[] = [
+  { id: "classique", nom: { fr: "Classique", en: "Classic" }, detail: { fr: "photo ou logo à gauche, filet vertical", en: "photo or logo on the left, vertical rule" } },
+  { id: "compacte", nom: { fr: "Compacte", en: "Compact" }, detail: { fr: "trois lignes, sans image", en: "three lines, no image" } },
+  { id: "logo", nom: { fr: "Logo dessous", en: "Logo below" }, detail: { fr: "texte puis logo de l'entreprise", en: "text, then the company logo" } },
+  { id: "filet", nom: { fr: "Filet de couleur", en: "Colour rule" }, detail: { fr: "filet horizontal au-dessus", en: "horizontal rule on top" } },
 ];
+
+/** Libellés écrits dans la signature elle-même : en anglais sur la page anglaise. */
+const LIBELLES: Record<Langue, { fixe: string; mobile: string }> = {
+  fr: { fixe: "T", mobile: "M" },
+  en: { fixe: "Office", mobile: "Mobile" },
+};
 
 const FONT = "font-family:Arial,Helvetica,sans-serif;";
 
@@ -57,13 +65,14 @@ export const lienTel = (t: string) => {
 
 const couleurSure = (c: string) => (/^#[0-9a-f]{6}$/i.test(c) ? c : "#1f6feb");
 
-function lignesContact(d: DonneesSignature, c: string, sep: string): string[] {
+function lignesContact(d: DonneesSignature, c: string, sep: string, lang: Langue): string[] {
+  const lib = LIBELLES[lang];
   const a = (href: string, txt: string) =>
     `<a href="${echapper(href)}" style="color:${c};text-decoration:none;">${echapper(txt)}</a>`;
   const out: string[] = [];
   const tels: string[] = [];
-  if (d.telephone.trim()) tels.push(`<span style="color:#555555;">T&nbsp;</span>${a(lienTel(d.telephone), d.telephone.trim())}`);
-  if (d.mobile.trim()) tels.push(`<span style="color:#555555;">M&nbsp;</span>${a(lienTel(d.mobile), d.mobile.trim())}`);
+  if (d.telephone.trim()) tels.push(`<span style="color:#555555;">${lib.fixe}&nbsp;</span>${a(lienTel(d.telephone), d.telephone.trim())}`);
+  if (d.mobile.trim()) tels.push(`<span style="color:#555555;">${lib.mobile}&nbsp;</span>${a(lienTel(d.mobile), d.mobile.trim())}`);
   if (tels.length) out.push(tels.join(sep));
   const web: string[] = [];
   if (d.email.trim()) web.push(a("mailto:" + d.email.trim(), d.email.trim()));
@@ -104,11 +113,11 @@ const table = (inner: string) =>
 const tr = (html: string, padTop = 0) =>
   html ? `<tr><td style="${FONT}font-size:13px;line-height:19px;color:#333333;${padTop ? `padding-top:${padTop}px;` : ""}">${html}</td></tr>` : "";
 
-export function construireSignature(d: DonneesSignature, disp: Disposition): string {
+export function construireSignature(d: DonneesSignature, disp: Disposition, lang: Langue = "fr"): string {
   const c = couleurSure(d.couleur);
   const photo = normaliserUrl(d.photoUrl);
   const logo = normaliserUrl(d.logoUrl);
-  const contacts = lignesContact(d, c, ' <span style="color:#bbbbbb;">|</span> ');
+  const contacts = lignesContact(d, c, ' <span style="color:#bbbbbb;">|</span> ', lang);
 
   if (disp === "compacte") {
     const l1 = [nomHtml(d, c, 15), posteHtml(d)].filter(Boolean).join(' <span style="color:#bbbbbb;">|</span> ');
@@ -140,12 +149,13 @@ export function construireSignature(d: DonneesSignature, disp: Disposition): str
 }
 
 /** Version texte (repli quand la copie HTML est refusée, ou pour un client en texte brut). */
-export function signatureTexte(d: DonneesSignature): string {
+export function signatureTexte(d: DonneesSignature, lang: Langue = "fr"): string {
+  const lib = LIBELLES[lang];
   const site = normaliserUrl(d.site);
   return [
     d.nom,
     [d.poste, d.entreprise].filter((x) => x.trim()).join(" · "),
-    [d.telephone && "T " + d.telephone, d.mobile && "M " + d.mobile].filter(Boolean).join(" | "),
+    [d.telephone && lib.fixe + " " + d.telephone, d.mobile && lib.mobile + " " + d.mobile].filter(Boolean).join(" | "),
     [d.email, site && urlAffichee(site)].filter(Boolean).join(" | "),
     d.adresse,
     normaliserUrl(d.linkedin),

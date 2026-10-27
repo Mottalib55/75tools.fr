@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ComponentType } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -64,7 +64,58 @@ const CompteurDeCaracteres = lazy(() => import("./pages/outils/CompteurDeCaracte
 const GenerateurMotDePasse = lazy(() => import("./pages/outils/GenerateurMotDePasse"));
 const GenerateurLoremIpsum = lazy(() => import("./pages/outils/GenerateurLoremIpsum"));
 const TestVitesseDeFrappe = lazy(() => import("./pages/outils/TestVitesseDeFrappe"));
-import { detectBrowserLanguage } from "@/lib/i18n";
+import { OUTILS, type Langue } from "@/lib/outils";
+const Racine = lazy(() => import("./pages/Racine"));
+
+/** Une page par outil ; la même sert les deux langues (prop `lang`). */
+const PAGES: Record<string, ComponentType<{ lang?: Langue }>> = {
+  "compresser-pdf": CompresserPdf,
+  "fusionner-pdf": FusionnerPdf,
+  "separer-pdf": SeparerPdf,
+  "jpg-en-pdf": JpgEnPdf,
+  "pdf-en-jpg": PdfEnJpg,
+  "signer-pdf": SignerPdf,
+  "heic-en-jpg": HeicEnJpg,
+  "png-en-jpg": PngEnJpg,
+  "webp-en-jpg": WebpEnJpg,
+  "redimensionner-image": RedimensionnerImage,
+  "supprimer-fond-image": SupprimerFondImage,
+  "photo-identite": PhotoIdentite,
+  "creer-un-logo": CreerUnLogo,
+  "generateur-qr-code": GenerateurQrCode,
+  "qr-code-wifi": QrCodeWifi,
+  "qr-code-pdf": QrCodePdf,
+  "qr-code-whatsapp": QrCodeWhatsapp,
+  "qr-code-avis-google": QrCodeAvisGoogle,
+  "lire-qr-code": LireQrCode,
+  "generateur-facture": GenerateurFacture,
+  "generateur-devis": GenerateurDevis,
+  "modele-cv": ModeleCv,
+  "lettre-de-resiliation": LettreDeResiliation,
+  "attestation-hebergement": AttestationHebergement,
+  "attestation-sur-l-honneur": AttestationSurLHonneur,
+  "signature-mail": SignatureMail,
+  "signature-outlook": SignatureOutlook,
+  "signature-gmail": SignatureGmail,
+  "carte-de-visite-qr-code": CarteVisiteQrCode,
+  "modele-carte-de-visite": ModeleCarteVisite,
+  "carte-de-visite-nfc": CarteVisiteNfc,
+  "calculer-un-pourcentage": CalculerUnPourcentage,
+  "calcul-ht-ttc": CalculHtTtc,
+  "calcul-marge-commerciale": CalculMargeCommerciale,
+  "nombre-de-jours-entre-deux-dates": NombreDeJoursEntreDeuxDates,
+  "calculateur-age": CalculateurAge,
+  "chronometre": Chronometre,
+  "minuteur": Minuteur,
+  "compte-a-rebours": CompteARebours,
+  "tirage-au-sort": TirageAuSort,
+  "roue-de-la-chance": RoueDeLaChance,
+  "compteur-de-mots": CompteurDeMots,
+  "compteur-de-caracteres": CompteurDeCaracteres,
+  "generateur-mot-de-passe": GenerateurMotDePasse,
+  "generateur-lorem-ipsum": GenerateurLoremIpsum,
+  "test-vitesse-de-frappe": TestVitesseDeFrappe,
+};
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -79,8 +130,8 @@ const App = () => (
           <BrowserRouter>
           <Suspense fallback={<div className="min-h-screen bg-neutral-950" />}>
           <Routes>
-            {/* Language redirect */}
-            <Route path="/" element={<Hub lang={detectBrowserLanguage()} />} />
+            {/* Racine : noindex, liens vers /fr/ et /en/, redirection selon la langue du navigateur (RECETTE §13) */}
+            <Route path="/" element={<Racine />} />
 
             {/* French routes */}
             <Route path="/fr" element={<Hub lang="fr" />} />
@@ -96,53 +147,14 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/card/:username" element={<PublicCard />} />
 
-            {/* Pages-outils françaises (pré-rendues, voir scripts/prerender.mjs) */}
-            <Route path="/compresser-pdf" element={<CompresserPdf />} />
-            <Route path="/fusionner-pdf" element={<FusionnerPdf />} />
-            <Route path="/separer-pdf" element={<SeparerPdf />} />
-            <Route path="/jpg-en-pdf" element={<JpgEnPdf />} />
-            <Route path="/pdf-en-jpg" element={<PdfEnJpg />} />
-            <Route path="/signer-pdf" element={<SignerPdf />} />
-            <Route path="/heic-en-jpg" element={<HeicEnJpg />} />
-            <Route path="/png-en-jpg" element={<PngEnJpg />} />
-            <Route path="/webp-en-jpg" element={<WebpEnJpg />} />
-            <Route path="/redimensionner-image" element={<RedimensionnerImage />} />
-            <Route path="/supprimer-fond-image" element={<SupprimerFondImage />} />
-            <Route path="/photo-identite" element={<PhotoIdentite />} />
-            <Route path="/creer-un-logo" element={<CreerUnLogo />} />
-            <Route path="/generateur-qr-code" element={<GenerateurQrCode />} />
-            <Route path="/qr-code-wifi" element={<QrCodeWifi />} />
-            <Route path="/qr-code-pdf" element={<QrCodePdf />} />
-            <Route path="/qr-code-whatsapp" element={<QrCodeWhatsapp />} />
-            <Route path="/qr-code-avis-google" element={<QrCodeAvisGoogle />} />
-            <Route path="/lire-qr-code" element={<LireQrCode />} />
-            <Route path="/generateur-facture" element={<GenerateurFacture />} />
-            <Route path="/generateur-devis" element={<GenerateurDevis />} />
-            <Route path="/modele-cv" element={<ModeleCv />} />
-            <Route path="/lettre-de-resiliation" element={<LettreDeResiliation />} />
-            <Route path="/attestation-hebergement" element={<AttestationHebergement />} />
-            <Route path="/attestation-sur-l-honneur" element={<AttestationSurLHonneur />} />
-            <Route path="/signature-mail" element={<SignatureMail />} />
-            <Route path="/signature-outlook" element={<SignatureOutlook />} />
-            <Route path="/signature-gmail" element={<SignatureGmail />} />
-            <Route path="/carte-de-visite-qr-code" element={<CarteVisiteQrCode />} />
-            <Route path="/modele-carte-de-visite" element={<ModeleCarteVisite />} />
-            <Route path="/carte-de-visite-nfc" element={<CarteVisiteNfc />} />
-            <Route path="/calculer-un-pourcentage" element={<CalculerUnPourcentage />} />
-            <Route path="/calcul-ht-ttc" element={<CalculHtTtc />} />
-            <Route path="/calcul-marge-commerciale" element={<CalculMargeCommerciale />} />
-            <Route path="/nombre-de-jours-entre-deux-dates" element={<NombreDeJoursEntreDeuxDates />} />
-            <Route path="/calculateur-age" element={<CalculateurAge />} />
-            <Route path="/chronometre" element={<Chronometre />} />
-            <Route path="/minuteur" element={<Minuteur />} />
-            <Route path="/compte-a-rebours" element={<CompteARebours />} />
-            <Route path="/tirage-au-sort" element={<TirageAuSort />} />
-            <Route path="/roue-de-la-chance" element={<RoueDeLaChance />} />
-            <Route path="/compteur-de-mots" element={<CompteurDeMots />} />
-            <Route path="/compteur-de-caracteres" element={<CompteurDeCaracteres />} />
-            <Route path="/generateur-mot-de-passe" element={<GenerateurMotDePasse />} />
-            <Route path="/generateur-lorem-ipsum" element={<GenerateurLoremIpsum />} />
-            <Route path="/test-vitesse-de-frappe" element={<TestVitesseDeFrappe />} />
+            {/* Pages-outils, en français et en anglais (registre src/lib/outils.ts, pré-rendues par scripts/prerender.mjs) */}
+            {OUTILS.flatMap((o) => {
+              const Page = PAGES[o.id];
+              return [
+                <Route key={o.fr.href} path={o.fr.href.slice(0, -1)} element={<Page lang="fr" />} />,
+                <Route key={o.en.href} path={o.en.href.slice(0, -1)} element={<Page lang="en" />} />,
+              ];
+            })}
 
             {/* Gym Squad */}
             <Route path="/gym" element={<GymSquad />} />

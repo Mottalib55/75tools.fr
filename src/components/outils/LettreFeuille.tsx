@@ -1,10 +1,12 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Bouton } from "@/components/outils/OutilLayout";
+import { useLangue, tr } from "@/lib/langue";
 
 /**
  * Feuille A4 des lettres et attestations (résiliation, hébergement, sur l'honneur) :
  * blocs fixes en haut et en bas, corps modifiable à l'écran, impression seule de la feuille.
  * À l'impression, la zone de texte est remplacée par un bloc de texte (une textarea se coupe mal).
+ * Interface bilingue (useLangue) ; le document lui-même reste en français, y compris ses dates.
  */
 
 /** Date du jour au format AAAA-MM-JJ, à appeler dans un useEffect (rendu initial déterministe). */
@@ -73,7 +75,8 @@ export const LettreFeuille = ({
   texte,
   onTexte,
   bas,
-  libelleTexte = "Texte de la lettre",
+  libelleTexte,
+  id,
 }: {
   haut?: ReactNode;
   titre?: string;
@@ -81,58 +84,71 @@ export const LettreFeuille = ({
   onTexte: (t: string) => void;
   bas?: ReactNode;
   libelleTexte?: string;
-}) => (
-  <div className="feuille-lettre rounded-lg bg-white text-neutral-900 shadow-xl px-5 py-6 sm:px-10 sm:py-10 text-[0.95rem] sm:text-base leading-relaxed [overflow-wrap:anywhere] print:shadow-none print:rounded-none print:p-0 print:text-[11pt]">
-    <style>{`@media print { @page { size: A4; margin: 18mm 20mm; } html, body { background: #fff !important; } }`}</style>
-    {haut}
-    {titre && <p className="text-center font-bold tracking-wide uppercase my-6 print:my-8">{titre}</p>}
-    <ZoneAuto value={texte} onChange={onTexte} label={libelleTexte} />
-    <div className="hidden print:block whitespace-pre-wrap">{texte}</div>
-    {bas}
-  </div>
-);
+  id?: string;
+}) => {
+  const lang = useLangue();
+  return (
+    <div id={id} lang="fr" className="feuille-lettre scroll-mt-4 rounded-lg bg-white text-neutral-900 shadow-xl px-5 py-6 sm:px-10 sm:py-10 text-[0.95rem] sm:text-base leading-relaxed [overflow-wrap:anywhere] print:shadow-none print:rounded-none print:p-0 print:text-[11pt]">
+      <style>{`@media print { @page { size: A4; margin: 18mm 20mm; } html, body { background: #fff !important; } }`}</style>
+      {haut}
+      {titre && <p className="text-center font-bold tracking-wide uppercase my-6 print:my-8">{titre}</p>}
+      <ZoneAuto value={texte} onChange={onTexte} label={libelleTexte ?? tr(lang, "Texte de la lettre", "Letter text (in French)")} />
+      <div className="hidden print:block whitespace-pre-wrap">{texte}</div>
+      {bas}
+    </div>
+  );
+};
 
 /** Boutons et messages sous la feuille : copier le texte complet, imprimer ou enregistrer en PDF. */
 export const ActionsLettre = ({
   texteComplet,
   retouche,
   reinitialiser,
-  nomDocument = "la lettre",
+  nomDocument,
 }: {
   texteComplet: string;
   retouche: boolean;
   reinitialiser: () => void;
-  nomDocument?: string;
+  nomDocument?: string; // « la lettre », « l'attestation » / "the letter", "the statement"
 }) => {
+  const lang = useLangue();
   const [etat, setEtat] = useState("");
+  const doc = nomDocument ?? tr(lang, "la lettre", "the letter");
   const copier = async () => {
     try {
       await navigator.clipboard.writeText(texteComplet);
-      setEtat(`Texte copié : collez-le dans votre traitement de texte ou dans un e-mail.`);
+      setEtat(tr(lang, "Texte copié : collez-le dans votre traitement de texte ou dans un e-mail.", "Text copied: paste it into your word processor or an email."));
     } catch {
-      setEtat("Votre navigateur a refusé la copie : sélectionnez le texte à la souris, puis copiez-le.");
+      setEtat(tr(lang, "Votre navigateur a refusé la copie : sélectionnez le texte à la souris, puis copiez-le.", "Your browser blocked copying: select the text with the mouse, then copy it."));
     }
   };
   return (
     <div className="print:hidden space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Bouton onClick={() => window.print()}>Imprimer ou enregistrer en PDF</Bouton>
+        <Bouton onClick={() => window.print()}>{tr(lang, "Imprimer ou enregistrer en PDF", "Print or save as PDF")}</Bouton>
         <Bouton secondaire onClick={copier}>
-          Copier le texte
+          {tr(lang, "Copier le texte", "Copy the text")}
         </Bouton>
         {retouche && (
           <Bouton secondaire onClick={reinitialiser}>
-            Revenir au texte généré
+            {tr(lang, "Revenir au texte généré", "Back to the generated text")}
           </Bouton>
         )}
       </div>
       <p className="text-sm text-neutral-500">
-        Cliquez dans {nomDocument} pour la retoucher. Pour un PDF, choisissez « Enregistrer au format PDF » comme
-        imprimante.
+        {tr(
+          lang,
+          `Cliquez dans ${doc} pour la retoucher. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.`,
+          `Click inside ${doc} to edit it. For a PDF, pick "Save as PDF" as the printer.`
+        )}
       </p>
       {retouche && (
         <p role="status" className="text-sm text-amber-300">
-          Vous avez retouché le texte : les changements faits ensuite dans le formulaire ne s'y reportent plus.
+          {tr(
+            lang,
+            "Vous avez retouché le texte : les changements faits ensuite dans le formulaire ne s'y reportent plus.",
+            "You have edited the text: later changes in the form no longer update it."
+          )}
         </p>
       )}
       <p aria-live="polite" className="text-sm text-sky-300 min-h-[1.25rem]">
