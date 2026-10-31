@@ -85,7 +85,7 @@ const T = {
     tauxTva: "Taux de TVA",
     saisirAchat: "Saisissez le prix d'achat HT.",
     achatNombre: "Le prix d'achat n'est pas un nombre.",
-    achatZero: "Le prix d'achat doit être supérieur à 0 : valeur ramenée à 0,01 €.",
+    achatZero: "Le prix d'achat doit être supérieur à 0 : sur un achat nul, ni le coefficient ni les taux ne se calculent.",
     saisirVente: "Saisissez le prix de vente HT.",
     venteNombre: "Le prix de vente n'est pas un nombre.",
     venteZero: "Le prix de vente doit être supérieur à 0 : valeur ramenée à 0,01 €.",
@@ -132,7 +132,7 @@ const T = {
     tauxTva: "VAT rate",
     saisirAchat: "Enter the cost price before VAT.",
     achatNombre: "The cost price is not a number.",
-    achatZero: "The cost price must be above 0: set to €0.01.",
+    achatZero: "The cost price must be above 0: with a zero cost, neither the multiplier nor the rates can be worked out.",
     saisirVente: "Enter the selling price before VAT.",
     venteNombre: "The selling price is not a number.",
     venteZero: "The selling price must be above 0: set to €0.01.",
@@ -200,7 +200,7 @@ const lireAchat = (s: string, msg: string[], t: Textes, lire: (s: string) => num
   const n = lire(s);
   if (s.trim() === "") return msg.push(t.saisirAchat), null;
   if (n === null) return msg.push(t.achatNombre), null;
-  if (n <= 0) return msg.push(t.achatZero), 0.01;
+  if (n <= 0) return msg.push(t.achatZero), null;
   return n;
 };
 

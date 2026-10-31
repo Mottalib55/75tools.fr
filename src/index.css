@@ -1,8 +1,9 @@
+/* L'@import doit précéder toute autre règle, sinon le navigateur l'ignore (polices jamais chargées, audit du 2026-10-28). */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
 
 @layer base {
   :root {

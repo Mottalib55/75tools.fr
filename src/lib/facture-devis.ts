@@ -243,8 +243,8 @@ export const LIBELLE_NATURE: Record<Nature, string> = {
 /** Mentions de bas de document, selon le cas. */
 export function mentions(d: Document, e: Emetteur, c: Client, t: Totaux): string[] {
   const m: string[] = [];
-  if (e.franchise) m.push("TVA non applicable, art. 293 B du CGI");
-  else if (d.autoliquidation && c.type === "pro") m.push("Autoliquidation");
+  // Franchise en base : « TVA non applicable, art. 293 B du CGI » est écrit à côté des totaux (aperçu et PDF), pas une seconde fois ici.
+  if (!e.franchise && d.autoliquidation && c.type === "pro") m.push("Autoliquidation");
   if (e.optionDebits && !e.franchise) m.push("Option pour le paiement de la taxe d'après les débits");
   m.push(`Nature des opérations : ${LIBELLE_NATURE[d.nature]}`);
   if (d.type === "facture") {

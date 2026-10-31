@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, Dumbbell, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import SEO from "@/components/SEO";
 
 const MEMBERS = ["Motta", "Raul", "Tobi", "Dani", "Jean", "Vlad", "Lucas", "Hugo", "Sergio", "Carlos", "Ignacio"];
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -150,6 +151,8 @@ const GymSquad = () => {
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-[#e0e0e0]">
+      {/* Appli privée d'un groupe : hors des moteurs de recherche. */}
+      <SEO title="Gym Squad" description="Gym Squad" url="https://75tools.fr/gym" noindex={true} />
       <div className="max-w-[1100px] mx-auto px-4 py-5">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-2">
