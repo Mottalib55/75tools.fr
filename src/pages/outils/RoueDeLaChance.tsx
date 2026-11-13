@@ -335,7 +335,7 @@ const RoueDeLaChance = ({ lang = "fr" }: { lang?: Langue }) => {
           aria-live="polite"
           className={cn(
             "text-center min-h-[2.25rem] [overflow-wrap:anywhere]",
-            gagnant && !tourne ? "text-2xl sm:text-3xl font-semibold text-white" : "text-base text-neutral-500 pt-1.5"
+            gagnant && !tourne ? "text-2xl sm:text-3xl font-semibold text-white" : "text-base text-neutral-400 pt-1.5"
           )}
         >
           {tourne ? t.tourne : gagnant ? gagnant : t.attente}
@@ -360,7 +360,7 @@ const RoueDeLaChance = ({ lang = "fr" }: { lang?: Langue }) => {
         <label className="block">
           <span className="block text-sm text-neutral-300 mb-1">{t.liste}</span>
           <textarea value={texte} onChange={(e) => setTexte(e.target.value)} rows={8} disabled={tourne} className={classeZoneTexte + " resize-y"} />
-          <span className="block text-xs text-neutral-500 mt-1">{t.parts(choix.length)}</span>
+          <span className="block text-xs text-neutral-400 mt-1">{t.parts(choix.length)}</span>
         </label>
         <label className="flex items-center gap-2 text-sm text-neutral-300">
           <input type="checkbox" checked={retirer} onChange={(e) => setRetirer(e.target.checked)} className="w-4 h-4 accent-sky-400" />

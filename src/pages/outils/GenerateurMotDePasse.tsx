@@ -295,7 +295,7 @@ const GenerateurMotDePasse = ({ lang = "fr" }: { lang?: Langue }) => {
             <div className="h-2 mt-1 rounded bg-neutral-800 overflow-hidden" aria-hidden="true">
               <div className={"h-full " + niv.couleur} style={{ width: `${Math.min(1, bits / 128) * 100}%` }} />
             </div>
-            <p className="text-xs text-neutral-500 mt-1">{niv.detail}</p>
+            <p className="text-xs text-neutral-400 mt-1">{niv.detail}</p>
           </div>
         </div>
 
@@ -351,12 +351,12 @@ const GenerateurMotDePasse = ({ lang = "fr" }: { lang?: Langue }) => {
               <legend className="text-sm text-neutral-300 mb-1">{t.caracteres}</legend>
               {ORDRE_TYPES.map((ty) => (
                 <Case key={ty} coche={types.includes(ty)} onChange={(v) => basculerType(ty, v)}>
-                  {t.types[ty]} <span className="text-neutral-500">{EXEMPLES[ty]}</span>
+                  {t.types[ty]} <span className="text-neutral-400">{EXEMPLES[ty]}</span>
                 </Case>
               ))}
             </fieldset>
             <Case coche={exclureAmbigus} onChange={setExclureAmbigus}>
-              {t.ambigus} <span className="text-neutral-500 font-mono">0 O o 1 l I | ' " `</span>
+              {t.ambigus} <span className="text-neutral-400 font-mono">0 O o 1 l I | ' " `</span>
             </Case>
             <Case coche={unDeChaque} onChange={setUnDeChaque}>
               {t.unDeChaque}
@@ -397,7 +397,7 @@ const GenerateurMotDePasse = ({ lang = "fr" }: { lang?: Langue }) => {
             <Case coche={majuscule} onChange={setMajuscule}>{t.majuscule}</Case>
             <Case coche={chiffre} onChange={setChiffre}>{t.chiffre}</Case>
             {langueMots === "fr" && <Case coche={accents} onChange={setAccents}>{t.accents}</Case>}
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-neutral-400">
               {t.liste(tailleListe.toLocaleString(loc), Math.log2(tailleListe).toLocaleString(loc, { maximumFractionDigits: 1 }))}
             </p>
           </>
@@ -424,7 +424,7 @@ const GenerateurMotDePasse = ({ lang = "fr" }: { lang?: Langue }) => {
 
 const ContenuFr = () => (
   <>
-    <Section titre="Générateur de mot de passe : un mot de passe fort en un clic">
+    <Section titre="Générateur de mot de passe sécurisé : un mot de passe fort en un clic">
       <p>
         Ce générateur de mot de passe affiche un mot de passe fort dès l'ouverture de la page : 16 caractères tirés au
         hasard parmi les minuscules, les majuscules, les chiffres et 32 symboles, soit environ 104 bits d'entropie,

@@ -194,7 +194,7 @@ const CarteVisiteNfc = ({ lang = "fr" }: { lang?: Langue }) => {
       <div data-resultat aria-live="polite" className="border-l-2 border-sky-400 bg-neutral-900 rounded-r-md p-5 lg:sticky lg:top-4">
         {reco ? (
           <>
-            <p className="text-xs uppercase tracking-wider text-neutral-500">{t.reco}</p>
+            <p className="text-xs uppercase tracking-wider text-neutral-400">{t.reco}</p>
             <p id="recommandation" className="mt-1 text-xl font-semibold text-white">{reco.titre}</p>
             <ul className="mt-3 space-y-2 text-sm text-neutral-300 list-disc pl-5">
               {reco.raisons.map((x) => (
@@ -211,9 +211,9 @@ const CarteVisiteNfc = ({ lang = "fr" }: { lang?: Langue }) => {
           </>
         ) : (
           <>
-            <p className="text-xs uppercase tracking-wider text-neutral-500">{t.reponse}</p>
+            <p className="text-xs uppercase tracking-wider text-neutral-400">{t.reponse}</p>
             <p className="mt-1 text-neutral-300">{t.attente(t.questions.length)}</p>
-            <p className="mt-3 text-sm text-neutral-500">{t.bref}</p>
+            <p className="mt-3 text-sm text-neutral-400">{t.bref}</p>
           </>
         )}
       </div>

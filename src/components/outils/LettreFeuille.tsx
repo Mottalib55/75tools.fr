@@ -135,7 +135,7 @@ export const ActionsLettre = ({
           </Bouton>
         )}
       </div>
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-400">
         {tr(
           lang,
           `Cliquez dans ${doc} pour la retoucher. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.`,

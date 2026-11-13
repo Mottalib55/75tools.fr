@@ -38,10 +38,10 @@ export const ChampNombre = ({
         className={cn(classeChamp, "tabular-nums", suffixe && "pr-10")}
       />
       {suffixe && (
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">{suffixe}</span>
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">{suffixe}</span>
       )}
     </span>
-    {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+    {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
   </label>
 );
 

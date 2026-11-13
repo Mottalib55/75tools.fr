@@ -331,7 +331,7 @@ const SeparerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
               className={classeChamp}
               aria-describedby="aide-pages"
             />
-            <span id="aide-pages" className="block text-xs text-neutral-500 mt-1">
+            <span id="aide-pages" className="block text-xs text-neutral-400 mt-1">
               {t.aideChamp}
             </span>
           </div>
@@ -392,7 +392,7 @@ const SeparerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
           </p>
         )}
         {enCours && <Progression {...prog} />}
-        {!res && !enCours && !fichier && <p className="text-sm text-neutral-500">{t.attente}</p>}
+        {!res && !enCours && !fichier && <p className="text-sm text-neutral-400">{t.attente}</p>}
         {res && (
           <div className="rounded-lg border border-neutral-800 p-4 space-y-3" role="status" aria-live="polite">
             <p className="text-neutral-200 [overflow-wrap:anywhere]">

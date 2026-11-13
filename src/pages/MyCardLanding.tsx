@@ -125,7 +125,7 @@ const MyCardLanding = () => {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6">
-        <nav aria-label="Breadcrumb" className="pt-4 text-sm text-neutral-500">
+        <nav aria-label="Breadcrumb" className="pt-4 text-sm text-neutral-400">
           <Link to="/en/" className="hover:text-white">75tools</Link> <span aria-hidden="true">›</span> <span>MyCard</span>
         </nav>
 
@@ -135,7 +135,7 @@ const MyCardLanding = () => {
               Free digital business card
             </h1>
             <p className="mt-3 text-neutral-400 text-base sm:text-lg max-w-2xl">
-              One link and one QR code for your phone, email, website and social profiles. Contacts save you in one tap.
+              Your free digital business card is one link and one QR code for your phone, email, website and social profiles. Contacts save you in one tap.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <button type="button" onClick={() => navigate("/register")}
@@ -149,7 +149,7 @@ const MyCardLanding = () => {
                 See an example card
               </button>
             </div>
-            <p className="mt-3 text-sm text-neutral-500">No app to install, no fee, no advertising. Account needed to publish your card.</p>
+            <p className="mt-3 text-sm text-neutral-400">No app to install, no fee, no advertising. Account needed to publish your card.</p>
           </div>
 
           <div className="border border-neutral-800 rounded-2xl p-6 bg-neutral-900/60" aria-label="Example of a MyCard">
@@ -169,7 +169,7 @@ const MyCardLanding = () => {
         </section>
 
         <section className="border-t border-neutral-800 pt-8">
-          <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-5 tracking-tight">How MyCard works</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-5 tracking-tight">How the MyCard digital business card works</h2>
           <div className="space-y-4 leading-relaxed">
             <p>
               A paper business card runs out, goes out of date the day you change jobs and ends up in a drawer before anyone types your
@@ -203,7 +203,7 @@ const MyCardLanding = () => {
               <details key={f.q} className="group py-4">
                 <summary className="cursor-pointer list-none flex justify-between gap-4 text-neutral-100 font-medium">
                   <span>{f.q}</span>
-                  <span className="text-neutral-500 group-open:rotate-45 transition-transform" aria-hidden="true">+</span>
+                  <span className="text-neutral-400 group-open:rotate-45 transition-transform" aria-hidden="true">+</span>
                 </summary>
                 <p className="mt-3 text-neutral-400 leading-relaxed">{f.r}</p>
               </details>
@@ -222,7 +222,7 @@ const MyCardLanding = () => {
           </ul>
         </section>
 
-        <aside className="author mt-14 border-t border-neutral-800 pt-6 text-sm text-neutral-500" data-author>
+        <aside className="author mt-14 border-t border-neutral-800 pt-6 text-sm text-neutral-400" data-author>
           <p>
             MyCard is built and maintained by Radif Partners, publisher of 75tools (<a href="/en/legal-notice/#method" className="underline underline-offset-4">our method</a>).
             Page updated on <time dateTime={LAST_UPDATED}>{displayDate(LAST_UPDATED, "en")}</time>.
@@ -234,7 +234,7 @@ const MyCardLanding = () => {
       </main>
 
       <footer className="border-t border-neutral-800 mt-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-neutral-500 space-y-2">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-neutral-400 space-y-2">
           <p>
             Page updated on <time dateTime={LAST_UPDATED}>{displayDate(LAST_UPDATED, "en")}</time>.
           </p>

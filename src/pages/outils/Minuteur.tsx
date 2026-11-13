@@ -357,7 +357,7 @@ const Minuteur = ({ lang = "fr" }: { lang?: Langue }) => {
         <div className="w-full max-w-md h-1.5 rounded-full bg-neutral-800 overflow-hidden" aria-hidden="true">
           <div className="h-full bg-sky-400" style={{ width: `${Math.min(100, Math.max(0, progression * 100))}%` }} />
         </div>
-        <p role="status" aria-live="polite" className={cn("text-lg min-h-[1.75rem]", termine ? "text-amber-300" : "text-neutral-500")}>
+        <p role="status" aria-live="polite" className={cn("text-lg min-h-[1.75rem]", termine ? "text-amber-300" : "text-neutral-400")}>
           {termine ? t.ecoule : enMarche ? t.enCours : enPause ? t.enPause : ""}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
@@ -400,7 +400,7 @@ const Minuteur = ({ lang = "fr" }: { lang?: Langue }) => {
               { l: t.secondes, v: sec, set: setSec, k: "s" },
             ].map((c) => (
               <label key={c.k} className="block min-w-0">
-                <span className="block text-xs text-neutral-500 mb-1">{c.l}</span>
+                <span className="block text-xs text-neutral-400 mb-1">{c.l}</span>
                 <input
                   type="text"
                   inputMode="numeric"

@@ -214,7 +214,7 @@ const CompteARebours = ({ lang = "fr" }: { lang?: Langue }) => {
               <span className="font-mono tabular-nums text-white text-4xl sm:text-6xl lg:text-7xl leading-none">
                 {pret ? (i === 0 ? v.toLocaleString(locale(lang)) : d2(v)) : "--"}
               </span>
-              <span className="mt-2 text-xs sm:text-sm uppercase tracking-wider text-neutral-500">{t.unites[i]}</span>
+              <span className="mt-2 text-xs sm:text-sm uppercase tracking-wider text-neutral-400">{t.unites[i]}</span>
             </div>
           ))}
         </div>

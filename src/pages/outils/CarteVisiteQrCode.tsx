@@ -229,7 +229,7 @@ const CarteVisiteQrCode = ({ lang = "fr" }: { lang?: Langue }) => {
           </div>
           <div className="space-y-2 text-sm">
             <p className="text-neutral-200">{t.scanner}</p>
-            <p className="text-neutral-500 tabular-nums">
+            <p className="text-neutral-400 tabular-nums">
               {t.stats(taille.toLocaleString(locale(lang)), modules)}
               {module2cm && t.module(module2cm)}
             </p>

@@ -244,7 +244,7 @@ export const ImageLot = ({
 
       <div data-resultat className="min-w-0 space-y-3 lg:col-start-2 lg:row-start-1 lg:row-span-2">
         {elements.length === 0 ? (
-          <p className="rounded-lg border border-neutral-800 p-4 text-sm text-neutral-500">{attente ?? t.attente}</p>
+          <p className="rounded-lg border border-neutral-800 p-4 text-sm text-neutral-400">{attente ?? t.attente}</p>
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2">
@@ -276,7 +276,7 @@ export const ImageLot = ({
                     {e.apercu ? (
                       <img src={e.apercu} alt="" className="max-w-full max-h-full object-contain" />
                     ) : (
-                      <span className="text-[0.65rem] text-neutral-500 uppercase">
+                      <span className="text-[0.65rem] text-neutral-400 uppercase">
                         {e.fichier.name.split(".").pop()?.slice(0, 4)}
                       </span>
                     )}
@@ -285,7 +285,7 @@ export const ImageLot = ({
                     <p className="text-neutral-100 truncate" title={e.fichier.name}>
                       {e.fichier.name}
                     </p>
-                    <p className="text-neutral-500 tabular-nums [overflow-wrap:anywhere]">
+                    <p className="text-neutral-400 tabular-nums [overflow-wrap:anywhere]">
                       {oct(e.fichier.size)}
                       {e.etat === "fait" && e.resultat && (
                         <>
@@ -298,7 +298,7 @@ export const ImageLot = ({
                       {e.etat === "attente" && <span>{t.attenteEl}</span>}
                     </p>
                     {e.etat === "fait" && e.resultat?.detail && (
-                      <p className="text-neutral-500 text-xs [overflow-wrap:anywhere]">{e.resultat.detail}</p>
+                      <p className="text-neutral-400 text-xs [overflow-wrap:anywhere]">{e.resultat.detail}</p>
                     )}
                     {e.etat === "erreur" && <p className="text-amber-300 text-xs [overflow-wrap:anywhere]">{e.message}</p>}
                   </div>
@@ -365,7 +365,7 @@ export const ReglageQualite = ({
       onChange={(e) => onChange(Number(e.target.value))}
       className="w-full h-12 accent-sky-400"
     />
-    <span className="block text-xs text-neutral-500">
+    <span className="block text-xs text-neutral-400">
       {en
         ? "85% suits almost every photo; above 92%, the file grows with no visible gain."
         : "85 % convient à presque toutes les photos ; au-dessus de 92 %, le poids grimpe sans gain visible."}

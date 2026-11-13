@@ -234,7 +234,7 @@ const ModeleCarteVisite = ({ lang = "fr" }: { lang?: Langue }) => {
             />
           </div>
           <Bouton onClick={() => window.print()}>{t.imprimer}</Bouton>
-          <p className="text-xs text-neutral-500">{t.note}</p>
+          <p className="text-xs text-neutral-400">{t.note}</p>
         </div>
 
         {/* Suite du texte */}

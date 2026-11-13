@@ -309,7 +309,7 @@ const TirageAuSort = ({ lang = "fr" }: { lang?: Langue }) => {
             <label className="block">
               <span className="block text-sm text-neutral-300 mb-1">{t.liste}</span>
               <textarea value={liste} onChange={(e) => setListe(e.target.value)} rows={6} className={classeZoneTexte + " resize-y"} placeholder={t.placeholder} />
-              <span className="block text-xs text-neutral-500 mt-1">{t.compte(nb2(participants.length), participants.length)}</span>
+              <span className="block text-xs text-neutral-400 mt-1">{t.compte(nb2(participants.length), participants.length)}</span>
             </label>
             <label className="flex items-center gap-2 text-sm text-neutral-300">
               <input type="checkbox" checked={ignorerDoublons} onChange={(e) => setIgnorerDoublons(e.target.checked)} className="w-4 h-4 accent-sky-400" />
@@ -364,12 +364,12 @@ const TirageAuSort = ({ lang = "fr" }: { lang?: Langue }) => {
       <div className="space-y-4 min-w-0">
         <div ref={zone} data-resultat aria-live="polite" className="rounded-xl border border-neutral-800 bg-neutral-900 p-5 min-h-[8rem] scroll-mt-4">
           {!resultat ? (
-            <p className="text-neutral-500">{t.attente}</p>
+            <p className="text-neutral-400">{t.attente}</p>
           ) : mode === "equipes" ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {resultat.map((q, i) => (
                 <div key={i}>
-                  <p className="text-sm uppercase tracking-wider text-neutral-500 mb-1">{t.equipe(i + 1)}</p>
+                  <p className="text-sm uppercase tracking-wider text-neutral-400 mb-1">{t.equipe(i + 1)}</p>
                   <ul className="text-white space-y-0.5">
                     {q.map((p, j) => (
                       <li key={j} className="[overflow-wrap:anywhere]">
@@ -382,7 +382,7 @@ const TirageAuSort = ({ lang = "fr" }: { lang?: Langue }) => {
             </div>
           ) : (
             <>
-              <p className="text-sm uppercase tracking-wider text-neutral-500 mb-2">
+              <p className="text-sm uppercase tracking-wider text-neutral-400 mb-2">
                 {mode === "nombres" ? t.tires : resultat[0].length > 1 ? t.ordre : t.gagnant}
               </p>
               <ol className={cn("text-white", resultat[0].length === 1 ? "text-4xl sm:text-5xl font-semibold" : "text-xl space-y-1 list-decimal pl-6")}>
@@ -406,7 +406,7 @@ const TirageAuSort = ({ lang = "fr" }: { lang?: Langue }) => {
             <ul className="text-sm text-neutral-400 space-y-1 max-h-48 overflow-y-auto">
               {historique.map((h, i) => (
                 <li key={i} className="[overflow-wrap:anywhere]">
-                  <span className="tabular-nums text-neutral-500">{h.heure}</span> {h.texte}
+                  <span className="tabular-nums text-neutral-400">{h.heure}</span> {h.texte}
                 </li>
               ))}
             </ul>

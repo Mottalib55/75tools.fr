@@ -100,7 +100,7 @@ export function ListeOrdonnable<T extends { id: string }>({
           )}
         >
           <GripVertical className="hidden sm:block w-4 h-4 shrink-0 text-neutral-600 cursor-grab" aria-hidden="true" />
-          <span className="w-6 shrink-0 text-center text-sm text-neutral-500 tabular-nums">{i + 1}</span>
+          <span className="w-6 shrink-0 text-center text-sm text-neutral-400 tabular-nums">{i + 1}</span>
           <div className="flex-1 min-w-0">{rendu(e, i)}</div>
           <button type="button" className={btn} disabled={desactive || i === 0} onClick={() => bouger(i, i - 1)} aria-label={`${tr(lang, "Monter", "Move up")} ${libelle(e)}`}>
             <ArrowUp className="w-4 h-4" aria-hidden="true" />
@@ -233,6 +233,6 @@ export const ChoixListe = ({
     >
       {children}
     </select>
-    {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+    {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
   </label>
 );

@@ -177,9 +177,9 @@ const Jauge = ({ nom, valeur, limite, lang }: { nom: string; valeur: number; lim
 
 const Stat = ({ libelle, valeur, aide }: { libelle: string; valeur: string; aide?: string }) => (
   <div className="rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 min-w-0">
-    <p className="text-xs text-neutral-500">{libelle}</p>
+    <p className="text-xs text-neutral-400">{libelle}</p>
     <p className="text-lg font-semibold text-white tabular-nums [overflow-wrap:anywhere]">{valeur}</p>
-    {aide && <p className="text-xs text-neutral-500">{aide}</p>}
+    {aide && <p className="text-xs text-neutral-400">{aide}</p>}
   </div>
 );
 
@@ -267,7 +267,7 @@ const CompteurDeCaracteres = ({ lang = "fr" }: { lang?: Langue }) => {
           <p className="text-sm text-neutral-300 mt-1">
             <span id="nb-sans-espaces" className="tabular-nums font-semibold text-white">{nb(r.sansEspaces)}</span> {t.sans}
           </p>
-          {r.car === 0 && <p className="text-xs text-neutral-500 mt-1">{t.attente}</p>}
+          {r.car === 0 && <p className="text-xs text-neutral-400 mt-1">{t.attente}</p>}
           {limite > 0 && (
             <div className="mt-2">
               <Jauge nom={t.votreLimite} valeur={r.car} limite={limite} lang={lang} />

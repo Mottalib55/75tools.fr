@@ -43,10 +43,11 @@ const MenuOutils = ({ lang, actif }: { lang: Langue; actif: (href: string) => bo
         aria-expanded={ouvert}
         aria-controls="menu-outils"
         onClick={() => setOuvert((o) => !o)}
-        className="inline-flex items-center gap-2 h-10 px-3 rounded-md border border-neutral-700 text-sm text-neutral-200 hover:border-neutral-500 whitespace-nowrap"
+        className="inline-flex items-center gap-2 h-10 min-w-10 justify-center px-3 rounded-md border border-neutral-700 text-sm text-neutral-200 hover:border-neutral-500 whitespace-nowrap"
       >
         {ouvert ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
-        {libelle}
+        {/* Sous 380 px, le libellé reste lu par les lecteurs d'écran mais laisse la place au logo (§10.2 : rien ne dépasse à 320 px). */}
+        <span className="max-[379px]:sr-only">{libelle}</span>
       </button>
       <nav
         id="menu-outils"
@@ -59,7 +60,7 @@ const MenuOutils = ({ lang, actif }: { lang: Langue; actif: (href: string) => bo
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-h-[80vh] overflow-y-auto">
           {CATEGORIES.map((c) => (
             <div key={c.id}>
-              <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2">{c.nom[lang]}</p>
+              <p className="text-xs uppercase tracking-wider text-neutral-400 mb-2">{c.nom[lang]}</p>
               <ul className="space-y-1 text-sm">
                 {outilsDe(c.id).map((o) => (
                   <li key={o.id}>
@@ -104,7 +105,7 @@ export const OutilLayout = ({ children, lang: langProp }: { children: ReactNode;
           {categorie && (
             <Link
               to={`${ACCUEIL[lang]}#${categorie.id}`}
-              className="hidden md:block mr-auto text-sm text-neutral-500 hover:text-white whitespace-nowrap"
+              className="hidden md:block mr-auto text-sm text-neutral-400 hover:text-white whitespace-nowrap"
             >
               {categorie.nom[lang]}
             </Link>
@@ -146,7 +147,7 @@ export const OutilLayout = ({ children, lang: langProp }: { children: ReactNode;
               </div>
             ))}
           </div>
-          <div className="mt-10 text-neutral-500 space-y-2">
+          <div className="mt-10 text-neutral-400 space-y-2">
             <p>
               {tr(lang, "Pages mises à jour le", "Pages updated on")} <time dateTime={OUTILS_MAJ}>{displayDate(OUTILS_MAJ, lang)}</time>.
             </p>
@@ -222,7 +223,7 @@ export const Faq = ({ faq }: { faq: QuestionFaq[] }) => {
           <details key={f.q} className="group py-4">
             <summary className="cursor-pointer list-none flex justify-between gap-4 text-neutral-100 font-medium">
               <span>{f.q}</span>
-              <span className="text-neutral-500 group-open:rotate-45 transition-transform" aria-hidden="true">+</span>
+              <span className="text-neutral-400 group-open:rotate-45 transition-transform" aria-hidden="true">+</span>
             </summary>
             <p className="mt-3 text-neutral-400 leading-relaxed">{f.r}</p>
           </details>
@@ -274,14 +275,14 @@ export const AutresOutils = ({ courant }: { courant: string }) => {
           <li key={o.id}>
             <Link to={o[lang].href} className="block h-full border border-neutral-800 rounded-lg px-4 py-3 !no-underline hover:border-neutral-600">
               <span className="block text-neutral-100">{o[lang].long}</span>
-              <span className="block text-sm text-neutral-500 mt-1">{o[lang].carte}</span>
+              <span className="block text-sm text-neutral-400 mt-1">{o[lang].carte}</span>
             </Link>
           </li>
         ))}
         <li>
           <Link to={ACCUEIL[lang]} className="block h-full border border-neutral-800 rounded-lg px-4 py-3 !no-underline hover:border-neutral-600">
             <span className="block text-neutral-100">{tr(lang, "Tous les outils 75tools", "All 75tools tools")}</span>
-            <span className="block text-sm text-neutral-500 mt-1">
+            <span className="block text-sm text-neutral-400 mt-1">
               {tr(lang, "PDF, images, QR codes, documents, calculs, minuteur et texte.", "PDF, images, QR codes, documents, calculators, timer and text.")}
             </span>
           </Link>
@@ -320,9 +321,9 @@ export const Champ = ({
       placeholder={placeholder}
       autoComplete={autoComplete}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full h-12 rounded-md border border-neutral-700 bg-neutral-900 px-3 text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-sky-400"
+      className="w-full h-12 rounded-md border border-neutral-700 bg-neutral-900 px-3 text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-sky-400"
     />
-    {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+    {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
   </label>
 );
 

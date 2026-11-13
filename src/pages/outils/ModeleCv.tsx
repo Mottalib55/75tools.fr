@@ -264,7 +264,7 @@ const Champ2 = ({ label, value, onChange, placeholder, type = "text", className,
   <label className={cn("block min-w-0", className)}>
     <span className="block text-sm text-neutral-300 mb-1">{label}</span>
     <input type={type} name={name} value={value} placeholder={placeholder} autoComplete={autoComplete} onChange={(e) => onChange(e.target.value)} className={classeChamp} />
-    {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+    {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
   </label>
 );
 
@@ -280,7 +280,7 @@ const Zone2 = ({ label, value, onChange, placeholder, lignes = 3, aide, name }: 
   <label className="block min-w-0">
     <span className="block text-sm text-neutral-300 mb-1">{label}</span>
     <textarea rows={lignes} name={name} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={classeZoneTexte} />
-    {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+    {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
   </label>
 );
 
@@ -548,7 +548,7 @@ const ModeleCv = ({ lang = "fr" }: { lang?: Langue }) => {
                     e.target.value = "";
                   }}
                 />
-                <span className="text-xs text-neutral-500">{t.photoNote}</span>
+                <span className="text-xs text-neutral-400">{t.photoNote}</span>
               </div>
             </Bloc>
 
@@ -686,7 +686,7 @@ const ModeleCv = ({ lang = "fr" }: { lang?: Langue }) => {
               <CvFeuille cv={cv} photo={photo} />
             </div>
           </div>
-          <p className="cv-ecran text-xs text-neutral-500">{hauteur > 1130 ? t.deuxPages : t.unePage}</p>
+          <p className="cv-ecran text-xs text-neutral-400">{hauteur > 1130 ? t.deuxPages : t.unePage}</p>
         </div>
       </div>
     </>

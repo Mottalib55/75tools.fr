@@ -245,7 +245,7 @@ const Chronometre = ({ lang = "fr" }: { lang?: Langue }) => {
             {t.pleinEcran}
           </Bouton>
         </div>
-        <p className="text-xs text-neutral-500 text-center">{t.clavier}</p>
+        <p className="text-xs text-neutral-400 text-center">{t.clavier}</p>
       </div>
 
       <div className="space-y-3 min-w-0">
@@ -256,7 +256,7 @@ const Chronometre = ({ lang = "fr" }: { lang?: Langue }) => {
           </Bouton>
         </div>
         {tours.length === 0 ? (
-          <p className="text-sm text-neutral-500">{t.attente}</p>
+          <p className="text-sm text-neutral-400">{t.attente}</p>
         ) : (
           <div className="max-h-80 overflow-y-auto rounded-lg border border-neutral-800">
             <table className="w-full text-sm tabular-nums">
@@ -284,7 +284,7 @@ const Chronometre = ({ lang = "fr" }: { lang?: Langue }) => {
           </div>
         )}
         {tours.length > 1 && (
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-400">
             <span className="text-emerald-300">{t.vert}</span>
             {t.legende}
             <span className="text-amber-300">{t.orange}</span>

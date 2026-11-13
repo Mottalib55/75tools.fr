@@ -229,7 +229,7 @@ const GenerateurQrCode = ({ lang = "fr" }: { lang?: Langue }) => {
               className={classeChamp}
               autoComplete="url"
             />
-            <span className="block text-xs text-neutral-500 mt-1">{t.aideLien}</span>
+            <span className="block text-xs text-neutral-400 mt-1">{t.aideLien}</span>
           </label>
         ) : (
           <label className="block min-w-0">
@@ -242,7 +242,7 @@ const GenerateurQrCode = ({ lang = "fr" }: { lang?: Langue }) => {
               placeholder={t.phTexte}
               className={classeZoneTexte}
             />
-            <span className="block text-xs text-neutral-500 mt-1">{t.aideTexte}</span>
+            <span className="block text-xs text-neutral-400 mt-1">{t.aideTexte}</span>
           </label>
         )}
         {remarque && (

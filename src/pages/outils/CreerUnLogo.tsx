@@ -528,7 +528,7 @@ ${parties.join("\n")}
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
           <canvas ref={petits} width={280} height={64} className="rounded border border-neutral-800 shrink-0 max-w-full" aria-label={t.petits} />
-          <p className="text-xs text-neutral-500 min-w-0 flex-1 basis-40">{t.petitsTexte}</p>
+          <p className="text-xs text-neutral-400 min-w-0 flex-1 basis-40">{t.petitsTexte}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Bouton onClick={png}>PNG {nb(largeurPng)} px</Bouton>
@@ -653,7 +653,7 @@ ${parties.join("\n")}
             <input id="logo-trait" type="range" min={1} max={3} step={0.25} value={r.trait} onChange={(e) => maj("trait")(Number(e.target.value))} className="w-full h-10 accent-sky-400" />
           </label>
         )}
-        <p className="text-xs text-neutral-500">{t.noteSvg}</p>
+        <p className="text-xs text-neutral-400">{t.noteSvg}</p>
       </div>
 
       <div ref={cache} className="hidden" aria-hidden="true">

@@ -210,7 +210,7 @@ export const QrApercu = ({
         <div className="space-y-2 text-sm min-w-0" aria-live="polite">
           <p className="text-neutral-200">{t.scanner}</p>
           {svg && (
-            <p className="text-neutral-500 tabular-nums">{t.stats(octetsUtf8(texte).toLocaleString(loc), modules, module3cm)}</p>
+            <p className="text-neutral-400 tabular-nums">{t.stats(octetsUtf8(texte).toLocaleString(loc), modules, module3cm)}</p>
           )}
           {erreur && texte && (
             <p role="status" className="text-amber-300">

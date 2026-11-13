@@ -232,7 +232,7 @@ const FusionnerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
                   {e.erreur ? (
                     <p className="text-xs text-red-300 [overflow-wrap:anywhere]">{e.erreur}</p>
                   ) : (
-                    <p className="text-xs text-neutral-500 tabular-nums">
+                    <p className="text-xs text-neutral-400 tabular-nums">
                       {t.pages(nb(e.pages), e.pages)} · {formatOctets(e.fichier.size, lang)}
                     </p>
                   )}
@@ -268,7 +268,7 @@ const FusionnerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
         {erreur && <Alerte>{erreur}</Alerte>}
         {enCours && <Progression {...prog} />}
         {!res && !enCours && (
-          <p className="text-sm text-neutral-500">{liste.length === 1 ? t.unSeul : t.attente}</p>
+          <p className="text-sm text-neutral-400">{liste.length === 1 ? t.unSeul : t.attente}</p>
         )}
         {res && (
           <div className="rounded-lg border border-neutral-800 p-4 space-y-3" role="status" aria-live="polite">

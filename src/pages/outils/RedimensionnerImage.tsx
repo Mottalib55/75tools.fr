@@ -248,7 +248,7 @@ const Redimensionner = ({ lang = "fr" }: { lang?: Langue }) => {
     <label className="block min-w-0" htmlFor={id}>
       <span className="block text-sm text-neutral-300 mb-1">{libelle}</span>
       <input id={id} type="text" inputMode="decimal" value={valeur} onChange={(e) => set(e.target.value)} className={classeChamp} />
-      {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+      {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
     </label>
   );
 
@@ -275,7 +275,7 @@ const Redimensionner = ({ lang = "fr" }: { lang?: Langue }) => {
             <div className="grid gap-4 grid-cols-2">
               {champ("redim-largeur", t.largeurMax, largeur, setLargeur)}
               {champ("redim-hauteur", t.hauteurMax, hauteur, setHauteur)}
-              <p className="col-span-2 text-xs text-neutral-500 -mt-2">{t.aideDims}</p>
+              <p className="col-span-2 text-xs text-neutral-400 -mt-2">{t.aideDims}</p>
             </div>
           )}
           {mode === "pourcentage" && (

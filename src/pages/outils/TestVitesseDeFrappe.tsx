@@ -308,7 +308,7 @@ const TestVitesseDeFrappe = ({ lang = "fr" }: { lang?: Langue }) => {
           </label>
         )}
         {langueTexte === "fr" && (
-          <label className={cn("flex items-center gap-2 min-h-[2.75rem] text-sm", enCours ? "text-neutral-500" : "text-neutral-200 cursor-pointer")}>
+          <label className={cn("flex items-center gap-2 min-h-[2.75rem] text-sm", enCours ? "text-neutral-400" : "text-neutral-200 cursor-pointer")}>
             <input
               type="checkbox"
               checked={!accents}
@@ -330,21 +330,21 @@ const TestVitesseDeFrappe = ({ lang = "fr" }: { lang?: Langue }) => {
       <div data-resultat className="max-w-xl space-y-1">
         <div className="grid grid-cols-3 gap-2" aria-live="off">
           <div className="rounded-md border border-neutral-800 px-3 py-2">
-            <p className="text-xs text-neutral-500">{t.restant}</p>
+            <p className="text-xs text-neutral-400">{t.restant}</p>
             <p id="temps-restant" className="text-xl font-semibold text-white tabular-nums">
               {Math.floor(restant / 60)}:{String(restant % 60).padStart(2, "0")}
             </p>
           </div>
           <div className="rounded-md border border-neutral-800 px-3 py-2">
-            <p className="text-xs text-neutral-500">{t.mpmNets}</p>
+            <p className="text-xs text-neutral-400">{t.mpmNets}</p>
             <p id="mpm-direct" className="text-xl font-semibold text-white tabular-nums">{ecoule < 3000 && !termine ? "…" : fmt(scores.mpmNet)}</p>
           </div>
           <div className="rounded-md border border-neutral-800 px-3 py-2">
-            <p className="text-xs text-neutral-500">{t.precision}</p>
+            <p className="text-xs text-neutral-400">{t.precision}</p>
             <p className="text-xl font-semibold text-white tabular-nums">{pct(scores.precision)}</p>
           </div>
         </div>
-        <p className="text-xs text-neutral-500">{termine ? t.fini : enCours ? t.enCours : t.attente}</p>
+        <p className="text-xs text-neutral-400">{termine ? t.fini : enCours ? t.enCours : t.attente}</p>
       </div>
 
       <div
@@ -353,7 +353,7 @@ const TestVitesseDeFrappe = ({ lang = "fr" }: { lang?: Langue }) => {
         lang={langueTexte}
         translate="no"
         onClick={() => champ.current?.focus()}
-        className="relative h-40 sm:h-44 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-900 p-4 font-mono text-[1.05rem] sm:text-lg leading-relaxed text-neutral-500 [overflow-wrap:anywhere] select-none"
+        className="relative h-40 sm:h-44 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-900 p-4 font-mono text-[1.05rem] sm:text-lg leading-relaxed text-neutral-400 [overflow-wrap:anywhere] select-none"
       >
         {Array.from(saisie, (c, i) =>
           c === cible[i] ? (
@@ -404,10 +404,10 @@ const TestVitesseDeFrappe = ({ lang = "fr" }: { lang?: Langue }) => {
             <strong id="mpm-final" className="text-3xl tabular-nums">{fmt(scores.mpmNet)}</strong> {t.mpmNetsLong} {pct(scores.precision)} {t.dePrecision}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-            <p><span className="block text-neutral-500">{t.brut}</span><span className="text-white tabular-nums">{fmt(scores.mpmBrut)} {t.motsMin}</span></p>
-            <p><span className="block text-neutral-500">{t.justes}</span><span className="text-white tabular-nums">{fmt(scores.corrects)} {t.sur} {fmt(scores.saisis)}</span></p>
-            <p><span className="block text-neutral-500">{t.erreurs}</span><span className="text-white tabular-nums">{fmt(scores.erreursCommises)}</span></p>
-            <p><span className="block text-neutral-500">{t.dureeLib}</span><span className="text-white tabular-nums">{Math.round(minutes * 60)} s</span></p>
+            <p><span className="block text-neutral-400">{t.brut}</span><span className="text-white tabular-nums">{fmt(scores.mpmBrut)} {t.motsMin}</span></p>
+            <p><span className="block text-neutral-400">{t.justes}</span><span className="text-white tabular-nums">{fmt(scores.corrects)} {t.sur} {fmt(scores.saisis)}</span></p>
+            <p><span className="block text-neutral-400">{t.erreurs}</span><span className="text-white tabular-nums">{fmt(scores.erreursCommises)}</span></p>
+            <p><span className="block text-neutral-400">{t.dureeLib}</span><span className="text-white tabular-nums">{Math.round(minutes * 60)} s</span></p>
           </div>
           <ul className="list-disc pl-5 text-sm text-neutral-300 space-y-1">
             {conseils.map((c) => (
@@ -417,7 +417,7 @@ const TestVitesseDeFrappe = ({ lang = "fr" }: { lang?: Langue }) => {
           <Bouton onClick={() => reinitialiser(true)}>{t.recommencer}</Bouton>
         </div>
       )}
-      <p className="text-xs text-neutral-500">{t.rienEnvoye}</p>
+      <p className="text-xs text-neutral-400">{t.rienEnvoye}</p>
     </div>
   );
 

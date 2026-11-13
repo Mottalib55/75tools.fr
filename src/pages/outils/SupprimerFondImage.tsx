@@ -537,7 +537,7 @@ const SupprimerFondImage = ({ lang = "fr" }: { lang?: Langue }) => {
           {choix<Outil>("gomme", outil, setOutil, t.gomme)}
           {choix<Outil>("restaurer", outil, setOutil, t.restaurer)}
         </div>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-400">
           {outil === "pipette" ? t.aidePipette : outil === "gomme" ? t.aideGomme : t.aideRestaurer}
         </p>
         {outil !== "pipette" && curseur("fond-pinceau", t.pinceau, pinceau, 2, Math.max(40, Math.round(Math.max(taille.w, taille.h) / 6)), setPinceau, " px")}
@@ -569,13 +569,13 @@ const SupprimerFondImage = ({ lang = "fr" }: { lang?: Langue }) => {
         <label className="flex items-start gap-3 text-sm">
           <input type="radio" name="fond-mode" checked={contigu} onChange={() => setContigu(true)} className="mt-1 w-4 h-4 accent-sky-400" />
           <span>
-            {t.contigu} <span className="text-neutral-500">{t.contiguAide}</span>
+            {t.contigu} <span className="text-neutral-400">{t.contiguAide}</span>
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm">
           <input type="radio" name="fond-mode" checked={!contigu} onChange={() => setContigu(false)} className="mt-1 w-4 h-4 accent-sky-400" />
           <span>
-            {t.tout} <span className="text-neutral-500">{t.toutAide}</span>
+            {t.tout} <span className="text-neutral-400">{t.toutAide}</span>
           </span>
         </label>
       </fieldset>
@@ -612,7 +612,7 @@ const SupprimerFondImage = ({ lang = "fr" }: { lang?: Langue }) => {
                 className={`min-w-0 max-w-full max-h-[70vh] w-auto h-auto block ${outil === "pipette" ? "cursor-crosshair" : "cursor-cell touch-none"}`}
               />
             </div>
-            <p className="text-xs text-neutral-500 [overflow-wrap:anywhere]">
+            <p className="text-xs text-neutral-400 [overflow-wrap:anywhere]">
               {nom} · {infos}
             </p>
             <div className="flex flex-wrap gap-2 items-center">
@@ -644,7 +644,7 @@ const SupprimerFondImage = ({ lang = "fr" }: { lang?: Langue }) => {
               {t.recadrer}
             </label>
           )}
-          <p className="text-sm text-neutral-500">{taille ? t.pret : t.attente}</p>
+          <p className="text-sm text-neutral-400">{taille ? t.pret : t.attente}</p>
           {taille && (
             <Bouton secondaire onClick={fermer}>
               {t.autre}

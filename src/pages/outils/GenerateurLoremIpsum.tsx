@@ -244,7 +244,7 @@ const GenerateurLoremIpsum = ({ lang = "fr" }: { lang?: Langue }) => {
       </form>
 
       <div data-resultat aria-live="polite" className="min-w-0">
-        <p id="compte-lorem" className="text-sm text-neutral-500 mb-2 tabular-nums">
+        <p id="compte-lorem" className="text-sm text-neutral-400 mb-2 tabular-nums">
           {t.compte(nb(nbMots), nb([...sortie].length))}
         </p>
         {balises ? (

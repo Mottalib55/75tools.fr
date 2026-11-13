@@ -164,9 +164,9 @@ const T = {
 
 const Stat = ({ libelle, valeur, aide }: { libelle: string; valeur: string; aide?: string }) => (
   <div className="rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 min-w-0">
-    <p className="text-xs text-neutral-500">{libelle}</p>
+    <p className="text-xs text-neutral-400">{libelle}</p>
     <p className="text-lg font-semibold text-white tabular-nums [overflow-wrap:anywhere]">{valeur}</p>
-    {aide && <p className="text-xs text-neutral-500">{aide}</p>}
+    {aide && <p className="text-xs text-neutral-400">{aide}</p>}
   </div>
 );
 
@@ -261,7 +261,7 @@ const CompteurDeMots = ({ lang = "fr" }: { lang?: Langue }) => {
           <div data-resultat aria-live="polite" className="rounded-lg border border-sky-400/40 bg-neutral-900 px-4 py-3">
             <p className="text-sm text-neutral-400">{t.mots}</p>
             <p id="nb-mots" className="text-4xl font-semibold text-white tabular-nums">{nb(r.mots)}</p>
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-neutral-400 mt-1">
               {r.mots === 0 ? t.attente : langueTexte === "fr" ? t.elisions(nb(r.motsElisions)) : t.parMinute(v.lecture)}
             </p>
           </div>
@@ -313,7 +313,7 @@ const CompteurDeMots = ({ lang = "fr" }: { lang?: Langue }) => {
               ))}
             </ol>
           ) : (
-            <p className="text-sm text-neutral-500">{t.frequentsVide}</p>
+            <p className="text-sm text-neutral-400">{t.frequentsVide}</p>
           )}
         </div>
         <div className="min-w-0">
@@ -328,7 +328,7 @@ const CompteurDeMots = ({ lang = "fr" }: { lang?: Langue }) => {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-neutral-500">{t.longsVide}</p>
+            <p className="text-sm text-neutral-400">{t.longsVide}</p>
           )}
         </div>
       </div>

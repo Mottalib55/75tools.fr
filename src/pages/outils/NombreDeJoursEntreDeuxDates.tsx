@@ -278,7 +278,7 @@ const BlocEcart = () => {
               {c && <li>{t.dont(p(c.samedis, t.samedi), p(c.dimanches, t.dimanche), p(feries.length, t.ferie))}</li>}
             </ul>
           ) : (
-            <p className="mt-4 text-sm text-neutral-500">{t.attente}</p>
+            <p className="mt-4 text-sm text-neutral-400">{t.attente}</p>
           )}
         </div>
       </div>
@@ -299,12 +299,12 @@ const BlocEcart = () => {
                 <li key={f.n} className="flex flex-wrap gap-x-2 break-inside-avoid">
                   <span className="text-neutral-100">{dateLongue(f.n, true, lang)}</span>
                   <span className="text-neutral-400">{f.nom}</span>
-                  {(js === 0 || js === 6) && <span className="text-neutral-500">{t.weekend}</span>}
+                  {(js === 0 || js === 6) && <span className="text-neutral-400">{t.weekend}</span>}
                 </li>
               );
             })}
           </ul>
-          {feries.length > 60 && <p className="text-xs text-neutral-500 mt-1">{t.limite}</p>}
+          {feries.length > 60 && <p className="text-xs text-neutral-400 mt-1">{t.limite}</p>}
         </div>
       )}
       <Alertes messages={msg} />
@@ -444,7 +444,7 @@ const ContenuFr = () => (
         aux départements d'outre-mer ne sont pas pris en compte.
       </p>
       <Tableau entetes={["Jour férié", "2026", "2027"]} minW="26rem" lignes={feries2026_2027("fr")} />
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-400">
         Pâques tombe le {dateLongue(paques(2026), false)} en 2026 et le {dateLongue(paques(2027), false)} en 2027.
       </p>
     </Section>
@@ -503,7 +503,7 @@ const ContenuEn = () => (
         departments are not included. To watch a date approach live, try the <Link to="/en/countdown/">countdown</Link>.
       </p>
       <Tableau entetes={["Public holiday", "2026", "2027"]} minW="26rem" lignes={feries2026_2027("en")} />
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-400">
         Easter Sunday falls on {dateLongue(paques(2026), false, "en")} in 2026 and on {dateLongue(paques(2027), false, "en")} in 2027.
       </p>
     </Section>

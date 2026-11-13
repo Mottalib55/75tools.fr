@@ -358,7 +358,7 @@ const PhotoIdentite = ({ lang = "fr" }: { lang?: Langue }) => {
                   </svg>
                 )}
               </div>
-              <p className="text-xs text-neutral-500 max-w-[16rem]">{t.legende}</p>
+              <p className="text-xs text-neutral-400 max-w-[16rem]">{t.legende}</p>
             </div>
 
             <div className="min-w-0 space-y-4">
@@ -407,7 +407,7 @@ const PhotoIdentite = ({ lang = "fr" }: { lang?: Langue }) => {
             {t.seule}
           </Bouton>
         </div>
-        <p className="text-sm text-neutral-500">{pret ? t.pret : t.attente}</p>
+        <p className="text-sm text-neutral-400">{pret ? t.pret : t.attente}</p>
         {pret && (
           <Bouton
             secondaire

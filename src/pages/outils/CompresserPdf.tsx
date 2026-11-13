@@ -308,20 +308,20 @@ const CompresserPdf = ({ lang = "fr" }: { lang?: Langue }) => {
           {enCours ? t.enCours : t.bouton}
         </Bouton>
         {enCours && <Progression {...prog} />}
-        {!res && !enCours && <p className="text-sm text-neutral-500">{t.attente}</p>}
+        {!res && !enCours && <p className="text-sm text-neutral-400">{t.attente}</p>}
         {res && (
           <div className="rounded-lg border border-neutral-800 p-4 space-y-3" role="status" aria-live="polite">
             <div className="grid grid-cols-3 gap-3 tabular-nums">
               <div>
-                <p className="text-xs uppercase tracking-wider text-neutral-500">{t.avant}</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{t.avant}</p>
                 <p className="text-lg text-white">{oct(res.avant)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-neutral-500">{t.apres}</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{t.apres}</p>
                 <p className="text-lg text-white">{oct(res.apres)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-neutral-500">{t.gain}</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{t.gain}</p>
                 <p className={gain > 0 ? "text-lg text-sky-300" : "text-lg text-amber-300"}>
                   {gain > 0 ? t.plusLeger(gain.toLocaleString(locale(lang))) : t.aucun}
                 </p>

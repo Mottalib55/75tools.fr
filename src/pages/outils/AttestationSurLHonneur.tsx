@@ -389,7 +389,7 @@ const AttestationSurLHonneur = ({ lang = "fr" }: { lang?: Langue }) => {
               placeholder={t.faitsEx}
               onChange={(ev) => maj("faits")(ev.target.value)}
             />
-            <span className="block text-xs text-neutral-500 mt-1">
+            <span className="block text-xs text-neutral-400 mt-1">
               {d.faits.length.toLocaleString(locale(lang))} / {(2000).toLocaleString(locale(lang))} {t.caracteres}
             </span>
           </label>

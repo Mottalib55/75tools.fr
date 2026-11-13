@@ -150,7 +150,7 @@ const WebpEnJpg = ({ lang = "fr" }: { lang?: Langue }) => {
                   onClick={() => setSortie(v)}
                   className={`h-12 rounded-md border text-sm ${sortie === v ? "border-sky-400 text-white bg-neutral-900" : "border-neutral-700 text-neutral-300"}`}
                 >
-                  {nom} <span className="text-neutral-500">· {aide}</span>
+                  {nom} <span className="text-neutral-400">· {aide}</span>
                 </button>
               ))}
             </div>

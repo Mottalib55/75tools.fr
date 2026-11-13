@@ -265,7 +265,7 @@ const QrCodeAvisGoogle = ({ lang = "fr" }: { lang?: Langue }) => {
               ))}
             </select>
           </label>
-          <p className="text-sm text-neutral-500">{t.note}</p>
+          <p className="text-sm text-neutral-400">{t.note}</p>
         </div>
       </form>
 

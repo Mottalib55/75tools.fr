@@ -115,7 +115,7 @@ export const PageOutil = ({
           titre={f.h1}
           chapeau={f.chapeau}
           ariane={
-            <nav aria-label={tr(lang, "Fil d'Ariane", "Breadcrumb")} className="mb-1.5 text-xs text-neutral-500">
+            <nav aria-label={tr(lang, "Fil d'Ariane", "Breadcrumb")} className="mb-1.5 text-xs text-neutral-400">
               <Link to={ACCUEIL[lang]} className="hover:text-neutral-300">{accueil}</Link>
               <span aria-hidden="true"> › </span>
               <Link to={`${ACCUEIL[lang]}#${categorie.id}`} className="hover:text-neutral-300">{categorie.nom[lang]}</Link>
@@ -133,7 +133,7 @@ export const PageOutil = ({
         <Faq faq={faq} />
         {sources.length > 0 && <Sources sources={sources} />}
         <AutresOutils courant={f.href} />
-        <aside className="author mt-12 border-t border-neutral-800 pt-6 text-sm text-neutral-500 space-y-2 print:hidden" data-author>
+        <aside className="author mt-12 border-t border-neutral-800 pt-6 text-sm text-neutral-400 space-y-2 print:hidden" data-author>
           <p>
             {tr(lang, "Outil conçu et tenu à jour par l'équipe de 75tools, édité par la société Radif Partners", "Tool built and maintained by the 75tools team, published by Radif Partners")}
             {" ("}
@@ -158,9 +158,9 @@ export const PageOutil = ({
 
 /** Classe commune des champs sombres (input, select, textarea), 48 px de haut pour les champs d'une ligne. */
 export const classeChamp =
-  "w-full h-12 rounded-md border border-neutral-700 bg-neutral-900 px-3 text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-sky-400";
+  "w-full h-12 rounded-md border border-neutral-700 bg-neutral-900 px-3 text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-sky-400";
 export const classeZoneTexte =
-  "w-full rounded-md border border-neutral-700 bg-neutral-900 p-3 text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-sky-400";
+  "w-full rounded-md border border-neutral-700 bg-neutral-900 p-3 text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-sky-400";
 /** Liste déroulante : flèche dessinée par le site, 2,5 rem de marge droite (RECETTE, contrôle 12). */
 export const classeSelect =
   classeChamp +
@@ -170,7 +170,7 @@ export const classeSelect =
 export const NoteLocale = ({ className }: { className?: string }) => {
   const lang = useLangue();
   return (
-    <p className={cn("text-sm text-neutral-500", className)}>
+    <p className={cn("text-sm text-neutral-400", className)}>
       {tr(
         lang,
         "Vos fichiers restent sur votre appareil : ils sont traités par votre navigateur, rien n'est envoyé à un serveur.",

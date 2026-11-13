@@ -370,7 +370,7 @@ const Pad = ({ onSignature }: { onSignature: (s: Signature | null) => void }) =>
           {t.effacer}
         </Bouton>
       </div>
-      <p className="text-xs text-neutral-500">{t.aideTrait}</p>
+      <p className="text-xs text-neutral-400">{t.aideTrait}</p>
     </div>
   );
 };
@@ -776,7 +776,7 @@ const SignerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
                   onChange={(e) => (setTexteMention(e.target.value), setRes(null))}
                   className={classeChamp}
                 />
-                {t.aideMention && <p className="text-xs text-neutral-500">{t.aideMention}</p>}
+                {t.aideMention && <p className="text-xs text-neutral-400">{t.aideMention}</p>}
               </div>
             )}
             <label className="flex items-center gap-3 text-sm text-neutral-300">
@@ -806,7 +806,7 @@ const SignerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
             <Bouton onClick={signer} disabled={!doc || !sig || enCours}>
               {enCours ? t.enCours : t.signer}
             </Bouton>
-            {!res && !enCours && <p className="text-sm text-neutral-500">{fichier && !sig ? t.dabord : t.attente}</p>}
+            {!res && !enCours && <p className="text-sm text-neutral-400">{fichier && !sig ? t.dabord : t.attente}</p>}
             {res && (
               <div className="rounded-lg border border-neutral-800 p-4 space-y-3" role="status" aria-live="polite">
                 <p className="text-neutral-200">{t.pret(formatOctets(res.size, lang))}</p>
@@ -873,7 +873,7 @@ const SignerPdf = ({ lang = "fr" }: { lang?: Langue }) => {
                 )}
               </>
             ) : (
-              <div className="rounded-lg border border-dashed border-neutral-800 aspect-[210/297] max-h-[28rem] grid place-items-center text-sm text-neutral-500 p-6 text-center">
+              <div className="rounded-lg border border-dashed border-neutral-800 aspect-[210/297] max-h-[28rem] grid place-items-center text-sm text-neutral-400 p-6 text-center">
                 {fichier ? t.preparation : t.apercuIci}
               </div>
             )}

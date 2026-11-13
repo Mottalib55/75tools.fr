@@ -207,7 +207,7 @@ const T = {
 };
 
 const Gris = ({ v, repli }: { v: string; repli: string }) =>
-  v.trim() ? <>{v.trim()}</> : <span className="text-neutral-400 print:text-neutral-500">{repli}</span>;
+  v.trim() ? <>{v.trim()}</> : <span className="text-neutral-500">{repli}</span>;
 
 const LettreDeResiliation = ({ lang = "fr" }: { lang?: Langue }) => {
   const t = T[lang];

@@ -38,7 +38,7 @@ const Etiquette = ({ label, aide, children, className }: { label: string; aide?:
   <label className={cn("block min-w-0", className)}>
     <span className="block text-sm text-neutral-300 mb-1">{label}</span>
     {children}
-    {aide && <span className="block text-xs text-neutral-500 mt-1">{aide}</span>}
+    {aide && <span className="block text-xs text-neutral-400 mt-1">{aide}</span>}
   </label>
 );
 
@@ -126,7 +126,7 @@ const Nombre = ({ label, value, onChange, min, max, signaler, aide, suffixe, cla
             onBlur={verifier}
             className={cn(classeChamp, suffixe && "pr-10", "tabular-nums")}
           />
-          {suffixe && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-500 pointer-events-none">{suffixe}</span>}
+          {suffixe && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400 pointer-events-none">{suffixe}</span>}
         </span>
       </Etiquette>
       {hors && (
@@ -143,7 +143,7 @@ const Case = ({ label, checked, onChange, aide, name }: { label: ReactNode; chec
     <input type="checkbox" name={name} checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-sky-400" />
     <span className="min-w-0">
       <span className="block text-sm text-neutral-200">{label}</span>
-      {aide && <span className="block text-xs text-neutral-500 mt-0.5">{aide}</span>}
+      {aide && <span className="block text-xs text-neutral-400 mt-0.5">{aide}</span>}
     </span>
   </label>
 );
@@ -268,7 +268,7 @@ const Apercu = ({ d, e, c }: { d: Document; e: Emetteur; c: Client }) => {
         </div>
       </div>
       <div className="mt-4 ml-auto sm:w-1/2 bg-neutral-100 rounded p-3">
-        <p className="text-[10px] font-bold text-neutral-500">{d.type === "facture" ? "FACTURÉ À" : "CLIENT"}</p>
+        <p className="text-[10px] font-bold text-neutral-600">{d.type === "facture" ? "FACTURÉ À" : "CLIENT"}</p>
         <p className="font-bold text-sm">{c.nom || "Client"}</p>
         {identiteClient(c).map((l, i) => (
           <p key={i} className="text-neutral-600">{l}</p>
@@ -883,7 +883,7 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
                   <Nombre label={tx.prix} name={`prix-${i}`} value={l.prix} onChange={majL(l.id, "prix")} min={0} max={10000000} signaler={signaler} suffixe="€" />
                   {e.franchise ? (
                     <Etiquette label={tx.tva}>
-                      <span className={cn(classeChamp, "flex items-center text-neutral-500")}>{tx.sansTva}</span>
+                      <span className={cn(classeChamp, "flex items-center text-neutral-400")}>{tx.sansTva}</span>
                     </Etiquette>
                   ) : (
                     <Etiquette label={tx.tva}>
@@ -953,7 +953,7 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
             {libelleTotal}
             {lang === "en" ? ": " : " : "}
             <strong className="text-white text-lg" id="total-ttc">{mt(t.totalTTC)}</strong>
-            {!t.sansTVA && <span className="text-neutral-500 text-sm"> {tx.dontTVA} {mt(t.totalTVA)}</span>}
+            {!t.sansTVA && <span className="text-neutral-400 text-sm"> {tx.dontTVA} {mt(t.totalTVA)}</span>}
           </p>
           <div className="flex flex-wrap gap-2">
             <Bouton onClick={pdf} disabled={enCours}>
@@ -969,9 +969,9 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
           <p role="status" aria-live="polite" className="text-sm text-sky-300 [overflow-wrap:anywhere] empty:hidden">
             {statut}
           </p>
-          {!statut && <p className="text-xs text-neutral-500">{tx.attente}</p>}
+          {!statut && <p className="text-xs text-neutral-400">{tx.attente}</p>}
           {tx.langueDoc && <p className="text-xs text-amber-200/90">{tx.langueDoc}</p>}
-          <p className="text-xs text-neutral-500">{tx.confidentialite}</p>
+          <p className="text-xs text-neutral-400">{tx.confidentialite}</p>
         </div>
         {points.length > 0 && (
           <div className="rounded-lg border border-amber-400/40 p-4 text-sm">
@@ -983,7 +983,7 @@ export const FactureDevisEditeur = ({ type, exemple }: { type: TypeDocument; exe
             </ul>
           </div>
         )}
-        {tx.apercu && <p className="text-xs uppercase tracking-wider text-neutral-500">{tx.apercu}</p>}
+        {tx.apercu && <p className="text-xs uppercase tracking-wider text-neutral-400">{tx.apercu}</p>}
         <div lang="fr">
           <Apercu d={d} e={e} c={c} />
         </div>

@@ -316,7 +316,7 @@ const JpgEnPdf = ({ lang = "fr" }: { lang?: Langue }) => {
                   {e.erreur ? (
                     <p className="text-xs text-red-300 [overflow-wrap:anywhere]">{e.erreur}</p>
                   ) : (
-                    <p className="text-xs text-neutral-500 tabular-nums">
+                    <p className="text-xs text-neutral-400 tabular-nums">
                       {nb(e.largeur)} × {nb(e.hauteur)} px · {formatOctets(e.fichier.size, lang)}
                     </p>
                   )}
@@ -370,7 +370,7 @@ const JpgEnPdf = ({ lang = "fr" }: { lang?: Langue }) => {
         </div>
         {erreur && <Alerte>{erreur}</Alerte>}
         {enCours && <Progression {...prog} />}
-        {!res && !enCours && <p className="text-sm text-neutral-500">{t.attente}</p>}
+        {!res && !enCours && <p className="text-sm text-neutral-400">{t.attente}</p>}
         {res && (
           <div className="rounded-lg border border-neutral-800 p-4 space-y-3" role="status" aria-live="polite">
             <p className="text-neutral-200 tabular-nums">{t.pret(nb(valides.length), valides.length, formatOctets(res.size, lang))}</p>

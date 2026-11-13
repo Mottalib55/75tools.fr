@@ -232,7 +232,7 @@ const QrCodeWhatsapp = ({ lang = "fr" }: { lang?: Langue }) => {
             onChange={(e) => setMessage(e.target.value)}
             className={classeZoneTexte}
           />
-          <span className="block text-xs text-neutral-500 mt-1">{t.aideMessage}</span>
+          <span className="block text-xs text-neutral-400 mt-1">{t.aideMessage}</span>
         </label>
 
         <div className="rounded-lg border border-neutral-800 p-4 space-y-3 min-w-0">

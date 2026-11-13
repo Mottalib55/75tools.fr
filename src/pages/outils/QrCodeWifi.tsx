@@ -235,7 +235,7 @@ const QrCodeWifi = ({ lang = "fr" }: { lang?: Langue }) => {
               autoComplete="off"
               spellCheck={false}
             />
-            <span className="block text-xs text-neutral-500 mt-1">{t.aideSsid}</span>
+            <span className="block text-xs text-neutral-400 mt-1">{t.aideSsid}</span>
           </label>
           <label className="block min-w-0">
             <span className="block text-sm text-neutral-300 mb-1">{t.securite}</span>

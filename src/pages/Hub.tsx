@@ -74,11 +74,11 @@ const TEXTES = {
     titre: "Outils gratuits en ligne : PDF, images, QR code | 75tools",
     meta: "Outils gratuits en ligne : PDF, images, QR codes, facture, devis, CV, pourcentage, minuteur et compteur de mots. Sans inscription, et rien n'est envoyé.",
     h1: "Outils gratuits en ligne",
-    intro: `PDF, images, QR codes, documents, calculs, minuteur et texte : ${OUTILS.length} outils qui fonctionnent dans votre navigateur, sans inscription.`,
+    intro: `Voici ${OUTILS.length} outils gratuits en ligne pour les PDF, les images, les QR codes, les documents, les calculs, le minuteur et le texte : ils fonctionnent dans votre navigateur, sans inscription.`,
     categories: "Catégories",
     applications: "Applications 75tools",
     mycard: "Carte de visite en ligne MyCard : une page de contact à partager par lien ou QR code (en anglais).",
-    commentTitre: "Comment fonctionnent ces outils",
+    commentTitre: "Comment fonctionnent ces outils gratuits en ligne",
     comment:
       "Tous les outils de 75tools travaillent dans votre navigateur. Quand vous compressez un PDF, convertissez une photo d'iPhone en JPG ou créez un QR code, le fichier est ouvert et transformé par votre appareil grâce à des bibliothèques chargées avec la page (pdf-lib et pdf.js pour les PDF, le canvas du navigateur pour les images), puis vous le téléchargez directement : il ne passe par aucun serveur et 75tools n'en garde aucune copie. Les documents (facture, devis, lettre de résiliation, attestations) suivent les règles françaises lues sur les sites officiels, avec la date de lecture indiquée en bas de chaque page. Les calculs (pourcentage, TVA, marge, jours entre deux dates) montrent leur formule pour que vous puissiez les refaire à la main. Chaque outil reste gratuit, sans compte et sans limite d'usage.",
     sourcesTitre: "Textes officiels utilisés",
@@ -89,11 +89,11 @@ const TEXTES = {
     titre: "Free Online Tools: PDF, Images, QR Codes, Invoices | 75tools",
     meta: "Free online tools that run in your browser: compress and merge PDFs, convert HEIC or WebP, QR codes, French invoices and VAT, timer and word counter. No upload.",
     h1: "Free online tools",
-    intro: `PDF, images, QR codes, French documents, calculators, timer and text: ${OUTILS.length} tools that run in your browser, with no sign-up.`,
+    intro: `Here are ${OUTILS.length} free online tools for PDFs, images, QR codes, French documents, calculators, timers and text: they run in your browser, with no sign-up.`,
     categories: "Categories",
     applications: "75tools apps",
     mycard: "MyCard online business card: a contact page to share by link or QR code.",
-    commentTitre: "How these tools work",
+    commentTitre: "How these free online tools work",
     comment:
       "Every 75tools tool runs inside your browser. When you compress a PDF, turn an iPhone photo into a JPG or create a QR code, your own device opens and transforms the file with libraries loaded alongside the page (pdf-lib and pdf.js for PDFs, the browser canvas for images), and you download the result straight away: it never goes through a server and 75tools keeps no copy. The document tools (invoice, quote, cancellation letter, attestations) follow French rules read on official websites, and the date we read them is shown at the bottom of each page; the documents stay in French because French offices expect them that way. Calculators (percentage, VAT, margin, days between dates) show their formula so you can check them by hand. Every tool is free, with no account and no usage limit.",
     sourcesTitre: "Official sources we rely on",
@@ -204,7 +204,7 @@ const Hub = ({ lang }: { lang: Langue }) => {
             {CATEGORIES.map((c) => (
               <section key={c.id} id={c.id} className="scroll-mt-6">
                 <h2 className="text-2xl font-semibold text-white tracking-tight">{c.nom[lang]}</h2>
-                <p className="mt-1 text-neutral-500">{c.chapeau[lang]}</p>
+                <p className="mt-1 text-neutral-400">{c.chapeau[lang]}</p>
                 <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {outilsDe(c.id).map((o) => (
                     <li key={o.id}>
@@ -264,7 +264,7 @@ const Hub = ({ lang }: { lang: Langue }) => {
 
           <Faq faq={FAQ[lang]} />
 
-          <aside className="author mt-12 border-t border-neutral-800 pt-6 text-sm text-neutral-500 space-y-2" data-author>
+          <aside className="author mt-12 border-t border-neutral-800 pt-6 text-sm text-neutral-400 space-y-2" data-author>
             <p>
               {tr(
                 lang,
@@ -276,7 +276,7 @@ const Hub = ({ lang }: { lang: Langue }) => {
         </main>
 
         <footer className="border-t border-neutral-800 py-8">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center text-neutral-500 text-sm space-y-2">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center text-neutral-400 text-sm space-y-2">
             <p>
               {t.maj} <time dateTime={LAST_UPDATED}>{displayDate(LAST_UPDATED, lang)}</time>
             </p>

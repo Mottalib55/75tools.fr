@@ -331,7 +331,7 @@ const PdfEnJpg = ({ lang = "fr" }: { lang?: Langue }) => {
           </Bouton>
           {fichier && dpi === "300" && pages.length > 30 && <p className="text-sm text-amber-200/90">{t.long(pages.length)}</p>}
           {enCours && <Progression {...prog} />}
-          {rendus.length === 0 && !enCours && <p className="text-sm text-neutral-500">{t.attente}</p>}
+          {rendus.length === 0 && !enCours && <p className="text-sm text-neutral-400">{t.attente}</p>}
           {rendus.length > 0 && !enCours && (
             <div className="rounded-lg border border-neutral-800 p-4 space-y-3" role="status" aria-live="polite">
               <p className="text-neutral-200 tabular-nums">{t.pretes(nb(rendus.length), rendus.length > 1, oct(total))}</p>

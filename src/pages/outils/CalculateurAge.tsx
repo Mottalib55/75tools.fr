@@ -232,7 +232,7 @@ const CalculateurAge = ({ lang = "fr" }: { lang?: Langue }) => {
               </li>
             </ul>
           ) : (
-            <p className="mt-3 text-sm text-neutral-500">{t.attente}</p>
+            <p className="mt-3 text-sm text-neutral-400">{t.attente}</p>
           )}
         </div>
       </div>

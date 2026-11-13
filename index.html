@@ -13,13 +13,13 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
 
-    <!-- Preconnect for performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Polices auto-hébergées (src/index.css) : plus d'appel à Google Fonts -->
+    <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="msapplication-TileColor" content="#0a0a0a" />
 
     <!-- Conditional manifest and iOS meta tags for card pages -->
@@ -115,11 +115,15 @@
 
     <!-- Alternate Languages -->
 
+    <!-- Chargement différé (MASTERFACTORY §20, audit Lighthouse du 2026-10-28) : gtag.js et Clarity partent à la
+         première interaction (défilement, toucher, clic, touche) ou 6 s après le chargement. Les appels gtag() et
+         clarity() faits avant restent en file et partent avec le script. -->
+<script>window.__differer=function(u){var f=0,E=['scroll','pointerdown','keydown','touchstart'];function g(){if(f)return;f=1;E.forEach(function(e){removeEventListener(e,g)});var s=document.createElement('script');s.async=true;s.src=u;document.head.appendChild(s);}E.forEach(function(e){addEventListener(e,g,{once:true,passive:true})});if(document.readyState==='complete')setTimeout(g,6000);else addEventListener('load',function(){setTimeout(g,6000)});};</script>
     <!-- Microsoft Clarity en mode sans cookie : consentv2 « denied » mis en file avant le script. -->
-<script>(function(){window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments);};window.clarity('consentv2',{ad_Storage:'denied',analytics_Storage:'denied'});var s=document.createElement('script');s.async=true;s.src='https://www.clarity.ms/tag/yr1dpuley8';document.head.appendChild(s);})();</script>
+<script>(function(){window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments);};window.clarity('consentv2',{ad_Storage:'denied',analytics_Storage:'denied'});window.__differer('https://www.clarity.ms/tag/yr1dpuley8');})();</script>
 <!-- Google Analytics 4, régime « sans bandeau » (décision de l'éditeur du 2026-10-17) : cookies _ga et _ga_<ID> de 13 mois au plus, publicité refusée, IP anonymisée, adresse de page sans paramètres. -->
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{analytics_storage:'granted',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',functionality_storage:'granted',security_storage:'granted'});</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LNTVCQ9NEV"></script>
+<script>window.__differer('https://www.googletagmanager.com/gtag/js?id=G-LNTVCQ9NEV');</script>
 <script>gtag('js',new Date());gtag('config','G-LNTVCQ9NEV',{anonymize_ip:true,page_location:location.origin+location.pathname,cookie_expires:33696000,cookie_update:false,allow_google_signals:false,allow_ad_personalization_signals:false});</script>
 </head>
 
